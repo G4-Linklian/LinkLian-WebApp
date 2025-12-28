@@ -6,7 +6,7 @@ import RegistrationLoginPage from "@/comps/registration/auth/loginComp";
 
 import React from 'react'
 
-import LayoutShell from "@/comps/layouts/LayoutShell";
+import LayoutShell from "@/comps/layouts/LayoutShellManagement";
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);

@@ -7,7 +7,7 @@ import Head from 'next/head';
 
 import React from 'react'
 
-import LayoutShell from "@/comps/layouts/LayoutShell";
+import LayoutShellManagement from "@/comps/layouts/LayoutShellManagement";
 
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
@@ -35,9 +35,9 @@ export default function RegistrationHome() {
                 <meta name="description" content="Information Page" />
             </Head>
 
-            <LayoutShell>
+            <LayoutShellManagement>
                 <PageContent></PageContent>
-            </LayoutShell>
+            </LayoutShellManagement>
         </>
     );
 }
