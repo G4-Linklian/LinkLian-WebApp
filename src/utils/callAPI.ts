@@ -9,14 +9,17 @@ interface ApiRequestOptions {
 }
 
 export async function fetchDataApi(method: string, from: string, body: {}): Promise<any> {
-    const urls = process.env.BACKEND_PATH;
+    const urls = process.env.NEXT_PUBLIC_BASE_URL;
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
+
+    console.log("urls", urls, basePath);
 
     if (!urls) {
         throw new Error('BACKEND_PATH environment variable is not set');
     }
 
     try {
-        const response = await fetch(`${urls}/api/${from}`, {
+        const response = await fetch(`${urls}${basePath}/${from}`, {
             method,
             headers: {
                 'Content-Type': 'application/json',
