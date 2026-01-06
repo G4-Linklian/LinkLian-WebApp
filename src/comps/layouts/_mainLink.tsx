@@ -1,13 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  IconAlignJustified
-} from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
-
 import { useMediaQuery } from "@/comps/public/useMediaQuery"
 import { useNotification } from "@/comps/noti/notiComp";
 import { decodeToken } from "@/utils/authToken";
@@ -86,7 +82,6 @@ export function MainLinks() {
 
     console.log("token", token)
 
-    // setToken(token)
     setToken("token")
   }, [router.isReady]);
 
@@ -155,24 +150,14 @@ export function MainLinks() {
             alt="profile"
             width={120}
             height={50}
-            // className="border-2 mr-3"
             style={{
-              // borderRadius: "50%",
               marginLeft: isLargerThanSm ? '10px' : '0'
             }}
-          // onClick={toggleDropdown}
           />
         </Link>
       </div>
 
       <div style={{ display: "flex", justifyContent: "center" }} className="text-black flex items-center">
-        {/* profile */}
-
-        {/* {!isLargerThanSm && (
-                    <IconSearch className="mr-2 border rounded-md p-1 w-full h-full" />
-                )} */}
-
-
 
       </div>
 
@@ -181,16 +166,6 @@ export function MainLinks() {
           <Links links={data} />
         </div>
       )}
-
-      {/* <div className="flex items-center justify-center text-black mr-3">
-        <img
-          src="/Me.JPG"
-          alt="profile"
-          width={38}
-          height={38}
-          className="border-2 rounded-full"
-        />
-      </div> */}
     </div>
   );
 }

@@ -1,0 +1,137 @@
+import {
+  Modal,
+  Button,
+  Group,
+  TextInput,
+  Select,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { UserSysFields } from "@/utils/interface/user.types";
+
+interface AddStaffModalProps {
+  opened: boolean;
+  close: () => void;
+  onSubmit?: (values: UserSysFields) => void;
+  learningAreaOptions?: { value: string; label: string }[];
+}
+
+export default function AddStaffModal({
+  opened,
+  close,
+  onSubmit,
+  learningAreaOptions = [],
+}: AddStaffModalProps) {
+
+  const form = useForm<UserSysFields>({
+    initialValues: {
+      email: "",
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      phone: "",
+      code: "",
+      user_status: "",
+      learning_area_id: undefined,
+    },
+  });
+
+  const handleSubmit = (values: UserSysFields) => {
+    console.log("submit values:", values);
+    onSubmit?.(values);
+    close();
+  };
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={close}
+      centered
+      size="md"
+      radius={16}
+    >
+      <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มบุคลากร</h1>
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+        <TextInput
+          label="อีเมล"
+          placeholder="กรอกอีเมล"
+          {...form.getInputProps("email")}
+          radius={8}
+          required
+        />
+        <TextInput
+          label="ชื่อ"
+          placeholder="กรอกชื่อ"
+          {...form.getInputProps("first_name")}
+          radius={8}
+          required
+        />
+        <TextInput
+          label="ชื่อกลาง"
+          placeholder="กรอกชื่อกลาง"
+          {...form.getInputProps("middle_name")}
+          radius={8}
+        />
+        <TextInput
+          label="นามสกุล"
+          placeholder="กรอกนามสกุล"
+          {...form.getInputProps("last_name")}
+          radius={8}
+          required
+        />
+        <div className="flex gap-2 justify-between mt-2">
+          <TextInput
+            className="w-[50%]"
+            label="เบอร์โทร"
+            placeholder="กรอกเบอร์โทร"
+            {...form.getInputProps("phone")}
+            radius={8}
+          />
+          <TextInput
+            className="w-[50%]"
+            label="รหัสบุคลากร"
+            placeholder="กรอกรหัสบุคลากร"
+            {...form.getInputProps("code")}
+            radius={8}
+            required
+          />
+        </div>
+        <div className="flex gap-2 justify-between mt-3">
+          <Select
+            className="w-[40%]"
+            label="สถานะผู้ใช้"
+            placeholder="เลือกสถานะ"
+            data={[
+              { value: "Active", label: "Active (ใช้งาน)" },
+              { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
+              { value: "Resigned", label: "Resigned (ลาออก)" },
+              { value: "Graduated", label: "Graduated (สำเร็จการศึกษา)" },
+            ]}
+            {...form.getInputProps("user_status")}
+            radius={8}
+            required
+          />
+
+          <Select
+            className="w-[60%]"
+            label="สอนในกลุ่มการเรียนรู้"
+            placeholder="เช่น คณิตศาสตร์"
+            data={learningAreaOptions}
+            {...form.getInputProps("learning_area_id")}
+            radius={8}
+            required
+          />
+        </div>
+
+        <Group justify="flex-end" className="mt-8">
+          <Button color="blue" variant="outline" onClick={close} radius={8}>
+            ยกเลิก
+          </Button>
+
+          <Button type="submit" radius={8}>
+            เพิ่มบุคลากร
+          </Button>
+        </Group>
+      </form>
+    </Modal>
+  );
+}

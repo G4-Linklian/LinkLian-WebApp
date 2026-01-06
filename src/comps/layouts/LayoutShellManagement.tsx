@@ -1,14 +1,6 @@
 import { NotificationProvider } from "@/comps/noti/notiComp";
 
 import React, { useEffect, useState } from "react";
-import {
-  IconNews,
-  IconSchool,
-  IconUsers,
-  IconMessageDots,
-  IconUser,
-  IconBell
-} from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Sidebar } from "./_mainLinkManagement";
@@ -60,7 +52,7 @@ const LayoutShellManagement = ({ children }: any) => {
                     top: 0,
                     left: 0,
                     height: "100vh",
-                    zIndex: 9999,
+                    // zIndex: 9999,
                     paddingTop: "10px"
                 }}>
                     <Sidebar />
@@ -90,12 +82,14 @@ const LayoutShellManagement = ({ children }: any) => {
 
                 {/* Main content */}
                 <main style={{
-                    background: "#ffffff",
+                    // background: "#ffffff",
                     height: "100vh",
                     display: "flex",
                     justifyContent: "center",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                     width: "calc(100% - 16rem)",
+                    overflowY: "auto",
+                    backgroundColor: "#FAFAFA"
                 }}>
                     {children}
                 </main>

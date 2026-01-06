@@ -44,7 +44,7 @@ function SidebarLink({ label, route, icon }: MainLinkProps) {
       </div>
       <button
         onClick={changeRoute}
-        className={`w-[92%] flex items-center gap-3 px-4 py-3 transition-colors duration-200 rounded-xl
+        className={`w-[92%] flex items-center gap-3 px-4 py-3 transition-colors duration-200 rounded-xl cursor-pointer
         ${isActive
             ? "bg-[#FFF7EE] text-[#E87722]"
             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -74,13 +74,11 @@ export function Sidebar() {
   const userProfile = {
     name: token?.institution?.inst_name_th,
     email: token?.institution?.inst_email,
-    // email: "wachirawit.prem@linklian.ac.th",
-    avatar: "/image/ME.png"
+    avatar: "/image/school.png"
   };
 
   useEffect(() => {
     const token = decodeRegistrationToken();
-    console.log("token", token);
     setToken(token);
   }, [router.isReady]);
 
@@ -125,13 +123,12 @@ export function Sidebar() {
 
         {/* User Profile Card */}
         <div className="flex items-center gap-3 mt-2 pt-2">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative">
+          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 p-1 relative">
             {/* ใช้ img หรือ Next Image ก็ได้ */}
             <img
               src={userProfile.avatar}
               alt="User"
               className="w-full h-full object-cover"
-            // onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/40" }} // Fallback image
             />
           </div>
           <div className="flex flex-col overflow-hidden">

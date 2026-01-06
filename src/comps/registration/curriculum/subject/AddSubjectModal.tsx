@@ -1,0 +1,123 @@
+import {
+  Modal,
+  Button,
+  Group,
+  TextInput,
+  Select,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { subjectFields } from '@/utils/interface/subject.types';
+
+interface AddSubjectModalProps {
+  opened: boolean;
+  close: () => void;
+  onSubmit?: (values: subjectFields) => void;
+  learningAreaOptions: { value: string; label: string }[];
+}
+
+export default function AddSubjectModal({
+  opened,
+  close,
+  onSubmit,
+  learningAreaOptions
+}: AddSubjectModalProps) {
+  const form = useForm<subjectFields>({
+    initialValues: {
+      learning_area_id: undefined,
+      subject_code: "",
+      name_th: "",
+      name_en: "",
+      credit: undefined,
+      hour_per_week: undefined,
+    },
+  });
+
+  const handleSubmit = (values: subjectFields) => {
+    console.log("add subject:", values);
+    onSubmit?.(values);
+    form.reset();
+    close();
+  };
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={close}
+      centered
+      size="md"
+      radius={16}
+    >
+      <h1 className="text-black font-bold text-2xl mb-4 text-center">
+        เพิ่มวิชา
+      </h1>
+
+      <form
+        onSubmit={form.onSubmit(handleSubmit)}
+        className="flex flex-col gap-2"
+      >
+        <Select
+          label="กลุ่มการเรียนรู้"
+          placeholder="เลือกกลุ่มการเรียนรู้"
+          searchable
+          clearable
+          data={learningAreaOptions}
+          {...form.getInputProps("learning_area_id")}
+          required
+          radius={8}
+        />
+
+        <TextInput
+          label="รหัสวิชา"
+          placeholder="เช่น MATH101, ค10105"
+          {...form.getInputProps("subject_code")}
+          required
+          radius={8}
+        />
+
+        <TextInput
+          label="ชื่อวิชา (ภาษาไทย)"
+          placeholder="เช่น คณิตศาสตร์พื้นฐาน"
+          {...form.getInputProps("name_th")}
+          required
+          radius={8}
+        />
+
+        <TextInput
+          label="ชื่อวิชา (ภาษาอังกฤษ)"
+          placeholder="เช่น Basic Mathematics"
+          {...form.getInputProps("name_en")}
+          required
+          radius={8}
+        />
+
+        <TextInput
+          label="หน่วยกิต"
+          placeholder="เช่น 1.5"
+          type="number"
+          {...form.getInputProps("credit")}
+          required
+          radius={8}
+        />
+
+        <TextInput
+          label="ชั่วโมงต่อสัปดาห์"
+          placeholder="เช่น 2"
+          type="number"
+          {...form.getInputProps("hour_per_week")}
+          required
+          radius={8}
+        />
+
+        <Group justify="flex-end" mt="md">
+          <Button variant="outline" onClick={close} radius={8}>
+            ยกเลิก
+          </Button>
+
+          <Button type="submit" radius={8}>
+            เพิ่มวิชา
+          </Button>
+        </Group>
+      </form>
+    </Modal>
+  );
+}

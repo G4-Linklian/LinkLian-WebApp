@@ -1,13 +1,11 @@
 import React from 'react'
 import Breadcrumb from "@/comps/breadCrumb/breadCrumb";
-import {
-    IconCalendar,
-    IconFileText,
-    IconCopy,
-    IconUsers
-} from '@tabler/icons-react';
 import { StatCard, StatData, StatApiResponse, StatCardProps } from '@/comps/registration/shared/headerCard';
 import { STAT_UI_CONFIG } from "@/config/statConfig";
+import SemesterTable from '@/comps/registration/info/semester/semesterTable';
+import BuildingComps from '@/comps/registration/info/location/buildingComps';
+import StaffTable from '@/comps/registration/info/staff/staffTable';
+import TableSection from '../shared/TableSection';
 
 
 const infoComp = () => {
@@ -15,7 +13,7 @@ const infoComp = () => {
     // mock จาก API
     const statsFromApi: StatApiResponse[] = [
         { key: "academicYear", value: 4, label: "ปีการศึกษา" },
-        { key: "subject", value: 3, label: "วิชา" },
+        { key: "building", value: 3, label: "อาคาร" },
         { key: "classroom", value: 95, label: "ห้องเรียน" },
         { key: "staff", value: 68, label: "บุคลากร" },
     ];
@@ -44,11 +42,9 @@ const infoComp = () => {
     });
 
     return (
-        <>
+        <div className='info-comp pb-8'>
             <Breadcrumb
                 items={[
-                    //   { label: "ข้อมูลพื้นฐาน", href: "/basic" },
-                    //   { label: "ปีการศึกษา" },
                     { label: "ข้อมูลพื้นฐาน" },
                 ]}
             />
@@ -62,8 +58,21 @@ const infoComp = () => {
                         ))}
                     </div>
                 </div>
+
+                <TableSection>
+                    <StaffTable />
+                </TableSection>
+
+                <TableSection>
+                    <SemesterTable />
+                </TableSection>
+
+                <TableSection>
+                    <BuildingComps />
+                </TableSection>
+
             </div>
-        </>
+        </div>
     )
 }
 
