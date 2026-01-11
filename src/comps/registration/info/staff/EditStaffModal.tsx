@@ -38,6 +38,16 @@ export default function EditStaffModal({
       learning_area_id: undefined,
       user_sys_id: undefined,
     },
+
+    validate: {
+      phone: (value) => {
+        if (!value) return null;
+        if (!/^\d{10}$/.test(value)) {
+          return "เบอร์โทรต้องเป็นตัวเลข 10 หลักเท่านั้น";
+        }
+        return null;
+      },
+    },
   });
 
   useEffect(() => {
@@ -106,6 +116,7 @@ export default function EditStaffModal({
             placeholder="กรอกเบอร์โทร"
             {...form.getInputProps("phone")}
             radius={8}
+            pattern="[0-9]*"
           />
           <TextInput
             className="w-[50%]"
@@ -124,8 +135,6 @@ export default function EditStaffModal({
             data={[
               { value: "Active", label: "Active (ใช้งาน)" },
               { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-              { value: "Resigned", label: "Resigned (ลาออก)" },
-              { value: "Graduated", label: "Graduated (สำเร็จการศึกษา)" },
             ]}
             {...form.getInputProps("user_status")}
             radius={8}

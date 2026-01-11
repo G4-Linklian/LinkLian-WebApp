@@ -21,6 +21,8 @@ import { sectionFields } from "@/utils/interface/section.types";
 import { useRouter } from "next/router";
 import { getBuilding, getRoomLocation } from "@/utils/api/building";
 import { dayOptions } from "@/utils/function/options";
+import { useNotification } from '@/comps/noti/notiComp';
+import { timeFormatter } from '@/config/formatters';
 
 interface SectionEditModalProps {
   section: sectionFields | null;
@@ -46,7 +48,7 @@ export default function SectionDetailEditModal({
   const [roomOptions, setRoomOptions] = useState<any[]>([]);
   const [loadingBuilding, setLoadingBuilding] = useState(false);
   const [loadingRoom, setLoadingRoom] = useState(false);
-
+  const { showNotification } = useNotification();
 
   const form = useForm<sectionFields>({
     initialValues: {
@@ -103,14 +105,12 @@ export default function SectionDetailEditModal({
 
   useEffect(() => {
     const buildingId = form.values.building_id;
-    console.log("Selected building ID changed:", buildingId);
     if (!buildingId || buildingId === "" || buildingId === null || buildingId === undefined || buildingId === "null") {
       setRoomOptions([]);
       return;
     }
 
     setLoadingRoom(true);
-    console.log("Fetching rooms for building ID:", buildingId);
     getRoomLocation({ building_id: Number(buildingId) })
       .then((res) => {
         const options = res.data.map((r: any) => ({
@@ -125,7 +125,28 @@ export default function SectionDetailEditModal({
 
 
   const handleSubmit = (values: sectionFields) => {
-    console.log("submit values:", values);
+
+    if (!values.start_time || !values.end_time) {
+      showNotification(
+        'บันทึกข้อมูลไม่สำเร็จ',
+        'กรุณาเลือกเวลาเริ่มต้นและเวลาสิ้นสุด',
+        'error',
+      );
+      return;
+    }
+
+    const start = timeFormatter(String(values.start_time))
+    const end = timeFormatter(String(values.end_time))
+
+    if (end < start) {
+      showNotification(
+        'บันทึกข้อมูลไม่สำเร็จ',
+        'เวลาสิ้นสุดต้องหลังจากเวลาเริ่มต้น',
+        'error',
+      );
+      return;
+    }
+
     onSubmit?.(values);
     close();
   };
@@ -148,7 +169,7 @@ export default function SectionDetailEditModal({
       size="md"
       radius={16}
     >
-      <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไข Section การเรียน</h1>
+      <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไขเวลาเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
 
         <Select
@@ -157,6 +178,7 @@ export default function SectionDetailEditModal({
           data={dayOptions}
           {...form.getInputProps("day_of_week")}
           radius={8}
+          required
         />
 
         <div className="flex space-x-4">
@@ -168,6 +190,7 @@ export default function SectionDetailEditModal({
             rightSection={getPickerControl(startTimeRef)}
             className="w-[50%]"
             radius={8}
+            required
           />
 
           <TimeInput
@@ -178,6 +201,7 @@ export default function SectionDetailEditModal({
             rightSection={getPickerControl(endTimeRef)}
             className="w-[50%]"
             radius={8}
+            required
           />
         </div>
 
@@ -194,7 +218,7 @@ export default function SectionDetailEditModal({
           rightSection={loadingBuilding ? <Loader size={16} /> : <IconSelector size={16} />}
           {...form.getInputProps("building_id")}
           radius={8}
-
+          required
           onChange={(value) => {
             form.setFieldValue("building_id", String(value));
             form.setFieldValue("room_location_id", undefined);
@@ -212,6 +236,7 @@ export default function SectionDetailEditModal({
           rightSection={loadingRoom ? <Loader size={16} /> : <IconSelector size={16} />}
           {...form.getInputProps("room_location_id")}
           radius={8}
+          required
         />
 
 

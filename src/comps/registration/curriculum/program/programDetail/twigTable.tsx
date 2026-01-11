@@ -23,7 +23,7 @@ import { useNotification } from '@/comps/noti/notiComp';
 
 const BATCH_SIZE = 4;
 
-export default function programTable() {
+export default function twigTable() {
     const [programData, setProgramData] = useState<programFields[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
@@ -39,6 +39,7 @@ export default function programTable() {
         useState<programFields | null>(null);
 
     const { showNotification } = useNotification();
+    const { root_id } = router.query;
 
     const openEditModals = (program: programFields) => {
         setSelectedProgram(program);
@@ -56,11 +57,7 @@ export default function programTable() {
         const token = decodeRegistrationToken();
         if (token && token.institution && token.institution.inst_id) {
             setInstId(token.institution.inst_id);
-            if (token.institution.inst_type === "school") {
-                setProgramName("แผนการเรียน");
-            } else if (token.institution.inst_type === "uni") {
-                setProgramName("คณะ");
-            }
+            setProgramName("ภาควิชา");
         }
         setToken(token);
     }, [router.isReady]);
@@ -72,11 +69,9 @@ export default function programTable() {
         if (instId) {
             const programDatas = await getProgram({
                 inst_id: instId,
-                inst_type: token?.institution?.inst_type,
-                tree_type: "root",
                 children_count: true,
-                limit: BATCH_SIZE,
-                offset: offset,
+                inst_type: token?.institution?.inst_type,
+                tree_type: "twig",
             })
 
             setProgramData((prev) => [...prev, ...programDatas.data]);
@@ -99,7 +94,7 @@ export default function programTable() {
 
             const programDatas = await getProgram({
                 inst_id: instId,
-                tree_type: "root",
+                tree_type: "twig",
                 program_name: values.program_name,
             })
 
@@ -135,7 +130,7 @@ export default function programTable() {
 
             const programDatas = await getProgram({
                 inst_id: instId,
-                tree_type: "root",
+                tree_type: "twig",
                 program_name: values.program_name,
             })
 
@@ -195,11 +190,8 @@ export default function programTable() {
             <Table.Td ta="center" className='flex justify-center gap-2'>
                 <IconEye size={20} stroke={2} color='#636363ff'
                     onClick={() => {
-                        if (token.institution.inst_type === "school") {
-                            PushRouter(router, "/registration/curriculum/leaf", "root_id", element.program_id);
-                        } else if (token.institution.inst_type === "uni") {
-                            PushRouter(router, "/registration/curriculum/twig", "root_id", element.program_id);
-                        }
+                        //PushRouter(router, `/registration/curriculum/leaf`, "twig_id", element.program_id);
+                        router.push(`/registration/curriculum/leaf?twig_id=${element.program_id}&root_id=${root_id}`);
                     }
                     }
                     style={{ cursor: "pointer" }}
@@ -222,7 +214,7 @@ export default function programTable() {
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
                 <Text size="xl" fw={500}>
-                    {programName}
+                    ภาควิชา
                 </Text>
                 <Button
                     size="xs"
@@ -231,12 +223,12 @@ export default function programTable() {
                         openAddProgramModal();
                     }}
                 >
-                    เพิ่ม{programName}
+                    เพิ่มภาควิชา
                 </Button>
             </div>
 
             <ScrollArea
-                h={250}
+                h={550}
                 onScrollPositionChange={onScroll}
                 viewportRef={viewportRef}
                 type="always"
@@ -247,9 +239,9 @@ export default function programTable() {
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={10} ta="center">ลำดับ</Table.Th>
-                            <Table.Th w={40} ta="center">ชื่อ{programName}</Table.Th>
+                            <Table.Th w={40} ta="center">ชื่อภาควิชา</Table.Th>
                             <Table.Th w={70} ta="center">หมายเหตุ</Table.Th>
-                            <Table.Th w={30} ta="center">จำนวน{programName === "แผนการเรียน" ? "ห้องเรียน" : "สาขา"}</Table.Th>
+                            <Table.Th w={40} ta="center">จำนวนสาขา</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
                         </Table.Tr>
                     </Table.Thead>

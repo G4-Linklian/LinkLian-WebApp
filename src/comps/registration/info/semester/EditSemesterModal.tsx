@@ -3,12 +3,12 @@ import {
   Button,
   Group,
   TextInput,
-  Checkbox,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
+import { useNotification } from '@/comps/noti/notiComp';
 import { semesterFields } from "@/utils/interface/semester.types";
-import { useState, useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 
 interface SemesterEditModalProps {
   semester: semesterFields | null;
@@ -23,7 +23,8 @@ export default function SemesterEditModal({
   close,
   onSubmit,
 }: SemesterEditModalProps) {
-  if (!semester) return null;
+
+  const { showNotification } = useNotification();
 
   const form = useForm<semesterFields>({
     initialValues: {
@@ -38,23 +39,39 @@ export default function SemesterEditModal({
 
   useEffect(() => {
     if (!semester) return;
-
     form.setValues({
       semester_id: semester.semester_id,
       inst_id: semester.inst_id,
       semester: semester.semester ?? "",
-      start_date: semester.start_date
-        ? new Date(semester.start_date)
-        : undefined,
-      end_date: semester.end_date
-        ? new Date(semester.end_date)
-        : undefined,
+      start_date: semester.start_date ? new Date(semester.start_date) : undefined,
+      end_date: semester.end_date ? new Date(semester.end_date) : undefined,
       flag_valid: semester.flag_valid ?? true,
     });
   }, [semester]);
 
   const handleSubmit = (values: semesterFields) => {
-    console.log("submit values:", values);
+    if (!values.start_date || !values.end_date) {
+      showNotification(
+        'บันทึกข้อมูลไม่สำเร็จ',
+        'กรุณาเลือกวันที่เริ่มต้นและวันที่สิ้นสุด',
+        'error',
+      );
+      return;
+    }
+
+    const start = new Date(values.start_date);
+    const end = new Date(values.end_date);
+
+
+    if (end < start) {
+      showNotification(
+        'บันทึกข้อมูลไม่สำเร็จ',
+        'วันที่สิ้นสุดต้องหลังจากวันที่เริ่มต้น',
+        'error',
+      );
+      return;
+    }
+
     onSubmit?.(values);
     close();
   };
@@ -84,6 +101,7 @@ export default function SemesterEditModal({
           {...form.getInputProps("start_date")}
           mb="sm"
           radius={8}
+          required
         />
 
         <DateInput
@@ -92,17 +110,15 @@ export default function SemesterEditModal({
           {...form.getInputProps("end_date")}
           mb="sm"
           radius={8}
+          required
         />
 
         <Group justify="flex-end" className="mt-4">
-
-          <Button color="blue" variant="outline" radius={8}
-          onClick={close}
-          >
+          <Button color="blue" variant="outline" radius={8} onClick={close}>
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}> 
+          <Button type="submit" radius={8}>
             บันทึก
           </Button>
         </Group>

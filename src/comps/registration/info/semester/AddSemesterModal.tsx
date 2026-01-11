@@ -7,6 +7,7 @@ import {
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { semesterFields } from "@/utils/interface/semester.types";
+import { useNotification } from '@/comps/noti/notiComp';
 
 interface AddSemesterModalProps {
   opened: boolean;
@@ -19,6 +20,9 @@ export default function AddSemesterModal({
   close,
   onSubmit,
 }: AddSemesterModalProps) {
+
+  const { showNotification } = useNotification();
+
   const form = useForm<semesterFields>({
     initialValues: {
       semester_id: undefined,
@@ -31,7 +35,28 @@ export default function AddSemesterModal({
   });
 
   const handleSubmit = (values: semesterFields) => {
-    console.log("add semester:", values);
+
+    if (!values.start_date || !values.end_date) {
+      showNotification(
+        'บันทึกข้อมูลไม่สำเร็จ',
+        'กรุณาเลือกวันที่เริ่มต้นและวันที่สิ้นสุด',
+        'error',
+      );
+      return;
+    }
+
+    const start = new Date(values.start_date);
+    const end = new Date(values.end_date);
+
+    if (end < start) {
+      showNotification(
+        'บันทึกข้อมูลไม่สำเร็จ',
+        'วันที่สิ้นสุดต้องหลังจากวันที่เริ่มต้น',
+        'error',
+      );
+      return;
+    }
+
     onSubmit?.(values);
     form.reset();
     close();
@@ -73,7 +98,7 @@ export default function AddSemesterModal({
         <DateInput
           label="วันที่สิ้นสุด"
           valueFormat="DD/MM/YYYY"
-            placeholder="เช่น 30/04/2567"
+          placeholder="เช่น 30/04/2567"
           {...form.getInputProps("end_date")}
           required
           radius={8}

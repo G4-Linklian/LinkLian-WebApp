@@ -109,6 +109,7 @@ export default function SubjectEditModal({
           type="number"
           {...form.getInputProps("credit")}
           radius={8}
+          required
         />
 
         <TextInput
@@ -117,6 +118,7 @@ export default function SubjectEditModal({
           type="number"
           {...form.getInputProps("hour_per_week")}
           radius={8}
+          required
         />
 
         <Group justify="flex-end" className="mt-4">

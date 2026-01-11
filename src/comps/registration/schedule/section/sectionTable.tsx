@@ -32,7 +32,6 @@ export default function sectionTable({ semesterData }: any) {
     const [token, setToken] = useState<any | null>(false);
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
-    const [semesterId, setSemesterId] = useState<number | null>(null);
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddSection, { open: openAddSection, close: closeAddSection }] = useDisclosure(false);
@@ -59,9 +58,6 @@ export default function sectionTable({ semesterData }: any) {
             setInstId(token.institution.inst_id);
         }
 
-        if (router.query.semester_id) {
-            setSemesterId(Number(router.query.semester_id));
-        }
     }, [router.isReady]);
 
     const fetchData = async (offset: number, reset = false) => {
@@ -70,7 +66,7 @@ export default function sectionTable({ semesterData }: any) {
         const semesterId = router.query.semester_id;
 
         if (instId && semesterId) {
-            const subjectData = await getSectionMaster({
+            const sectionDatas = await getSectionMaster({
                 inst_id: instId,
                 semester_id: Number(semesterId),
                 sort_by: "section_id",
@@ -80,10 +76,10 @@ export default function sectionTable({ semesterData }: any) {
             });
 
             setSectionData((prev) =>
-                reset ? subjectData.data : [...prev, ...subjectData.data]
+                reset ? sectionDatas.data : [...prev, ...sectionDatas.data]
             );
 
-            setHasMore(subjectData.data.length === BATCH_SIZE);
+            setHasMore(sectionDatas.data.length === BATCH_SIZE);
         }
 
         setLoading(false);
@@ -99,21 +95,32 @@ export default function sectionTable({ semesterData }: any) {
     }, [instId, router.isReady, router.query.semester_id]);
 
     const addSectionData = async (values: sectionFields) => {
+        const semesterId = router.query.semester_id;
+
         if (!semesterId) {
-            showNotification("เพิ่มวิชาล้มเหลว!", "กรุณาเลือกภาคการศึกษาก่อนเพิ่มวิชา", "error");
+            showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", "กรุณาเลือกภาคการศึกษาก่อนเพิ่มกลุ่มเรียน", "error");
             return;
         }
 
-
         try {
+
+            const sectionData = await getSectionMaster({
+                semester_id: Number(semesterId),
+                subject_id: Number(values.subject_id),
+                section_name: values.section_name,
+                limit: 1,
+            });
+
+            if (sectionData.data.length > 0 && sectionData.data[0].section_id !== values.section_id) {
+                showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", "มีชื่อกลุ่มเรียนนี้อยู่ในระบบแล้ว", "error");
+                return;
+            }
 
             const payload = {
                 semester_id: Number(semesterId),
                 subject_id: Number(values.subject_id),
                 section_name: values.section_name,
             };
-
-            console.log("Add subject payload:", payload);
 
             const res = await createSectionSchedule(payload);
 
@@ -122,29 +129,43 @@ export default function sectionTable({ semesterData }: any) {
             fetchData(offset);
 
             if (res.success) {
-                showNotification("เพิ่มวิชาสำเร็จ!", "", "success");
+                showNotification("เพิ่มกลุ่มเรียนสำเร็จ!", "", "success");
             } else {
-                showNotification("เพิ่มวิชาล้มเหลว!", res.message, "error");
+                showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", res.message, "error");
             }
         } catch (error) {
-            console.error("Create subject failed:", error);
-            showNotification("เพิ่มวิชาล้มเหลว!", "An error occurred while creating the subject.", "error");
+            console.error("Create section failed:", error);
+            showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", "An error occurred while creating the section.", "error");
         }
     };
 
     const updateSectionData = async (values: sectionFields) => {
-        // if (!instId) return;
+        const semesterId = router.query.semester_id;
+
+        if (!semesterId) {
+            showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", "กรุณาเลือกภาคการศึกษาก่อนเพิ่มกลุ่มเรียน", "error");
+            return;
+        }
 
         try {
+            const sectionData = await getSectionMaster({
+                semester_id: Number(semesterId),
+                subject_id: Number(values.subject_id),
+                section_name: values.section_name,
+                limit: 1,
+            });
+
+            if (sectionData.data.length > 0 && sectionData.data[0].section_id !== values.section_id) {
+                showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", "มีชื่อกลุ่มเรียนนี้อยู่ในระบบแล้ว", "error");
+                return;
+            }
 
             const payload = {
-                ...values,
-                day_of_week: Number(values.day_of_week),
-                start_time: normalizeTime(values.start_time),
-                end_time: normalizeTime(values.end_time),
+                section_id: values.section_id,
+                semester_id: Number(semesterId),
+                subject_id: Number(values.subject_id),
+                section_name: values.section_name,
             };
-
-            console.log("Edit subject payload:", payload);
 
             const res = await updateSectionSchedule(payload);
 
@@ -153,13 +174,13 @@ export default function sectionTable({ semesterData }: any) {
             fetchData(0);
 
             if (res.success) {
-                showNotification("แก้ไข Section สำเร็จ!", "", "success");
+                showNotification("แก้ไขกลุ่มเรียนสำเร็จ!", "", "success");
             } else {
-                showNotification("แก้ไข Section ล้มเหลว!", res.message, "error");
+                showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", res.message, "error");
             }
         } catch (error) {
             console.error("Update section failed:", error);
-            showNotification("แก้ไข Section ล้มเหลว!", "An error occurred while updating the section.", "error");
+            showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", "An error occurred while updating the section.", "error");
         }
     };
 
@@ -218,7 +239,7 @@ export default function sectionTable({ semesterData }: any) {
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
                 <Text size="xl" fw={500}>
-                    Section การเรียนทั้งหมด
+                    กลุ่มเรียนทั้งหมด
                 </Text>
                 <Button
                     size="xs"
@@ -227,7 +248,7 @@ export default function sectionTable({ semesterData }: any) {
                         openAddSectionModal();
                     }}
                 >
-                    เพิ่มรายวิชา
+                    เพิ่มกลุ่มเรียน
                 </Button>
             </div>
 

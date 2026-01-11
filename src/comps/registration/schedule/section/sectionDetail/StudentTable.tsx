@@ -87,8 +87,6 @@ export default function StudentTable() {
                 limit: BATCH_SIZE
             })
 
-            console.log("Fetched student data:", userData);
-
             setStudentData((prev) => [...prev, ...userData.data]);
 
             if (userData.data.length < BATCH_SIZE) {

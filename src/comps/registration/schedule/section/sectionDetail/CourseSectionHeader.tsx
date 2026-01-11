@@ -14,11 +14,11 @@ import { dayOfWeekFormatter, timeFormatter, normalizeTime } from '@/config/forma
 import { sectionFields } from '@/utils/interface/section.types';
 import EditSectionModal from '@/comps/registration/schedule/section/EditSectionModal';
 import SectionDetailEditModal from '@/comps/registration/schedule/section/sectionDetail/EditSectionDetailModal';
-import { getSectionMaster, updateSectionSchedule, createSectionSchedule, createSchedule } from '@/utils/api/section';
+import { getSectionMaster, updateSectionSchedule, createSectionSchedule, createSchedule, getSchedule } from '@/utils/api/section';
 import { useNotification } from '@/comps/noti/notiComp';
 import AddSectionDetailModal from '@/comps/registration/schedule/section/sectionDetail/AddSectionDetailModal';
 
-const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions, sectionId }: any) => {
+const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions, sectionId, onFetch }: any) => {
   const course = sectionData?.[0] || {};
   const [openedSectionEditModal, { open: openSectionEditModal, close: closeSectionEditModal }] = useDisclosure(false);
   const [openedSectionDetailEditModal, { open: openSectionDetailEditModal, close: closeSectionDetailEditModal }] = useDisclosure(false);
@@ -45,25 +45,38 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
 
     try {
 
+      const scheduleData = await getSchedule({
+        section_id: Number(sectionId),
+        day_of_week: Number(values.day_of_week),
+        start_time: `${normalizeTime(values.start_time)}`,
+        end_time: `${normalizeTime(values.end_time)}`,
+        room_location_id: Number(values.room_location_id)
+      });
+
+      if (scheduleData.data && scheduleData.data.length > 0) {
+        showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", "ตารางเวลานี้มีอยู่แล้วในระบบ", "error");
+        return;
+      }
+
       const payload = {
         ...values,
         day_of_week: Number(values.day_of_week),
         start_time: normalizeTime(values.start_time),
         end_time: normalizeTime(values.end_time),
+        room_location_id: Number(values.room_location_id)
       };
-
-      console.log("Edit subject payload:", payload);
 
       const res = await updateSectionSchedule(payload);
 
       if (res.success) {
-        showNotification("แก้ไข Section สำเร็จ!", "", "success");
+        showNotification("แก้ไขกลุ่มเรียนสำเร็จ!", "", "success");
+        onFetch(true);
       } else {
-        showNotification("แก้ไข Section ล้มเหลว!", res.message, "error");
+        showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", res.message, "error");
       }
     } catch (error) {
       console.error("Update section failed:", error);
-      showNotification("แก้ไข Section ล้มเหลว!", "An error occurred while updating the section.", "error");
+      showNotification("แก้ไขกลุ่มเรียนล้มเหลว!", "An error occurred while updating the section.", "error");
     }
   };
 
@@ -72,28 +85,38 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
 
     try {
 
+      const scheduleData = await getSchedule({
+        section_id: Number(sectionId),
+        day_of_week: Number(values.day_of_week),
+        start_time: `${normalizeTime(values.start_time)}`,
+        end_time: `${normalizeTime(values.end_time)}`,
+        room_location_id: Number(values.room_location_id)
+      });
+
+      if (scheduleData.data && scheduleData.data.length > 0) {
+        showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", "ตารางเวลานี้มีอยู่แล้วในระบบ", "error");
+        return;
+      }
+
       const payload = {
         day_of_week: Number(values.day_of_week),
-        start_time: normalizeTime(values.start_time),
-        end_time: normalizeTime(values.end_time),
+        start_time: `${normalizeTime(values.start_time)}`,
+        end_time: `${normalizeTime(values.end_time)}`,
         section_id: Number(sectionId),
         room_location_id: Number(values.room_location_id)
       };
 
-      console.log("Create section schedule payload:", payload);
-
-      console.log("Edit subject payload:", payload);
-
       const res = await createSchedule(payload);
 
       if (res.success) {
-        showNotification("แก้ไข Section สำเร็จ!", "", "success");
+        showNotification("เพิ่มกลุ่มเรียนสำเร็จ!", "", "success");
+        onFetch(true);
       } else {
-        showNotification("แก้ไข Section ล้มเหลว!", res.message, "error");
+        showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", res.message, "error");
       }
     } catch (error) {
       console.error("Update section failed:", error);
-      showNotification("แก้ไข Section ล้มเหลว!", "An error occurred while updating the section.", "error");
+      showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", "An error occurred while adding the section.", "error");
     }
   };
 

@@ -47,22 +47,19 @@ const SectionDetail = () => {
         setLoading(true);
 
         const sectionId = router.query.section_id;
-        console.log("sectionId", sectionId);
 
         if (sectionId) {
             const sectionData = await getSectionMaster({
                 section_id: Number(sectionId),
-                sort_by: "section_id",
-                sort_order: "asc",
+                // sort_by: "section_id",
+                // sort_order: "asc",
             });
 
             const scheduleData = await getSchedule({
                 section_id: Number(sectionId),
-                sort_by: "schedule_id",
-                sort_order: "asc",
+                // sort_by: "schedule_id",
+                // sort_order: "asc",
             });
-
-            console.log("sectionData", sectionData);
 
             setSectionData((prev) =>
                 reset ? sectionData.data : [...prev, ...sectionData.data]
@@ -82,7 +79,6 @@ const SectionDetail = () => {
 
         const fetchSemesters = async () => {
             try {
-                console.log("instId", instId);
                 setLoading(true);
                 const semesterData = await getSemester({
                     inst_id: Number(instId),
@@ -130,7 +126,17 @@ const SectionDetail = () => {
                         <div className="header-section">
                             <h2 className="text-2xl font-bold text-gray-800 mb-1">จัดการ Section การเรียน</h2>
 
-                            <CourseSectionHeader sectionData={sectionData} scheduleData={scheduleData} token={token} semesterOptions={semesterOptions} sectionId={sectionId} />
+                            <CourseSectionHeader 
+                                sectionData={sectionData} 
+                                scheduleData={scheduleData} 
+                                token={token} 
+                                semesterOptions={semesterOptions} 
+                                sectionId={sectionId}
+                                onFetch={(reset = false) => {
+                                    console.log("Fetch triggered from CourseSectionHeader");
+                                    fetchData(0, reset);
+                                }}
+                            />
 
                             <TableSection>
                                 <TeacherComps />

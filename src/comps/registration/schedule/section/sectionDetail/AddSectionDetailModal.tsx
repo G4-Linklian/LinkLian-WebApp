@@ -21,6 +21,8 @@ import { sectionFields } from "@/utils/interface/section.types";
 import { useRouter } from "next/router";
 import { getBuilding, getRoomLocation } from "@/utils/api/building";
 import { dayOptions } from "@/utils/function/options";
+import { useNotification } from '@/comps/noti/notiComp';
+import { timeFormatter } from '@/config/formatters';
 
 interface SectionEditModalProps {
   opened: boolean;
@@ -43,7 +45,7 @@ export default function AddSectionDetailModal({
   const [roomOptions, setRoomOptions] = useState<any[]>([]);
   const [loadingBuilding, setLoadingBuilding] = useState(false);
   const [loadingRoom, setLoadingRoom] = useState(false);
-
+  const { showNotification } = useNotification();
 
   const form = useForm<sectionFields>({
     initialValues: {
@@ -95,6 +97,28 @@ export default function AddSectionDetailModal({
 
 
   const handleSubmit = (values: sectionFields) => {
+
+    if (!values.start_time || !values.end_time) {
+      showNotification(
+        'เพิ่มข้อมูลไม่สำเร็จ',
+        'กรุณาเลือกเวลาเริ่มต้นและเวลาสิ้นสุด',
+        'error',
+      );
+      return;
+    }
+
+    const start = timeFormatter(String(values.start_time))
+    const end = timeFormatter(String(values.end_time))
+
+    if (end < start) {
+      showNotification(
+        'เพิ่มข้อมูลไม่สำเร็จ',
+        'เวลาสิ้นสุดต้องหลังจากเวลาเริ่มต้น',
+        'error',
+      );
+      return;
+    }
+
     onSubmit?.(values);
     close();
   };
@@ -117,7 +141,7 @@ export default function AddSectionDetailModal({
       size="md"
       radius={16}
     >
-      <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่ม Section การเรียน</h1>
+      <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มเวลาเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
 
         <Select
@@ -126,6 +150,7 @@ export default function AddSectionDetailModal({
           data={dayOptions}
           {...form.getInputProps("day_of_week")}
           radius={8}
+          required
         />
 
         <div className="flex space-x-4">
@@ -137,6 +162,7 @@ export default function AddSectionDetailModal({
             rightSection={getPickerControl(startTimeRef)}
             className="w-[50%]"
             radius={8}
+            required
           />
 
           <TimeInput
@@ -147,6 +173,7 @@ export default function AddSectionDetailModal({
             rightSection={getPickerControl(endTimeRef)}
             className="w-[50%]"
             radius={8}
+            required
           />
         </div>
 
@@ -168,6 +195,7 @@ export default function AddSectionDetailModal({
             form.setFieldValue("room_location_id", undefined);
             setRoomOptions([]);
           }}
+          required
         />
 
         <Select
@@ -180,6 +208,7 @@ export default function AddSectionDetailModal({
           rightSection={loadingRoom ? <Loader size={16} /> : <IconSelector size={16} />}
           {...form.getInputProps("room_location_id")}
           radius={8}
+          required
         />
 
 

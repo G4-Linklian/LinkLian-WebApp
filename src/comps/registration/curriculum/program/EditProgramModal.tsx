@@ -6,7 +6,9 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { programFields } from '@/utils/interface/program.types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { decodeRegistrationToken } from "@/utils/authToken";
+import { useRouter } from "next/router";
 
 interface ProgramEditModalProps {
   program: programFields | null;
@@ -15,13 +17,19 @@ interface ProgramEditModalProps {
   onSubmit?: (values: programFields) => void;
 }
 
-export default function ProgramEditModal({
+export default function EditProgramModal({
   program,
   opened,
   close,
   onSubmit,
 }: ProgramEditModalProps) {
+  const token = decodeRegistrationToken();
+  const router = useRouter();
+
   if (!program) return null;
+  const [unitText, setUnitText] = useState("");
+  const instType = token?.institution?.inst_type;
+  const { root_id, twig_id } = router.query;
 
   const form = useForm<programFields>({
     initialValues: {
@@ -49,8 +57,25 @@ export default function ProgramEditModal({
     }
   }, [program]);
 
+  useEffect(() => {
+
+
+    if (!instType) return;
+
+    if (!root_id && instType === "school") {
+      setUnitText("ระดับชั้น");
+    } else if (!root_id && instType === "uni") {
+      setUnitText("คณะ");
+    } else if (root_id && instType === "school") {
+      setUnitText("ห้องเรียน");
+    } else if (root_id && instType === "uni") {
+      setUnitText("ภาควิชา");
+    } else if (twig_id && instType === "uni") {
+      setUnitText("สาขา");
+    }
+  }, [instType, root_id, twig_id]);
+
   const handleSubmit = (values: programFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };
@@ -63,11 +88,15 @@ export default function ProgramEditModal({
       size="md"
       radius={16}
     >
-      <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการโปรแกรม</h1>
+
+      <h1 className="color-black font-bold text-2xl mb-4 text-center">
+        จัดการ{`${unitText}`}
+      </h1>
+
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
         <TextInput
-          label="ชื่อโปรแกรม"
-          placeholder="เช่น โปรแกรมคณิตศาสตร์"
+          label={`ชื่อ${unitText}`}
+          //placeholder={`เช่น คณิตศาสตร์`}
           {...form.getInputProps("program_name")}
           required
           mb="sm"
@@ -75,8 +104,8 @@ export default function ProgramEditModal({
         />
 
         <TextInput
-          label="หมายเหตุ"
-          placeholder="เช่น ชั้นเรียนสำหรับนักเรียน"
+          label={`หมายเหตุ${unitText}`}
+          //placeholder={`เช่น ${unitText === "ห้องเรียน" ? "ห้องเรียนสำหรับนักเรียน" : "สาขาวิทยาการคอมพิวเตอร์"}`}
           {...form.getInputProps("remark")}
           mb="sm"
           radius={8}

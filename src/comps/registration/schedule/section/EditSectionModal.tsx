@@ -189,7 +189,7 @@ export default function SectionEditModal({
       size="md"
       radius={16}
     >
-      <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไข Section การเรียน</h1>
+      <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไขกลุ่มเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
 
         <Select
@@ -203,7 +203,7 @@ export default function SectionEditModal({
           clearable
           {...form.getInputProps("subject_id")}
           filter={({ options }) => options}
-
+          required
           rightSection={loading ? <Loader size={16} /> : <IconSelector size={16} />}
           radius={8}
         />
@@ -216,10 +216,11 @@ export default function SectionEditModal({
           disabled={true}
           clearable={false}
           radius={8}
+          required
         />
 
         <TextInput
-          label="ชื่อ Section"
+          label="ชื่อกลุ่มเรียน"
           placeholder="เช่น S1"
           {...form.getInputProps("section_name")}
           required

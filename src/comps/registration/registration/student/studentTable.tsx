@@ -4,9 +4,10 @@ import {
     ScrollArea,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from '@mantine/core';
-
+import { IconSearch, IconFilter, IconPlus } from '@tabler/icons-react';
 import {
     IconEdit,
 } from "@tabler/icons-react";
@@ -239,19 +240,46 @@ export default function StudentTable() {
         <div
             className='bg-white'
             style={{ padding: '1px' }}>
+
             <div className="flex justify-between items-center mb-3 mt-1">
+                {/* ส่วนหัวข้อ */}
                 <Text size="xl" fw={500} className='flex items-center gap-2'>
                     รายชื่อนักเรียน
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddStudentModal();
-                    }}
-                >
-                    เพิ่มนักเรียน
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                    // onChange={(event) => handleSearch(event.currentTarget.value)} 
+                    />
+
+
+                    <Button
+                        variant="default"
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconFilter size={14} />}
+                        onClick={() => {
+                            // logic เปิด Modal หรือ Dropdown filter
+                        }}
+                    >
+                        ตัวกรอง
+                    </Button>
+
+                    <Button
+                        size="xs"
+                        radius="md"
+                        // leftSection={<IconPlus size={14} />}
+                        onClick={() => {
+                            openAddStudentModal();
+                        }}
+                    >
+                        เพิ่มนักเรียน
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea

@@ -33,6 +33,16 @@ export default function AddStaffModal({
       user_status: "",
       learning_area_id: undefined,
     },
+
+    validate: {
+      phone: (value) => {
+        if (!value) return null;
+        if (!/^\d{10}$/.test(value)) {
+          return "เบอร์โทรต้องเป็นตัวเลข 10 หลักเท่านั้น";
+        }
+        return null;
+      },
+    },
   });
 
   const handleSubmit = (values: UserSysFields) => {
@@ -51,13 +61,15 @@ export default function AddStaffModal({
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มบุคลากร</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+
         <TextInput
-          label="อีเมล"
-          placeholder="กรอกอีเมล"
-          {...form.getInputProps("email")}
+          label="รหัสบุคลากร"
+          placeholder="กรอกรหัสบุคลากร"
+          {...form.getInputProps("code")}
           radius={8}
           required
         />
+
         <TextInput
           label="ชื่อ"
           placeholder="กรอกชื่อ"
@@ -78,6 +90,15 @@ export default function AddStaffModal({
           radius={8}
           required
         />
+
+        <TextInput
+          label="อีเมล"
+          placeholder="กรอกอีเมล"
+          {...form.getInputProps("email")}
+          radius={8}
+          required
+        />
+
         <div className="flex gap-2 justify-between mt-2">
           <TextInput
             className="w-[50%]"
@@ -85,30 +106,6 @@ export default function AddStaffModal({
             placeholder="กรอกเบอร์โทร"
             {...form.getInputProps("phone")}
             radius={8}
-          />
-          <TextInput
-            className="w-[50%]"
-            label="รหัสบุคลากร"
-            placeholder="กรอกรหัสบุคลากร"
-            {...form.getInputProps("code")}
-            radius={8}
-            required
-          />
-        </div>
-        <div className="flex gap-2 justify-between mt-3">
-          <Select
-            className="w-[40%]"
-            label="สถานะผู้ใช้"
-            placeholder="เลือกสถานะ"
-            data={[
-              { value: "Active", label: "Active (ใช้งาน)" },
-              { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-              { value: "Resigned", label: "Resigned (ลาออก)" },
-              { value: "Graduated", label: "Graduated (สำเร็จการศึกษา)" },
-            ]}
-            {...form.getInputProps("user_status")}
-            radius={8}
-            required
           />
 
           <Select
@@ -121,6 +118,18 @@ export default function AddStaffModal({
             required
           />
         </div>
+
+        <Select
+          label="สถานะผู้ใช้"
+          placeholder="เลือกสถานะ"
+          data={[
+            { value: "Active", label: "Active (ใช้งาน)" },
+            { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
+          ]}
+          {...form.getInputProps("user_status")}
+          radius={8}
+          required
+        />
 
         <Group justify="flex-end" className="mt-8">
           <Button color="blue" variant="outline" onClick={close} radius={8}>

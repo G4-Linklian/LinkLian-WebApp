@@ -150,9 +150,9 @@ export default function EditStudentModal({
       <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการนักเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
         <TextInput
-          label="อีเมล"
-          placeholder="กรอกอีเมล"
-          {...form.getInputProps("email")}
+          label="รหัสนักเรียน"
+          placeholder="กรอกรหัสนักเรียน"
+          {...form.getInputProps("code")}
           radius={8}
           required
         />
@@ -176,23 +176,19 @@ export default function EditStudentModal({
           radius={8}
           required
         />
-        <div className="flex gap-2 justify-between mt-2">
-          <TextInput
-            className="w-[50%]"
-            label="เบอร์โทร"
-            placeholder="กรอกเบอร์โทร"
-            {...form.getInputProps("phone")}
-            radius={8}
-          />
-          <TextInput
-            className="w-[50%]"
-            label="รหัสนักเรียน"
-            placeholder="กรอกรหัสนักเรียน"
-            {...form.getInputProps("code")}
-            radius={8}
-            required
-          />
-        </div>
+        <TextInput
+          label="อีเมล"
+          placeholder="กรอกอีเมล"
+          {...form.getInputProps("email")}
+          radius={8}
+          required
+        />
+        <TextInput
+          label="เบอร์โทร"
+          placeholder="กรอกเบอร์โทร"
+          {...form.getInputProps("phone")}
+          radius={8}
+        />
         <div className="flex gap-2 justify-between mt-3">
 
           <Select
@@ -207,7 +203,7 @@ export default function EditStudentModal({
 
           <Select
             className="w-[60%]"
-            label="เลือกห้องเรียน"
+            label="ห้องเรียน"
             placeholder="พิมพ์ชื่อห้องเรียน"
             data={programOptions}
             searchable
@@ -232,8 +228,6 @@ export default function EditStudentModal({
           data={[
             { value: "Active", label: "Active (ใช้งาน)" },
             { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-            { value: "Resigned", label: "Resigned (ลาออก)" },
-            { value: "Graduated", label: "Graduated (สำเร็จการศึกษา)" },
           ]}
           {...form.getInputProps("user_status")}
           radius={8}

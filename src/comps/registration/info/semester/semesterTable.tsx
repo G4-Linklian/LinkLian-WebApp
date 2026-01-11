@@ -20,6 +20,7 @@ import SemesterEditModal from '@/comps/registration/info/semester/EditSemesterMo
 import AddSemesterModal from '@/comps/registration/info/semester/AddSemesterModal';
 import { useDisclosure } from "@mantine/hooks";
 import { createSemester, updateSemester } from '@/utils/api/semester';
+import { useNotification } from '@/comps/noti/notiComp';
 
 const BATCH_SIZE = 3;
 
@@ -31,6 +32,7 @@ export default function SemesterTable() {
     const [token, setToken] = useState<any | null>(false);
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
+    const { showNotification } = useNotification();
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddSemester, { open: openAddSemester, close: closeAddSemester }] = useDisclosure(false);
@@ -83,6 +85,20 @@ export default function SemesterTable() {
         if (!instId) return;
 
         try {
+
+            const semesterData = await getSemester({
+                inst_id: instId,
+                semester: values.semester,
+                // start_date: values.start_date,
+                // end_date: values.end_date,
+                limit: 1
+            })
+
+            if (semesterData.data.length > 0) {
+                showNotification("เพิ่มภาคเรียนล้มเหลว!", "ภาคเรียนนี้มีอยู่ในระบบแล้ว", "error");
+                return;
+            }
+
             const res = await createSemester({
                 ...values,
                 inst_id: instId,
@@ -90,11 +106,16 @@ export default function SemesterTable() {
 
             setSemesterData([]);
             setHasMore(true);
-            fetchData(offset);
+            fetchData(0);
 
-            console.log("Created semester:", res.data);
+            if (res.success) {
+                showNotification("เพิ่มภาคเรียนสำเร็จ!", "", "success");
+            } else {
+                showNotification("เพิ่มภาคเรียนล้มเหลว!", res.message, "error");
+            }
         } catch (error) {
             console.error("Create semester failed:", error);
+            showNotification("เพิ่มภาคเรียนล้มเหลว!", "An error occurred while creating the semester.", "error");
         }
     };
 
@@ -110,17 +131,20 @@ export default function SemesterTable() {
                 end_date: normalizeDate(values.end_date),
             };
 
-            console.log("Edit semester payload:", payload);
-
             const res = await updateSemester(payload);
 
             setSemesterData([]);
             setHasMore(true);
             fetchData(0);
 
-            console.log("Created semester:", res.data);
+            if (res.success) {
+                showNotification("แก้ไขภาคเรียนสำเร็จ!", "", "success");
+            } else {
+                showNotification("แก้ไขภาคเรียนล้มเหลว!", res.message, "error");
+            }
         } catch (error) {
-            console.error("Create semester failed:", error);
+            console.error("แก้ไขภาคเรียนล้มเหลว:", error);
+            showNotification("แก้ไขภาคเรียนล้มเหลว!", "An error occurred while updating the semester.", "error");
         }
     };
 
@@ -227,10 +251,10 @@ export default function SemesterTable() {
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={40} ta="center">ปีการศึกษา</Table.Th>
-                            <Table.Th w={10} ta="center">เทอม</Table.Th>
+                            <Table.Th w={10} ta="center">ภาคเรียน</Table.Th>
                             <Table.Th w={50} ta="center">วันเริ่มต้น</Table.Th>
                             <Table.Th w={50} ta="center">วันสิ้นสุด</Table.Th>
-                            <Table.Th w={50} ta="center">สถานนะ</Table.Th>
+                            <Table.Th w={50} ta="center">สถานะ</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
                         </Table.Tr>
                     </Table.Thead>

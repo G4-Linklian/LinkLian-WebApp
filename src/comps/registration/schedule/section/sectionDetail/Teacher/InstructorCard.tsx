@@ -1,5 +1,5 @@
 import { Card, Avatar, Text, Group, Badge, Button, Stack, Divider, Tooltip, ActionIcon } from '@mantine/core';
-import { IconPhone, IconMail, IconId, IconSchool, IconEdit, IconDots } from '@tabler/icons-react';
+import { IconPhone, IconMail, IconId, IconSchool, IconEdit, IconDots, IconUserPin } from '@tabler/icons-react';
 
 function InstructorCard({ instructor, onEdit } : any) {
 
@@ -7,9 +7,9 @@ function InstructorCard({ instructor, onEdit } : any) {
 
   const getStatusColor = (status : any) => {
     switch (status) {
-      case 'Active': return 'green';
-      case 'Inactive': return 'gray';
-      case 'Suspended': return 'red';
+      case 'ครูสอนหลัก': return 'green';
+      case 'อาจารย์สอนหลัก': return 'green';
+      case 'ผู้ช่วยสอน': return 'blue';
       default: return 'blue';
     }
   };
@@ -19,8 +19,8 @@ function InstructorCard({ instructor, onEdit } : any) {
       
       <div className='pb-2'>
         <Group justify="space-between" mb="xs">
-            <Badge color={getStatusColor(instructor.user_status)} variant="light">
-                {instructor.user_status || 'Unknown'}
+            <Badge color={getStatusColor(instructor.position)} variant="light">
+                {instructor.position || 'Unknown'}
             </Badge>
             <ActionIcon variant="subtle" color="gray">
                 <IconDots size={16} />
@@ -53,14 +53,21 @@ function InstructorCard({ instructor, onEdit } : any) {
                 </Text>
             </Group>
 
-             {instructor.learning_area_id && (
+            {/* <Group gap={5} mt={4}>
+                <IconUserPin size={14} className="text-gray-500" />
+                <Text size="sm" c="dimmed">
+                 {instructor.position || '-'}
+                </Text>
+            </Group> */}
+
+             {/* {instructor.learning_area_id && (
                 <Group gap={5} mt={2}>
                     <IconMail size={14} stroke={1.5} className="text-gray-500" />
                     <Text size="xs" c="dimmed">
                     {instructor.learning_area_name || '-'}
                     </Text>
                 </Group>
-             )}
+             )} */}
           </div>
         </Group>
       </div>

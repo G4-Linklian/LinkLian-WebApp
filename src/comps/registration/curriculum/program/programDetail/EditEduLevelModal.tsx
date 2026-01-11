@@ -64,8 +64,8 @@ export default function EduLevelEditModal({
 
 
         <Select
-          label="กลุ่มการเรียนรู้"
-          placeholder="เลือกกลุ่มการเรียนรู้"
+          label="ระดับการศึกษา"
+          placeholder="เลือกระดับการศึกษา"
           data={eduLevelData}
           {...form.getInputProps("edu_lev_id")}
           required
@@ -74,8 +74,8 @@ export default function EduLevelEditModal({
         />
 
         <Select
-          label="กลุ่มการเรียนรู้"
-          placeholder="เลือกกลุ่มการเรียนรู้"
+          label="หลักสูตร"
+          placeholder="เลือกหลักสูตร"
           data={ProgramData.map((program: any) => ({
             value: program.program_id.toString(),
             label: program.program_name + " - " + program.remark,

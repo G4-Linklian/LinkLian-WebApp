@@ -105,4 +105,5 @@ export interface SectionSchedulePayload {
   end_time?: string;   // HH:mm:ss
   room_location_id?: number;
   schedule_id?: number;
+  flag_valid?: boolean;
 }

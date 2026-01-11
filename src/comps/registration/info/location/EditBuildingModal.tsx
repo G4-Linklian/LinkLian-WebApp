@@ -25,6 +25,7 @@ export default function EditBuildingModal({
 
   const form = useForm<buildingFields>({
     initialValues: {
+      building_id: undefined,
       building_name: "",
       building_no: "",
       remark: "",
@@ -38,6 +39,7 @@ export default function EditBuildingModal({
       building_name: building.building_name ?? "",
       building_no: building.building_no ?? "",
       remark: building.remark ?? "",
+      building_id: building.building_id,
     });
   }, [building]);
 

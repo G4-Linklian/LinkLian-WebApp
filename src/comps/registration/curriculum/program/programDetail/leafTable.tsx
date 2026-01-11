@@ -22,7 +22,7 @@ import { useNotification } from '@/comps/noti/notiComp';
 
 const BATCH_SIZE = 20;
 
-export default function leafTable({ onDataUpdate, onSetRootName } : any) {
+export default function leafTable({ onDataUpdate, onSetRootName }: any) {
     const [programData, setProgramData] = useState<programFields[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
@@ -31,7 +31,6 @@ export default function leafTable({ onDataUpdate, onSetRootName } : any) {
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
     const [programName, setProgramName] = useState<string>("");
-    const [rootProgramName, setRootProgramName] = useState<string>("");
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddProgram, { open: openAddProgram, close: closeAddProgram }] = useDisclosure(false);
@@ -70,26 +69,19 @@ export default function leafTable({ onDataUpdate, onSetRootName } : any) {
     const fetchData = async (offset: number) => {
         setLoading(true);
 
-        const { root_id } = router.query;
+        const { root_id, twig_id } = router.query;
 
         if (instId && root_id) {
             const programDatas = await getProgram({
                 inst_id: instId,
                 inst_type: token?.institution?.inst_type,
-                parent_id: root_id ? Number(root_id) : undefined,
+                parent_id: twig_id ? Number(twig_id) : Number(root_id),
                 tree_type: "leaf",
                 limit: BATCH_SIZE,
             })
 
-            const rootProgramDatas = await getProgram({
-                inst_id: instId,
-                program_id: root_id ? Number(root_id) : undefined,
-                tree_type: "root",
-                limit: 1,
-            })
+            console.log("Fetched program data:", programDatas);
 
-            setRootProgramName(rootProgramDatas.data[0]?.program_name || "");
-            onSetRootName(rootProgramDatas.data[0]?.program_name || "");
             setProgramData((prev) => [...prev, ...programDatas.data]);
             onDataUpdate([...programData, ...programDatas.data]);
 
@@ -99,6 +91,31 @@ export default function leafTable({ onDataUpdate, onSetRootName } : any) {
         }
         setLoading(false);
     };
+
+    useEffect(() => {
+        fetchData(0);
+    }, [router.isReady, instId]);
+
+    useEffect(() => {
+        const fetchProgramNameData = async (offset: number) => {
+
+            const { root_id, twig_id } = router.query;
+
+            if (instId && root_id) {
+                const rootProgramDatas = await getProgram({
+                    inst_id: instId,
+                    program_id: twig_id ? Number(twig_id) : Number(root_id),
+                    tree_type: "root",
+                    limit: 1,
+                })
+
+                onSetRootName(rootProgramDatas.data[0]?.program_name || "");
+            }
+        };
+
+        fetchProgramNameData(0);
+
+    }, [router.isReady, instId]);
 
     const addProgramData = async (values: programFields) => {
         if (!instId) return;
@@ -134,8 +151,6 @@ export default function leafTable({ onDataUpdate, onSetRootName } : any) {
                 inst_id: Number(values.inst_id),
             };
 
-            console.log("Edit program payload:", payload);
-
             const res = await updateProgram(payload);
 
             setProgramData([]);
@@ -148,17 +163,12 @@ export default function leafTable({ onDataUpdate, onSetRootName } : any) {
                 showNotification("แก้ไข" + programName + "ล้มเหลว!", res.message, "error");
             }
 
-            console.log("Created program:", res.data);
         } catch (error) {
             console.error("Update program failed:", error);
             showNotification("แก้ไข" + programName + "ล้มเหลว!", "An error occurred while updating the program.", "error");
         }
     };
 
-
-    useEffect(() => {
-        fetchData(0);
-    }, [router.isReady, instId]);
 
     const onScroll = () => {
         if (viewportRef.current) {

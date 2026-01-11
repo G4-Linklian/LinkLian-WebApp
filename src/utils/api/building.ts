@@ -5,12 +5,16 @@ import { buildingFields } from "@/utils/interface/building.types"
 export const getBuilding = async (input: buildingFields) => {
 
     const {
-        building_id = "",
-        inst_id = "",
+        building_id,
+        inst_id,
         building_no = "",
         building_name = "",
-        flag_valid = "",
+        flag_valid,
         room_format = "",
+        offset,
+        limit,
+        sort_by,
+        sort_order = "",
     } = input;
 
     const data = await fetchDataApi(`POST`, "building.get", {
@@ -20,6 +24,10 @@ export const getBuilding = async (input: buildingFields) => {
         building_name: building_name,
         flag_valid: flag_valid,
         room_format: room_format,
+        offset: offset,
+        limit: limit,
+        sort_by: sort_by,
+        sort_order: sort_order,
     });
 
     return data;
@@ -128,10 +136,17 @@ export const createRoomLocation = async (input: buildingFields) => {
 };
 
 export const createRoomLocationBatch = async (inputs: buildingFields[]) => {
-    
-    const data = await fetchDataApi(`POST`, "room.location.create.batch", inputs);
 
-    return data;
+    try {
+        const data = await fetchDataApi(`POST`, "room.location.create.batch", inputs);
+        return data;
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message,
+            status: error.response?.status,
+        };
+    }
 };
 
 

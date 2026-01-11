@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState } from 'react';
 import Breadcrumb from "@/comps/breadCrumb/breadCrumb";
-import LeafTable from '@/comps/registration/curriculum/program/programDetail/leafTable';
+import TwigTable from '@/comps/registration/curriculum/program/programDetail/twigTable';
 import EduLevelTable from '@/comps/registration/curriculum/program/programDetail/eduLevelTable';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import TableSection from '../../shared/TableSection';
@@ -18,20 +18,16 @@ const ProgramDetail = () => {
             <Breadcrumb
                 items={[
                     { label: "งานหลักสูตร", href: "/registration/curriculum" },
-                    { label: `จัดการ${token.institution.inst_type === "school" ? "แผนการเรียน " : "สาขา"}` },
+                    { label: `จัดการภาค` },
                 ]}
             />
             <div className="w-full h-[95%] mt-4 text-black">
                 <div className="header-section">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-1">จัดการ{token.institution.inst_type === "school" ? "แผนการเรียน : " : "สาขา : "}{rootProgramName}</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-1">จัดการภาควิชา</h2>
 
 
                     <TableSection>
-                        <LeafTable onDataUpdate={setProgramData} onSetRootName={setRootProgramName} />
-                    </TableSection>
-
-                    <TableSection>
-                        <EduLevelTable programData={programData} />
+                        <TwigTable />
                     </TableSection>
 
 

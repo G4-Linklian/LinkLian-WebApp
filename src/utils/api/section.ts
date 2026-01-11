@@ -18,7 +18,8 @@ export const getSectionMaster = async (input: sectionFields) => {
         offset,
         limit,
         sort_by,
-        sort_order
+        sort_order,
+        section_name
     } = input;
 
     const data = await fetchDataApi(`POST`, "section.master.get", {
@@ -35,13 +36,14 @@ export const getSectionMaster = async (input: sectionFields) => {
         offset: offset,
         limit: limit,
         sort_by: sort_by,
-        sort_order: sort_order
+        sort_order: sort_order,
+        section_name: section_name
     });
 
     return data;
 };
 
-export const getSchedule = async (input: sectionFields) => {
+export const getSchedule = async (input: SectionSchedulePayload) => {
     const {
         schedule_id,
         section_id,
@@ -99,13 +101,23 @@ export const getSectionEducator = async (input: sectionFields) => {
     const {
         section_id,
         user_sys_id,
+        position,
         flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order
     } = input;
 
     const data = await fetchDataApi(`POST`, "section.educator.get", {
         section_id: section_id,
         user_sys_id: user_sys_id,
+        position: position,
         flag_valid: flag_valid,
+        offset: offset,
+        limit: limit,
+        sort_by: sort_by,
+        sort_order: sort_order
     });
 
     return data;

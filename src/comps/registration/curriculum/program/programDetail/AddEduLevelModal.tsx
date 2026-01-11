@@ -37,8 +37,6 @@ export default function AddEduLevelModal({
   });
 
   const handleSubmit = (values: eduLevelFields) => {
-    console.log("add eduLevel:", values);
-
     onSubmit?.(values);
     form.reset();
     close();
@@ -61,8 +59,8 @@ export default function AddEduLevelModal({
         className="flex flex-col gap-2"
       >
         <Select
-          label="กลุ่มการเรียนรู้"
-          placeholder="เลือกกลุ่มการเรียนรู้"
+          label="ระดับการศึกษา"
+          placeholder="เลือกระดับการศึกษา"
           data={eduLevelData}
           {...form.getInputProps("edu_lev_id")}
           required
@@ -70,8 +68,8 @@ export default function AddEduLevelModal({
         />
 
         <Select
-          label="กลุ่มการเรียนรู้"
-          placeholder="เลือกกลุ่มการเรียนรู้"
+          label="หลักสูตร"
+          placeholder="เลือกหลักสูตร"
           data={ProgramData.map((program: any) => ({
             value: program.program_id.toString(),
             label: program.program_name + " - " + program.remark,
@@ -87,7 +85,7 @@ export default function AddEduLevelModal({
           </Button>
 
           <Button type="submit" radius={8}>
-            บันทึก
+            เพิ่มชั้นเรียน
           </Button>
         </Group>
       </form>

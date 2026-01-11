@@ -73,14 +73,14 @@ export const dataRegistration = [
         icon: <IconBook2 size={18} stroke={1.8} />,
     },
     {
-        label: "งานทะเบียนนักเรียน",
-        route: "/registration/registration",
-        icon: <IconUsersGroup size={18} stroke={1.8} />,
-    },
-    {
         label: "งานจัดตาราง",
         route: "/registration/scheduling",
         icon: <IconCalendarUser size={18} stroke={1.8} />,
+    },
+    {
+        label: "งานทะเบียนนักเรียน",
+        route: "/registration/registration",
+        icon: <IconUsersGroup size={18} stroke={1.8} />,
     },
     {
         label: "คู่มือ",

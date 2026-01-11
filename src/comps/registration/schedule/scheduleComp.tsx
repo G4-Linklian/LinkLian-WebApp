@@ -12,7 +12,7 @@ import TableSection from '@/comps/registration/shared/TableSection';
 const scheduleComp = () => {
     const router = useRouter();
 
-    const [semesterOptions, setSemesterOptions] = useState<{ value: string; label: string }[]>([]);
+    const [semesterOptions, setSemesterOptions] = useState<{ value: string; label: string; status: string }[]>([]);
     const [loading, setLoading] = useState(false);
     const [trigger, setTrigger] = useState(false);
 
@@ -34,7 +34,8 @@ const scheduleComp = () => {
 
                 const formattedOptions = semesterData.data.map((sem: any) => ({
                     value: sem.semester_id,
-                    label: sem.semester
+                    label: sem.semester,
+                    status: sem.status,
                 }));
 
                 setSemesterOptions(formattedOptions);
@@ -96,6 +97,18 @@ const scheduleComp = () => {
             borderColor: ui.borderColor,
         };
     });
+
+    useEffect(() => {
+    if (!semesterOptions.length) return;
+
+    const openSemester = semesterOptions.find(
+        (s) => s.status === "open"
+    );
+
+    if (openSemester) {
+        handleSemesterChange(openSemester.value);
+    }
+}, [semesterOptions, router.query.semester_id]);
 
     return (
         <div className='info-comp pb-8'>

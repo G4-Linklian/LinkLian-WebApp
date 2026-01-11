@@ -73,7 +73,7 @@ export default function roomTable() {
                 building_id: Number(building_id),
                 limit: BATCH_SIZE,
                 offset: offset,
-                sort_by: "room_location_id",
+                sort_by: "room_number",
                 sort_order: "asc",
             })
 
@@ -100,7 +100,6 @@ export default function roomTable() {
                         building_id: Number(building_id),
                     });
 
-                    console.log("Fetched buildings:", buildingData);
                     if (buildingData.data.length > 0) {
                         setBuildingName(buildingData.data[0]?.building_name || "");
                     }
@@ -118,7 +117,6 @@ export default function roomTable() {
         if (!buildingId || payloads.length === 0) return;
 
         try {
-
             const res = await createRoomLocationBatch(payloads);
 
             if (res.success) {
@@ -140,8 +138,18 @@ export default function roomTable() {
                 );
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Create room location batch failed:", error);
+
+            if (error?.response?.status === 409) {
+                showNotification(
+                    "ข้อมูลซ้ำ",
+                    "มีห้องซ้ำในชั้นเดียวกันของตึกเดียวกัน",
+                    "error"
+                );
+                return;
+            }
+
             showNotification(
                 "เกิดข้อผิดพลาด!",
                 "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",

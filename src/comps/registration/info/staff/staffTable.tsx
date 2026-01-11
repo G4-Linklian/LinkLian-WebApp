@@ -6,7 +6,8 @@ import {
     Loader,
     Center
 } from '@mantine/core';
-
+import { IconSearch, IconFilter, IconPlus } from '@tabler/icons-react';
+import { TextInput, ActionIcon } from '@mantine/core';
 import {
     IconEdit,
 } from "@tabler/icons-react";
@@ -227,7 +228,7 @@ export default function StaffTable() {
             key={element.user_sys_id}
             className='text-xs'
         >
-
+            <Table.Td ta="center">{element.code}</Table.Td>
             <Table.Td ta="center">{element.first_name} {element.last_name}</Table.Td>
             <Table.Td ta="center">{element.learning_area_name}</Table.Td>
             <Table.Td ta="center">{element.email}</Table.Td>
@@ -261,18 +262,44 @@ export default function StaffTable() {
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
+                {/* ส่วนหัวข้อ */}
                 <Text size="xl" fw={500} className='flex items-center gap-2'>
                     บุคลากร
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddStaffModal();
-                    }}
-                >
-                    เพิ่มบุคลากร
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                    // onChange={(event) => handleSearch(event.currentTarget.value)} 
+                    />
+
+
+                    <Button
+                        variant="default"
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconFilter size={14} />}
+                        onClick={() => {
+                            // logic เปิด Modal หรือ Dropdown filter
+                        }}
+                    >
+                        ตัวกรอง
+                    </Button>
+
+                    <Button
+                        size="xs"
+                        radius="md"
+                        // leftSection={<IconPlus size={14} />}
+                        onClick={() => {
+                            openAddStaffModal();
+                        }}
+                    >
+                        เพิ่มบุคลากร
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -287,9 +314,10 @@ export default function StaffTable() {
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             {/* <Table.Th w={5} ta="center">ลำดับ</Table.Th> */}
+                            <Table.Th w={40} ta="center">รหัสบุคลากร</Table.Th>
                             <Table.Th w={60} ta="center">ชื่อ-นามสกุล</Table.Th>
                             <Table.Th w={40} ta="center">กลุ่มการสอน</Table.Th>
-                            <Table.Th w={60} ta="center">อีเมล</Table.Th>
+                            <Table.Th w={70} ta="center">อีเมล</Table.Th>
                             <Table.Th w={30} ta="center">สถานะ</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
                         </Table.Tr>

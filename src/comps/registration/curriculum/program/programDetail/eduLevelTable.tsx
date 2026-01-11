@@ -71,12 +71,12 @@ export default function eduLevelTable({programData} : any) {
     const fetchData = async (offset: number) => {
         setLoading(true);
 
-        const { root_id } = router.query;
+        const { root_id, twig_id } = router.query;
 
         if (instId && root_id) {
             const eduLevelDatas = await getEduLevel({
                 inst_id: instId,
-                parent_id: root_id ? Number(root_id) : undefined,
+                parent_id: twig_id ? Number(twig_id) : Number(root_id),
                 offset: offset,
                 limit: BATCH_SIZE,
                 sort_by: "edu_lev_id",
@@ -161,13 +161,13 @@ export default function eduLevelTable({programData} : any) {
 
     const rows = eduLevelData.map((element, index) => (
         <Table.Tr
-            key={element.edu_lev_id}
+            key={String(element.edu_lev_id) + String(element.program_id)}
             className='text-xs'
         >
             <Table.Td ta="center">{index + 1}</Table.Td>
             <Table.Td ta="center">{element.level_name}</Table.Td>
             <Table.Td ta="center">{element.program_name}</Table.Td>
-            <Table.Td ta="center">{element.level_name + "/" + element.program_name}</Table.Td>
+            <Table.Td ta="center">{element.level_name + " / " + element.program_name}</Table.Td>
 
             <Table.Td ta="center" className='flex justify-center gap-2'>
                 <IconEdit size={20} stroke={2} color='#5e5e5eff'

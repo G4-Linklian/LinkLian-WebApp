@@ -67,6 +67,8 @@ export default function TeacherComps() {
         if (sectionId) {
             const sectionData = await getSectionEducator({
                 section_id: Number(sectionId),
+                sort_by: "position",
+                sort_order: "asc",
             })
 
             setSectionData(sectionData.data);

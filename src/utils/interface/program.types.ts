@@ -19,4 +19,5 @@ export interface programFields {
     parent_ids?: number;
     keyword?: string;
     user_sys_id?: number;
+    children_type?: string;
 }

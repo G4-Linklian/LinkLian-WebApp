@@ -18,7 +18,8 @@ export const getProgram = async (input: programFields) => {
         limit,
         sort_by,
         sort_order,
-        keyword = ""
+        keyword = "",
+        children_type = ""
     } = input;
 
     const data = await fetchDataApi(`POST`, "program.get", {
@@ -35,7 +36,8 @@ export const getProgram = async (input: programFields) => {
         limit: limit,
         sort_by: sort_by,
         sort_order: sort_order,
-        keyword: keyword
+        keyword: keyword,
+        children_type: children_type
     });
 
     return data;

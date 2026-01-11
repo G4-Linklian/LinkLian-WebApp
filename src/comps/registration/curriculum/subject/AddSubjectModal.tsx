@@ -86,7 +86,6 @@ export default function AddSubjectModal({
           label="ชื่อวิชา (ภาษาอังกฤษ)"
           placeholder="เช่น Basic Mathematics"
           {...form.getInputProps("name_en")}
-          required
           radius={8}
         />
 

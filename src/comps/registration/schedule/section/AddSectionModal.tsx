@@ -160,7 +160,7 @@ export default function AddSectionModal({
       size="md"
       radius={16}
     >
-      <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่ม Section การเรียน</h1>
+      <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มกลุ่มเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
 
         <Select
@@ -175,7 +175,7 @@ export default function AddSectionModal({
           {...form.getInputProps("subject_id")}
           filter={({ options }) => options}
           radius={8}
-
+          required
           rightSection={loading ? <Loader size={16} /> : <IconSelector size={16} />}
         />
 
@@ -187,10 +187,11 @@ export default function AddSectionModal({
           disabled={true}
           clearable={false}
           radius={8}
+          required
         />
 
         <TextInput
-          label="ชื่อ Section"
+          label="ชื่อกลุ่มเรียน"
           placeholder="เช่น S1"
           {...form.getInputProps("section_name")}
           required
