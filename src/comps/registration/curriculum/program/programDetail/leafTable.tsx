@@ -80,8 +80,6 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                 limit: BATCH_SIZE,
             })
 
-            console.log("Fetched program data:", programDatas);
-
             setProgramData((prev) => [...prev, ...programDatas.data]);
             onDataUpdate([...programData, ...programDatas.data]);
 

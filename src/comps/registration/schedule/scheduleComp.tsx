@@ -99,16 +99,16 @@ const scheduleComp = () => {
     });
 
     useEffect(() => {
-    if (!semesterOptions.length) return;
+        if (!semesterOptions.length) return;
 
-    const openSemester = semesterOptions.find(
-        (s) => s.status === "open"
-    );
+        const openSemester = semesterOptions.find(
+            (s) => s.status === "open"
+        );
 
-    if (openSemester) {
-        handleSemesterChange(openSemester.value);
-    }
-}, [semesterOptions, router.query.semester_id]);
+        if (openSemester) {
+            handleSemesterChange(openSemester.value);
+        }
+    }, [semesterOptions]);
 
     return (
         <div className='info-comp pb-8'>
@@ -152,7 +152,7 @@ const scheduleComp = () => {
                 </div>
 
                 <TableSection>
-                    <SectionTable semesterData={semesterOptions}/>
+                    <SectionTable semesterData={semesterOptions} />
                 </TableSection>
             </div>
         </div>

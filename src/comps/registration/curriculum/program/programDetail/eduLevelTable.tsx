@@ -43,7 +43,6 @@ export default function eduLevelTable({programData} : any) {
 
     const openEditModals = (eduLevel: eduLevelFields) => {
         setSelectedEduLevel(eduLevel);
-        console.log("Selected eduLevel for edit:", eduLevel);
         openEditModal();
     };
 

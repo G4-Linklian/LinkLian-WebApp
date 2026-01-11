@@ -63,7 +63,7 @@ export default function EditProgramModal({
     if (!instType) return;
 
     if (!root_id && instType === "school") {
-      setUnitText("ระดับชั้น");
+      setUnitText("แผนการเรียน");
     } else if (!root_id && instType === "uni") {
       setUnitText("คณะ");
     } else if (root_id && instType === "school") {
