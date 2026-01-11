@@ -11,28 +11,9 @@ import {
 } from '@tabler/icons-react';
 
 import { useMediaQuery } from "@/comps/public/useMediaQuery"
-
-// import { decodeToken } from "@/utils/auth/jwt";
-// import { login, sendOTP, verifyOTP } from '@/utils/auth/authAPI';
-
-// import OTPInput from '@/comps/auth/login/otpComp'
+import { decodeRegistrationToken, decodeToken } from "@/utils/authToken";
 import { useNotification } from "@/comps/noti/notiComp"
 import { loginInstitution } from '@/utils/auth/registrationLogin';
-
-
-interface MainProps {
-    email: string;
-}
-
-interface OTPInputProps {
-    email: string;
-    onVerificationComplete: (verified: boolean) => void;
-}
-
-interface OTPInputRefType {
-    focusInput: (index: number) => void;
-    resetOTP: () => void;
-}
 
 
 const RegistrationLoginPage = () => {
@@ -51,13 +32,14 @@ const RegistrationLoginPage = () => {
 
     const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
-    //   useEffect(() => {
-    //     const token = decodeToken();
+    useEffect(() => {
+        console.log("Router pathname changed:", router.pathname);
+        const token = decodeRegistrationToken();
 
-    //     if (token) {
-    //       router.push("/home");
-    //     }
-    //   }, []);
+        if (router.pathname == "/registration/login" && token) {
+            router.push("/registration/home");
+        }
+    }, [router.pathname]);
 
 
     const handleVerificationComplete = (verified: boolean) => {
@@ -78,13 +60,7 @@ const RegistrationLoginPage = () => {
                 inst_password: password
             };
 
-
-            console.log("loginField", loginField);
-
             const loginData = await loginInstitution(loginField);
-            console.log("loginData", loginData);
-            console.log("loginData.token", loginData.token);
-            console.log("loginData.user", loginData.institution);
 
             if (loginData.success) {
                 setUserEmail(loginData.institution);
