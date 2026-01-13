@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import RegistrationLoginPage from "@/comps/registration/auth/loginComp";
+import Head from 'next/head';
 
 import React from 'react'
 
@@ -30,6 +31,10 @@ function PageContent() {
 export default function RegistrationLogin() {
     return (
         <>
+            <Head>
+                <title>เข้าสู่ระบบ</title>
+                <meta name="login" content="Login" />
+            </Head>
             <PageContent></PageContent>
         </>
     );

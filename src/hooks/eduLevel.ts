@@ -17,18 +17,23 @@ export const useEduLevelOptions = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // const token = decodeRegistrationToken();
+
+        const token = decodeRegistrationToken();
+        let eduLevType = '';
         
-        // if (!token?.institution?.inst_id) {
-        //     console.warn("No institution ID found in token");
-        //     return;
-        // }
+        if (token && token.institution && token.institution.inst_type) {
+          if (token.institution.inst_type === "school") {
+            eduLevType = "high school";
+          } else if (token.institution.inst_type === "uni") {
+            eduLevType = "bachelor";
+          }
+        }
+
 
         const eduLevelData = await getEduLevelMaster({
           flag_valid: true,
+          edu_type: eduLevType,
         });
-
-        console.log("Fetched edu levels:", eduLevelData);
 
 
         const formattedOptions = eduLevelData.data.map((edu: any) => ({

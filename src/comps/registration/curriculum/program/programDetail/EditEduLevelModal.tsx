@@ -74,8 +74,8 @@ export default function EduLevelEditModal({
         />
 
         <Select
-          label="หลักสูตร"
-          placeholder="เลือกหลักสูตร"
+          label="เลือกห้องเรียน"
+          placeholder="เลือกห้องเรียน"
           data={ProgramData.map((program: any) => ({
             value: program.program_id.toString(),
             label: program.program_name + " - " + program.remark,

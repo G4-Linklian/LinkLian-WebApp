@@ -4,11 +4,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import { useForm } from '@mantine/form';
 import {
-    IconUserCircle,
-    IconUser,
-    IconLock
-} from '@tabler/icons-react';
+    TextInput,
+    PasswordInput,
+    Checkbox,
+    Button,
+    Group,
+} from '@mantine/core';
+import { IconUser, IconLock } from '@tabler/icons-react';
 
 import { useMediaQuery } from "@/comps/public/useMediaQuery"
 import { decodeRegistrationToken, decodeToken } from "@/utils/authToken";
@@ -44,20 +48,20 @@ const RegistrationLoginPage = () => {
 
     const handleVerificationComplete = (verified: boolean) => {
         setVerificationResult(verified);
-        console.log(`Verification ${verified ? 'successful' : 'failed'} for ${email}`);
+        console.log(`Verification ${verified ? 'successful' : 'failed'} for ${form.values.email}`);
     };
 
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (values: typeof form.values) => {
+        // e.preventDefault();
         setLoging(true);
 
         try {
-            console.log('Login attempt:', { email, password, rememberMe });
+            // console.log('Login attempt:', { email, password, rememberMe });
 
             const loginField: any = {
-                inst_email: email,
-                inst_password: password
+                inst_email: values.email,
+                inst_password: values.password
             };
 
             const loginData = await loginInstitution(loginField);
@@ -68,7 +72,7 @@ const RegistrationLoginPage = () => {
 
                 let expiresInDays: number
 
-                if (rememberMe) {
+                if (values.rememberMe) {
                     expiresInDays = 30
                 } else {
                     expiresInDays = 1
@@ -82,11 +86,10 @@ const RegistrationLoginPage = () => {
 
                 localStorage.setItem("linklian_registration_access_token", JSON.stringify(data));
 
-                showNotification("Login successful!", "You have been logged in successfully.", "success");
-                // Redirect to home or dashboard
+                showNotification("เข้าสู่ระบบสำเร็จ!", "คุณได้เข้าสู่ระบบเรียบร้อยแล้ว", "success");
                 router.push('/registration/home');
             } else {
-                showNotification("Login failed!", `${loginData.message}`, "error");
+                showNotification("เข้าสู่ระบบล้มเหลว!", `${loginData.message}`, "error");
                 setLoging(false);
                 return
             }
@@ -97,11 +100,25 @@ const RegistrationLoginPage = () => {
             console.error("Login Error:", error);
             showNotification("Login Error", "เกิดข้อผิดพลาดระหว่างการเข้าสู่ระบบ", "error");
         } finally {
-            // router.push('/home');
             setLoging(false);
-            //setLoging(false); // ปิด loading ไม่ว่าจะสำเร็จหรือ error
         }
     };
+
+    const form = useForm({
+        initialValues: {
+            email: '',
+            password: '',
+            rememberMe: false,
+        },
+
+        validate: {
+            email: (value) =>
+                /^\S+@\S+$/.test(value) ? null : 'Invalid email',
+            password: (value) =>
+                value.length < 6 ? 'Password must be at least 6 characters' : null,
+        },
+    });
+
 
 
     const isLargerThanSm = useMediaQuery("(min-width: 768px)");
@@ -112,7 +129,7 @@ const RegistrationLoginPage = () => {
             {/* Right side wavy pattern */}
             {isLargerThanSm ? (
                 <>
-                    <div className={`absolute right-0 h-[120%] w-[90%] opacity-95 z-0 -top-48`}
+                    <div className={`absolute right-20 h-[120%] w-[90%] opacity-95 z-0 -top-48`}
                         style={{
                             // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
                             transform: 'translateX(30%)'
@@ -121,7 +138,7 @@ const RegistrationLoginPage = () => {
 
                     </div>
 
-                    <div className={`absolute -right-20 h-[120%] w-[90%] opacity-55 z-0 top-32`}
+                    <div className={`absolute right-10 h-[120%] w-[90%] opacity-55 z-0 top-24`}
                         style={{
                             // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
                             transform: 'translateX(30%)'
@@ -130,7 +147,7 @@ const RegistrationLoginPage = () => {
 
                     </div>
 
-                    <div className={`absolute -right-10 h-[120%] w-[90%] opacity-35 z-0 top-0`}
+                    <div className={`absolute right-10 h-[120%] w-[90%] opacity-35 z-0 -top-10`}
                         style={{
                             // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
                             transform: 'translateX(30%)'
@@ -180,90 +197,50 @@ const RegistrationLoginPage = () => {
             flex flex-col w-full max-w-md p-8 rounded-lg
             ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}
           `}>
-                        <h1 className="text-2xl font-bold text-center mb-8 text-[#000000]">Login</h1>
+                        <h1 className="text-2xl font-bold text-center mb-8 text-[#000000]">การเข้าสู่ระบบ</h1>
 
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <IconUser size={20} className="text-teal-500" />
-                                    </div>
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="username or email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                        <form onSubmit={form.onSubmit(handleSubmit)}>
+                            <TextInput
+                                label="อีเมล"
+                                placeholder="อีเมล"
+                                leftSection={<IconUser size={18} stroke={1.5} />}
+                                required
+                                radius="md"
+                                mb="md"
+                                size='md'
+                                {...form.getInputProps('email')}
+                            />
 
-                            <div className="mb-4">
-                                <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <IconLock size={20} className="text-teal-500" />
-                                        </div>
-                                    </div>
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        placeholder="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 block w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            <PasswordInput
+                                label="รหัสผ่าน"
+                                placeholder="รหัสผ่าน"
+                                required
+                                radius="md"
+                                mb="md"
+                                leftSection={<IconLock size={18} stroke={1.5} />}
+                                size='md'
+                                {...form.getInputProps('password')}
+                            // Mantine มีปุ่มเปิด/ปิดตาให้อัตโนมัติอยู่แล้วครับ
+                            />
 
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center">
-                                    <input
-                                        id="remember-me"
-                                        name="remember-me"
-                                        type="checkbox"
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                        className="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                        remember me
-                                    </label>
-                                </div>
-                                <div className="text-sm">
-                                    <Link href="/resetpassword" className="text-blue-500 hover:text-blue-600">
-                                        Forgot Password?
-                                    </Link>
-                                </div>
-                            </div>
+                            <Group justify="space-between" mb="lg" mt="md">
+                                <Checkbox
+                                    label="Remember me"
+                                    {...form.getInputProps('rememberMe', { type: 'checkbox' })}
+                                />
 
+                            </Group>
 
-                            {loging ? (
-                                <div className='flex w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2 mt-1"></div>
-                                    Loging...
-                                </div>
-                            ) : (
-                                <>
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    >
-                                        Login
-                                    </button>
-                                </>
-                            )}
+                            <Button
+                                type="submit"
+                                fullWidth
+                                mt="xl"
+                                radius="md"
+                                loading={loging}
+                                color="blue"
+                            >
+                                {loging ? 'Logging in...' : 'Login'}
+                            </Button>
                         </form>
 
                         <div className="mt-4 text-center">

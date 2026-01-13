@@ -12,8 +12,8 @@ const curriculumComp = () => {
 
     // mock จาก API
     const statsFromApi: StatApiResponse[] = [
-        { key: "subject", value: 54, label: "รายวิชาทั้งหมด" },
         { key: "learningArea", value: 8, label: "กลุ่มสาระ" },
+        { key: "subject", value: 54, label: "รายวิชาทั้งหมด" },
         { key: "curriculum", value: 12, label: "แผนการเรียน" },
     ];
 

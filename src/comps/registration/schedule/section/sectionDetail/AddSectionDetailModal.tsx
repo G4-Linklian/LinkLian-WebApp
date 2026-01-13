@@ -113,7 +113,7 @@ export default function AddSectionDetailModal({
     if (end < start) {
       showNotification(
         'เพิ่มข้อมูลไม่สำเร็จ',
-        'เวลาสิ้นสุดต้องหลังจากเวลาเริ่มต้น',
+        'กรุณาเลือกเวลาสิ้นสุดที่มากกว่าเวลาเริ่มต้น',
         'error',
       );
       return;

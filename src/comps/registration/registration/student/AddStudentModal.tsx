@@ -55,7 +55,6 @@ export default function AddStudentModal({
   });
 
   const fetchProgram = async (keyword: string) => {
-    console.log("Fetching programs with keyword:", keyword);
 
     if (!token) return;
 
@@ -66,9 +65,9 @@ export default function AddStudentModal({
         inst_id: token.institution.inst_id,
         keyword,
         sort_order: "desc",
+        tree_type: "leaf",
+        limit: 10,
       });
-
-      console.log("Fetched program data:", programData);
 
       const options: ProgramOption[] = programData.data.map((programs: any) => ({
         value: programs.program_id,
@@ -128,12 +127,12 @@ export default function AddStudentModal({
           radius={8}
           required
         />
-        <TextInput
+        {/* <TextInput
           label="ชื่อกลาง"
           placeholder="กรอกชื่อกลาง"
           {...form.getInputProps("middle_name")}
           radius={8}
-        />
+        /> */}
         <TextInput
           label="นามสกุล"
           placeholder="กรอกนามสกุล"
@@ -169,7 +168,7 @@ export default function AddStudentModal({
           <Select
             className="w-[60%]"
             label="ห้องเรียน"
-            placeholder="พิมพ์ชื่อห้องเรียน"
+            placeholder="ค้นหาห้องเรียน"
             data={programOptions}
             searchable
             nothingFoundMessage={loadingProgram ? "กำลังค้นหา..." : "ไม่พบรายห้องเรียน"}

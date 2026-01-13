@@ -98,6 +98,8 @@ export default function EditStudentModal({
         inst_id: token.institution.inst_id,
         keyword,
         sort_order: "desc",
+        tree_type: "leaf",
+        limit: 10,
       });
 
       const options: ProgramOption[] = subjectData.data.map((programs: any) => ({
@@ -163,12 +165,12 @@ export default function EditStudentModal({
           radius={8}
           required
         />
-        <TextInput
+        {/* <TextInput
           label="ชื่อกลาง"
           placeholder="กรอกชื่อกลาง"
           {...form.getInputProps("middle_name")}
           radius={8}
-        />
+        /> */}
         <TextInput
           label="นามสกุล"
           placeholder="กรอกนามสกุล"

@@ -78,12 +78,6 @@ export default function AddStaffModal({
           required
         />
         <TextInput
-          label="ชื่อกลาง"
-          placeholder="กรอกชื่อกลาง"
-          {...form.getInputProps("middle_name")}
-          radius={8}
-        />
-        <TextInput
           label="นามสกุล"
           placeholder="กรอกนามสกุล"
           {...form.getInputProps("last_name")}
@@ -110,7 +104,7 @@ export default function AddStaffModal({
 
           <Select
             className="w-[60%]"
-            label="สอนในกลุ่มการเรียนรู้"
+            label="กลุ่มการสอน"
             placeholder="เช่น คณิตศาสตร์"
             data={learningAreaOptions}
             {...form.getInputProps("learning_area_id")}

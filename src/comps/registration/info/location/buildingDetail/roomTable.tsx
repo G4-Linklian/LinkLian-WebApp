@@ -213,7 +213,7 @@ export default function roomTable() {
             <Table.Td ta="center">{index + 1}</Table.Td>
             <Table.Td ta="center">{element.floor}</Table.Td>
             <Table.Td ta="center">{element.floor + String(element.room_number)}</Table.Td>
-            <Table.Td ta="center">{router.query.room_format == 'by_building_no' ? String(element.building_no) + String(element.floor) + String(element.room_number) : String(element.building_name) + String(element.floor) + String(element.room_number)}</Table.Td>
+            <Table.Td ta="center">{router.query.room_format == 'by_building_no' ? String(element.building_no) + String(element.floor) + String(element.room_number) : String(element.building_name) + " " + String(element.floor) + String(element.room_number)}</Table.Td>
 
             <Table.Td ta="center">{element.room_remark ? element.room_remark : "-"}</Table.Td>
 

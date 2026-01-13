@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from '@/comps/noti/notiComp';
+import { useEduLevelOptions } from "@/hooks/eduLevel";
 import { getEduLevel, getEduLevelMaster, createEduLevelNorm, deleteEduLevelNorm  } from '@/utils/api/eduLevel';
 import AddEduLevelModal from '@/comps/registration/curriculum/program/programDetail/AddEduLevelModal';
 import EduLevelEditModal from '@/comps/registration/curriculum/program/programDetail/EditEduLevelModal';
@@ -30,13 +31,15 @@ export default function eduLevelTable({programData} : any) {
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
     const [programName, setProgramName] = useState<string>("");
+    const [eduTypeName, setEduTypeName] = useState<string>("");
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddEduLevel, { open: openAddEduLevel, close: closeAddEduLevel }] = useDisclosure(false);
     const [selectedEduLevel, setSelectedEduLevel] =
         useState<eduLevelFields | null>(null);
 
-    const [eduLevelOptions, setEduLevelOptions] = useState<{ value: string; label: string }[]>([]);
+    // const [eduLevelOptions, setEduLevelOptions] = useState<{ value: string; label: string }[]>([]);
+    const { options: eduLevelOptions, isLoading: eduLevelLoading } = useEduLevelOptions();
 
     const { showNotification } = useNotification();
     const { root_id } = router.query;
@@ -59,8 +62,10 @@ export default function eduLevelTable({programData} : any) {
             setInstId(token.institution.inst_id);
             if (token.institution.inst_type === "school") {
                 setProgramName("ห้อง");
+                setEduTypeName("high school")
             } else if (token.institution.inst_type === "uni") {
                 setProgramName("สาขา");
+                setEduTypeName("bachelor")
             }
         }
         setToken(token);
@@ -116,30 +121,6 @@ export default function eduLevelTable({programData} : any) {
     useEffect(() => {
         fetchData(0);
     }, [router.isReady, instId]);
-
-    useEffect(() => {
-        const fetchLearningAreas = async () => {
-            try {
-
-                if (instId) {
-                    const eduLevelData = await getEduLevelMaster({
-                        flag_valid : true,
-                    });
-
-                    const options = eduLevelData.data.map((area: any) => ({
-                        value: area.edu_lev_id.toString(),
-                        label: area.level_name,
-                    }));
-
-                    setEduLevelOptions(options);
-                }
-            } catch (error) {
-                console.error("Failed to fetch learning areas:", error);
-            }
-        };
-
-        fetchLearningAreas();
-    }, [instId]);
 
 
     const onScroll = () => {

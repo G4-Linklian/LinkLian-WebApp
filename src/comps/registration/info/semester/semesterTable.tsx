@@ -67,7 +67,7 @@ export default function SemesterTable() {
             const semesterData = await getSemester({
                 inst_id: instId,
                 offset: offset,
-                sort_by: "end_date",
+                sort_by: "start_date",
                 sort_order: "desc",
                 limit: BATCH_SIZE
             })
@@ -88,9 +88,9 @@ export default function SemesterTable() {
 
             const semesterData = await getSemester({
                 inst_id: instId,
-                semester: values.semester,
-                // start_date: values.start_date,
-                // end_date: values.end_date,
+                // semester: values.semester,
+                start_date: values.start_date,
+                end_date: values.end_date,
                 limit: 1
             })
 
@@ -123,6 +123,19 @@ export default function SemesterTable() {
         if (!instId) return;
 
         try {
+
+            const semesterData = await getSemester({
+                inst_id: instId,
+                // semester: values.semester,
+                start_date: normalizeDate(values.start_date),
+                end_date: normalizeDate(values.end_date),
+                limit: 1
+            })
+
+            if (semesterData.data.length > 0) {
+                showNotification("เพิ่มภาคเรียนล้มเหลว!", "ภาคเรียนนี้มีอยู่ในระบบแล้ว", "error");
+                return;
+            }
 
             const payload = {
                 ...values,
