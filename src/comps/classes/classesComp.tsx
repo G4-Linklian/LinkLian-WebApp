@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Image from 'next/image';
-import { getUser, updateUser } from "@/utils/api/userData"
 
 import { decodeToken } from "@/utils/authToken";
 
