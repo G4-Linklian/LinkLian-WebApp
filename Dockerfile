@@ -1,34 +1,32 @@
+# Stage 1: Builder
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+# เปลี่ยนจาก package-lock.json เป็น yarn.lock
+COPY package.json yarn.lock ./
+
+# ใช้ yarn install --frozen-lockfile แทน npm ci 
+# เพื่อให้มั่นใจว่าเวอร์ชันของ package ตรงตาม yarn.lock เป๊ะๆ
+RUN yarn install --frozen-lockfile
 
 COPY . .
-RUN npm run build
+RUN yarn build
 
 
+# Stage 2: Runner
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4100
 
-# COPY --from=builder /app/package.json ./
-# COPY --from=builder /app/node_modules ./node_modules
-# COPY --from=builder /app/.next ./.next
-# COPY --from=builder /app/public ./public
-# COPY --from=builder /app/next.config.js ./next.config.js
-
+# Next.js standalone output จะรวมไฟล์ที่จำเป็นไว้ให้แล้ว
 COPY --from=builder /app/.next/standalone ./
-
 COPY --from=builder /app/.next/static ./.next/static
-
 COPY --from=builder /app/public ./public
 
 EXPOSE 4100
-# CMD ["npx", "next", "start", "-p", "4100"]
-# CMD ["node", ".next/standalone/server.js"]
 
+# รันด้วย server.js (สำหรับ standalone mode)
 CMD ["node", "server.js"]
