@@ -19,7 +19,7 @@ export interface StatData {
 }
 
 export interface StatApiResponse {
-    key: "academicYear" | "subject" | "classroom" | "staff";
+    key: "academicYear" | "subject" | "classroom" | "staff" | "learningArea" | "curriculum" | "building" | "classroomOff" | "classroomOn" | "clockCheck" | "clockX" | "sectionEdit";
     value: number;
     label: string;
 }
@@ -37,7 +37,7 @@ function StatCard({
             className={`
             flex items-center justify-between gap-2 sm:gap-3
             px-6 sm:px-3 py-6 sm:py-3
-            rounded-lg border-2
+            rounded-xl border-2
             ${borderColor} ${bgColor}
             w-full min-w-0
           `}
@@ -51,7 +51,7 @@ function StatCard({
                 ${iconColor}
             `}
             >
-                <Icon className="w-5 h-5 sm:w-2 sm:h-6 lg:w-7 lg:h-7" stroke={2} />
+                <Icon className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-7" stroke={2} />
             </div>
 
             {/* Content */}
@@ -61,14 +61,6 @@ function StatCard({
             <span className="text-sm sm:text-base text-gray-600 truncate">
                 {label}
             </span>
-            {/* <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
-                <span className="text-xl sm:text-2xl font-semibold text-gray-800 truncate">
-                    {value}
-                </span>
-                <span className="text-sm sm:text-base text-gray-600 truncate">
-                    {label}
-                </span>
-            </div> */}
         </div>
     );
 }

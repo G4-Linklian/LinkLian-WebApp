@@ -27,11 +27,11 @@ function PageContent() {
 }
 
 
-export default function RegistrationHome() {
+export default function InformationRegistration() {
     return (
         <>
             <Head>
-                <title>Information</title>
+                <title>ข้อมูลพื้นฐาน</title>
                 <meta name="description" content="Information Page" />
             </Head>
 

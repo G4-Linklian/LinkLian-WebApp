@@ -8,9 +8,10 @@ import Image from "next/image";
 import { useMediaQuery } from "@/comps/public/useMediaQuery";
 import { decodeToken, decodeRegistrationToken } from "@/utils/authToken";
 import { dataRegistration } from "@/comps/layouts/tabRoute";
-
+import { Avatar, Button } from "@mantine/core";
 import {
   IconHelpCircle,
+  IconLogout
 } from "@tabler/icons-react";
 
 interface MainLinkProps {
@@ -44,7 +45,7 @@ function SidebarLink({ label, route, icon }: MainLinkProps) {
       </div>
       <button
         onClick={changeRoute}
-        className={`w-[92%] flex items-center gap-3 px-4 py-3 transition-colors duration-200 rounded-xl
+        className={`w-[92%] flex items-center gap-3 px-4 py-3 transition-colors duration-200 rounded-xl cursor-pointer
         ${isActive
             ? "bg-[#FFF7EE] text-[#E87722]"
             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -74,13 +75,12 @@ export function Sidebar() {
   const userProfile = {
     name: token?.institution?.inst_name_th,
     email: token?.institution?.inst_email,
-    // email: "wachirawit.prem@linklian.ac.th",
-    avatar: "/image/ME.png"
+    avatar: "/image/school.png"
   };
 
   useEffect(() => {
     const token = decodeRegistrationToken();
-    console.log("token", token);
+    console.log("Decoded Registration Token:", token);
     setToken(token);
   }, [router.isReady]);
 
@@ -88,6 +88,11 @@ export function Sidebar() {
   if (!isLargerThanSm) {
     return null;
   }
+
+  const handleLogout = () => {
+    localStorage.removeItem("linklian_registration_access_token");
+    router.push("/registration/login");
+  };
 
   return (
     <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed left-0 top-0 z-50 overflow-y-auto">
@@ -117,23 +122,45 @@ export function Sidebar() {
 
       {/* Bottom Section: Support & Profile */}
       <div className="border-t border-gray-200 p-4">
-        {/* Help Link */}
-        <button className="flex items-center gap-4 px-4 py-3 text-gray-600 hover:text-black hover:bg-gray-50 w-full rounded-md mb-2">
-          <IconHelpCircle size={20} stroke={1.5} />
+        <Button
+          variant="subtle"
+          color="gray"
+          leftSection={<IconHelpCircle size={20} stroke={1.5} />}
+          fullWidth
+          justify="flex-start"
+          className="mb-2 ml-1"
+          size="md"
+        >
           <span className="text-sm font-medium">แจ้งปัญหา</span>
-        </button>
+        </Button>
+
+        <Button
+          variant="subtle"
+          color="gray"
+          leftSection={<IconLogout size={20} stroke={1.5} />}
+          fullWidth
+          justify="flex-start"
+          className="mb-2 ml-1"
+          size="md"
+          onClick={handleLogout}
+        >
+          <span className="text-sm font-medium">ออกจากระบบ</span>
+        </Button>
 
         {/* User Profile Card */}
         <div className="flex items-center gap-3 mt-2 pt-2">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 relative">
-            {/* ใช้ img หรือ Next Image ก็ได้ */}
-            <img
-              src={userProfile.avatar}
-              alt="User"
-              className="w-full h-full object-cover"
-            // onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/40" }} // Fallback image
-            />
-          </div>
+          <Avatar
+            src={token?.institution.logo_url}
+            alt={token?.institution.inst_name_th}
+            size={40}
+            radius={40}
+            color="orange"
+            p={2}
+            // className="border-2 border-white shadow-sm"
+            className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 p-1 relative"
+          >
+            {token?.institution.inst_name_th?.[0]}
+          </Avatar>
           <div className="flex flex-col overflow-hidden">
             <span className="text-xs font-bold text-gray-800 truncate">{userProfile.name}</span>
             <span className="text-[10px] text-gray-500 truncate">{userProfile.email}</span>

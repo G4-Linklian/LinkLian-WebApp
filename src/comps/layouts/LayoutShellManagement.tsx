@@ -1,20 +1,12 @@
 import { NotificationProvider } from "@/comps/noti/notiComp";
 
 import React, { useEffect, useState } from "react";
-import {
-  IconNews,
-  IconSchool,
-  IconUsers,
-  IconMessageDots,
-  IconUser,
-  IconBell
-} from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Sidebar } from "./_mainLinkManagement";
 
 import { useMediaQuery } from "@/comps/public/useMediaQuery"
-import { decodeToken } from "@/utils/authToken";
+import { decodeRegistrationToken, decodeToken } from "@/utils/authToken";
 import { tabRoutes } from "./tabRoute";
 
 const LayoutShellManagement = ({ children }: any) => {
@@ -25,6 +17,15 @@ const LayoutShellManagement = ({ children }: any) => {
     const [profileImage, setProfileImage] = useState<string>("");
 
     const [activeTab, setActiveTab] = useState<string | null>("tab3");
+
+    useEffect(() => {
+        console.log("Router pathname changed:", router.pathname);
+        const token = decodeRegistrationToken();
+        
+        if (router.pathname.startsWith("/registration") && !token){
+            router.push("/registration/login");
+        }
+    }, [router.pathname]);
 
     useEffect(() => {
         const cleanPath = router.pathname.split('?')[0];
@@ -60,7 +61,7 @@ const LayoutShellManagement = ({ children }: any) => {
                     top: 0,
                     left: 0,
                     height: "100vh",
-                    zIndex: 9999,
+                    // zIndex: 9999,
                     paddingTop: "10px"
                 }}>
                     <Sidebar />
@@ -90,12 +91,14 @@ const LayoutShellManagement = ({ children }: any) => {
 
                 {/* Main content */}
                 <main style={{
-                    background: "#ffffff",
+                    // background: "#ffffff",
                     height: "100vh",
                     display: "flex",
                     justifyContent: "center",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                     width: "calc(100% - 16rem)",
+                    overflowY: "auto",
+                    backgroundColor: "#FAFAFA"
                 }}>
                     {children}
                 </main>
