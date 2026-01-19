@@ -76,7 +76,7 @@ export default function StaffTable() {
                 inst_id: instId,
                 role_id: roleID,
                 offset: offset,
-                sort_by: "user_sys_id",
+                sort_by: "code",
                 sort_order: "asc",
                 limit: BATCH_SIZE
             })

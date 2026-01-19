@@ -95,7 +95,7 @@ export default function SemesterTable() {
             })
 
             if (semesterData.data.length > 0) {
-                showNotification("เพิ่มภาคเรียนล้มเหลว!", "ภาคเรียนนี้มีอยู่ในระบบแล้ว", "error");
+                showNotification("เพิ่มภาคเรียนล้มเหลว!", "ระยะการเปิดปิดของภาคเรียนทับซ้อนกับภาคเรียนอื่น", "error");
                 return;
             }
 
@@ -133,7 +133,7 @@ export default function SemesterTable() {
             })
 
             if (semesterData.data.length > 0) {
-                showNotification("เพิ่มภาคเรียนล้มเหลว!", "ภาคเรียนนี้มีอยู่ในระบบแล้ว", "error");
+                showNotification("แก้ไขภาคเรียนล้มเหลว!", "ระยะการเปิดปิดของภาคเรียนทับซ้อนกับภาคเรียนอื่น", "error");
                 return;
             }
 
