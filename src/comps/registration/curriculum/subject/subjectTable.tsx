@@ -42,7 +42,6 @@ export default function subjectTable() {
 
     const openEditModals = (subject: subjectFields) => {
         setSelectedSubject(subject);
-        console.log("Selected subject for edit:", subject);
         openEditModal();
     };
 
@@ -120,8 +119,6 @@ export default function subjectTable() {
                 inst_id: Number(values.inst_id),
             };
 
-            console.log("Edit subject payload:", payload);
-
             const res = await updateSubject(payload);
 
             setSubjectData([]);
@@ -147,8 +144,6 @@ export default function subjectTable() {
                     const learningAreaData = await getLearningArea({
                         inst_id: instId,
                     });
-
-                    console.log("Fetched learning areas for subject modal:", learningAreaData);
 
                     const options = learningAreaData.data.map((area: any) => ({
                         value: area.learning_area_id.toString(),

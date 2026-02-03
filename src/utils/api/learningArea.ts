@@ -1,59 +1,62 @@
 import { fetchDataApi } from "@/utils/callAPI"
 import { learningAreaFields } from "@/utils/interface/learningArea.types"
 
+// GET /learning-area/:id - ดึงข้อมูลตาม ID
+export const getLearningAreaById = async (id: number) => {
+    const data = await fetchDataApi(`GET`, `learning-area/${id}`, {});
+    return data;
+};
 
+// GET /learning-area - ค้นหาพร้อม pagination
 export const getLearningArea = async (input: learningAreaFields) => {
-
     const {
-        learning_area_id = "",
-        inst_id = "",
-        learning_area_name = "",
-        flag_valid = "",
+        learning_area_id,
+        inst_id,
+        learning_area_name,
+        flag_valid,
         offset,
         limit,
-        sort_by = "",
+        sort_by,
         sort_order,
-        subject_count = "",
+        subject_count,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "learning.area.get", {
-        learning_area_id: learning_area_id,
-        inst_id: inst_id,
-        learning_area_name: learning_area_name,
-        flag_valid: flag_valid,
-        offset: offset,
-        limit: limit,
-        sort_by: sort_by,
-        sort_order: sort_order,
-        subject_count: subject_count,
+    const data = await fetchDataApi(`GET`, "learning-area", {
+        learning_area_id,
+        inst_id,
+        learning_area_name,
+        flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order,
+        subject_count,
     });
 
     return data;
 };
 
-
+// POST /learning-area - สร้างใหม่
 export const createLearningArea = async (input: learningAreaFields) => {
-
     const {
-        inst_id = "",
-        learning_area_name = "",
-        remark = "",
-        flag_valid = "",
+        inst_id,
+        learning_area_name,
+        remark,
+        flag_valid,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "learning.area.create", {
-        inst_id: inst_id,
-        learning_area_name: learning_area_name,
-        flag_valid: flag_valid,
-        remark: remark,
+    const data = await fetchDataApi(`POST`, "learning-area", {
+        inst_id,
+        learning_area_name,
+        flag_valid,
+        remark,
     });
 
     return data;
 };
 
-
+// PUT /learning-area/:id - อัปเดต
 export const updateLearningArea = async (input: learningAreaFields) => {
-
     const {
         learning_area_id,
         inst_id,
@@ -62,30 +65,65 @@ export const updateLearningArea = async (input: learningAreaFields) => {
         flag_valid
     } = input;
 
-    const data = await fetchDataApi(`POST`, "learning.area.update", {
-        learning_area_id: learning_area_id,
-        inst_id: inst_id,
-        learning_area_name: learning_area_name,
-        remark: remark,
-        flag_valid: flag_valid
+    const data = await fetchDataApi(`PUT`, `learning-area/${learning_area_id}`, {
+        inst_id,
+        learning_area_name,
+        remark,
+        flag_valid
     });
 
     return data;
 };
 
-export const updateLearningAreaUserSys = async (input: learningAreaFields) => {
+// DELETE /learning-area/:id - ลบ
+export const deleteLearningArea = async (id: number) => {
+    const data = await fetchDataApi(`DELETE`, `learning-area/${id}`, {});
+    return data;
+};
 
+// POST /learning-area/user-sys - สร้าง user sys normalize
+export const createLearningAreaUserSys = async (input: learningAreaFields) => {
+    const {
+        learning_area_id,
+        user_sys_id,
+    } = input;
+
+    const data = await fetchDataApi(`POST`, "learning-area/user-sys", {
+        learning_area_id,
+        user_sys_id,
+    });
+
+    return data;
+};
+
+// PUT /learning-area/user-sys - อัปเดต user sys normalize
+export const updateLearningAreaUserSys = async (input: learningAreaFields) => {
     const {
         learning_area_id,
         user_sys_id,
         flag_valid,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "learning.area.usersys.update", {
-        learning_area_id: learning_area_id,
-        user_sys_id: user_sys_id,
-        flag_valid: flag_valid
+    const data = await fetchDataApi(`PUT`, "learning-area/user-sys", {
+        learning_area_id,
+        user_sys_id,
+        flag_valid
     });
 
-    return data;;
-}
+    return data;
+};
+
+// DELETE /learning-area/user-sys - ลบ user sys normalize
+export const deleteLearningAreaUserSys = async (input: learningAreaFields) => {
+    const {
+        learning_area_id,
+        user_sys_id,
+    } = input;
+
+    const data = await fetchDataApi(`DELETE`, "learning-area/user-sys", {
+        learning_area_id,
+        user_sys_id,
+    });
+
+    return data;
+};

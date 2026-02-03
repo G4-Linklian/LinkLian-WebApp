@@ -1,9 +1,10 @@
 import { fetchDataApi } from "@/utils/callAPI"
 import { sectionFields, SectionSchedulePayload } from "@/utils/interface/section.types"
 
+// ========== Search Endpoints ==========
 
+// GET /section/master - ค้นหา section (master view with student count)
 export const getSectionMaster = async (input: sectionFields) => {
-
     const {
         section_id,
         semester_id,
@@ -22,27 +23,57 @@ export const getSectionMaster = async (input: sectionFields) => {
         section_name
     } = input;
 
-    const data = await fetchDataApi(`POST`, "section.master.get", {
-        section_id: section_id,
-        semester_id: semester_id,
-        subject_id: subject_id,
-        flag_valid: flag_valid,
-        schedule_id: schedule_id,
-        day_of_week: day_of_week,
-        start_time: start_time,
-        end_time: end_time,
-        room_location_id: room_location_id,
-        inst_id: inst_id,
-        offset: offset,
-        limit: limit,
-        sort_by: sort_by,
-        sort_order: sort_order,
-        section_name: section_name
+    const data = await fetchDataApi(`GET`, "section/master", {
+        section_id,
+        semester_id,
+        subject_id,
+        flag_valid,
+        schedule_id,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+        inst_id,
+        offset,
+        limit,
+        sort_by,
+        sort_order,
+        section_name
     });
 
     return data;
 };
 
+// GET /section - ค้นหา section with schedule and room details
+export const getSection = async (input: sectionFields) => {
+    const {
+        section_id,
+        semester_id,
+        subject_id,
+        flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order,
+        section_name
+    } = input;
+
+    const data = await fetchDataApi(`GET`, "section", {
+        section_id,
+        semester_id,
+        subject_id,
+        flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order,
+        section_name
+    });
+
+    return data;
+};
+
+// GET /section/schedule - ค้นหา schedule
 export const getSchedule = async (input: SectionSchedulePayload) => {
     const {
         schedule_id,
@@ -54,50 +85,21 @@ export const getSchedule = async (input: SectionSchedulePayload) => {
         flag_valid,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "schedule.get", {
-        schedule_id: schedule_id,
-        section_id: section_id,
-        day_of_week: day_of_week,
-        start_time: start_time,
-        end_time: end_time,
-        room_location_id: room_location_id,
-        flag_valid: flag_valid
-    });
-
-    return data;
-};
-
-export const updateSectionSchedule = async (input: SectionSchedulePayload) => {
-
-    const {
+    const data = await fetchDataApi(`GET`, "section/schedule", {
+        schedule_id,
         section_id,
-        subject_id,
-        semester_id,
-        section_name,
         day_of_week,
         start_time,
         end_time,
         room_location_id,
-        schedule_id
-    } = input;
-
-    const data = await fetchDataApi(`POST`, "section.schedule.update", {
-        section_id: section_id,
-        subject_id: subject_id,
-        semester_id: semester_id,
-        section_name: section_name,
-        day_of_week: day_of_week,
-        start_time: start_time,
-        end_time: end_time,
-        room_location_id: room_location_id,
-        schedule_id: schedule_id
+        flag_valid
     });
 
     return data;
 };
 
+// GET /section/educator - ค้นหา section educator
 export const getSectionEducator = async (input: sectionFields) => {
-
     const {
         section_id,
         user_sys_id,
@@ -109,20 +111,196 @@ export const getSectionEducator = async (input: sectionFields) => {
         sort_order
     } = input;
 
-    const data = await fetchDataApi(`POST`, "section.educator.get", {
-        section_id: section_id,
-        user_sys_id: user_sys_id,
-        position: position,
-        flag_valid: flag_valid,
-        offset: offset,
-        limit: limit,
-        sort_by: sort_by,
-        sort_order: sort_order
+    const data = await fetchDataApi(`GET`, "section/educator", {
+        section_id,
+        user_sys_id,
+        position,
+        flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order
     });
 
     return data;
 };
 
+// GET /section/enrollment - ค้นหา enrollment
+export const getSectionEnrollment = async (input: sectionFields) => {
+    const {
+        section_id,
+        user_sys_id,
+        flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order
+    } = input;
+
+    const data = await fetchDataApi(`GET`, "section/enrollment", {
+        section_id,
+        user_sys_id,
+        flag_valid,
+        offset,
+        limit,
+        sort_by,
+        sort_order
+    });
+
+    return data;
+};
+
+// ========== Create Endpoints ==========
+
+// POST /section - สร้าง section
+export const createSection = async (input: sectionFields) => {
+    const {
+        subject_id,
+        semester_id,
+        section_name,
+    } = input;
+
+    const data = await fetchDataApi(`POST`, "section", {
+        subject_id,
+        semester_id,
+        section_name,
+    });
+
+    return data;
+};
+
+// POST /section/schedule - สร้าง schedule
+export const createSchedule = async (input: SectionSchedulePayload) => {
+    const {
+        section_id,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+    } = input;
+
+    const data = await fetchDataApi(`POST`, "section/schedule", {
+        section_id,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+    });
+
+    return data;
+};
+
+// POST /section/section-schedule - สร้าง section พร้อม schedule
+export const createSectionSchedule = async (input: SectionSchedulePayload) => {
+    const {
+        subject_id,
+        semester_id,
+        section_name,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+    } = input;
+
+    const data = await fetchDataApi(`POST`, "section/section-schedule", {
+        subject_id,
+        semester_id,
+        section_name,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+    });
+
+    return data;
+};
+
+// POST /section/educator - สร้าง section educator
+export const createSectionEducator = async (input: sectionFields) => {
+    const {
+        section_id,
+        user_sys_id,
+        position,
+    } = input;
+
+    const data = await fetchDataApi(`POST`, "section/educator", {
+        section_id,
+        user_sys_id,
+        position,
+    });
+
+    return data;
+};
+
+// POST /section/enrollment - สร้าง enrollment
+export const createSectionEnrollment = async (input: sectionFields) => {
+    const {
+        section_id,
+        user_sys_id,
+    } = input;
+
+    const data = await fetchDataApi(`POST`, "section/enrollment", {
+        section_id,
+        user_sys_id,
+    });
+
+    return data;
+};
+
+// ========== Update Endpoints ==========
+
+// PUT /section/:id - อัปเดต section
+export const updateSection = async (input: sectionFields) => {
+    const {
+        section_id,
+        subject_id,
+        semester_id,
+        section_name,
+        flag_valid,
+    } = input;
+
+    const data = await fetchDataApi(`PUT`, `section/${section_id}`, {
+        subject_id,
+        semester_id,
+        section_name,
+        flag_valid,
+    });
+
+    return data;
+};
+
+// PUT /section/section-schedule/update - อัปเดต section พร้อม schedule
+export const updateSectionSchedule = async (input: SectionSchedulePayload) => {
+    const {
+        section_id,
+        subject_id,
+        semester_id,
+        section_name,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+        schedule_id,
+        flag_valid,
+    } = input;
+
+    const data = await fetchDataApi(`PUT`, "section/section-schedule/update", {
+        section_id,
+        subject_id,
+        semester_id,
+        section_name,
+        day_of_week,
+        start_time,
+        end_time,
+        room_location_id,
+        schedule_id,
+        flag_valid,
+    });
+
+    return data;
+};
+
+// PUT /section/educator/update - อัปเดต section educator
 export const updateSectionEducator = async (input: sectionFields) => {
     const {
         section_id,
@@ -131,135 +309,73 @@ export const updateSectionEducator = async (input: sectionFields) => {
         flag_valid,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "section.educator.update", {
-        section_id: section_id,
-        user_sys_id: user_sys_id,
-        position: position,
-        flag_valid: flag_valid,
-    });
-
-    return data;
-}
-
-export const createSectionEducator = async (input: sectionFields) => {
-    const {
+    const data = await fetchDataApi(`PUT`, "section/educator/update", {
         section_id,
         user_sys_id,
         position,
-    } = input;
-
-    const data = await fetchDataApi(`POST`, "section.educator.create", {
-        section_id: section_id,
-        user_sys_id: user_sys_id,
-        position: position,
-    });
-
-    return data;
-}
-
-
-export const getSectionEnrollment = async (input: sectionFields) => {
-
-    const {
-        section_id,
-        user_sys_id,
         flag_valid,
-        offset,
-        limit,
-        sort_by,
-        sort_order
-    } = input;
-
-    const data = await fetchDataApi(`POST`, "section.enrollment.get", {
-        section_id: section_id,
-        user_sys_id: user_sys_id,
-        flag_valid: flag_valid,
-        offset: offset,
-        limit: limit,
-        sort_by: sort_by,
-        sort_order: sort_order
     });
 
     return data;
 };
 
+// PUT /section/enrollment/update - อัปเดต enrollment
 export const updateSectionEnrollment = async (input: sectionFields) => {
     const {
         section_id,
         user_sys_id,
-        position,
         flag_valid,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "section.enrollment.update", {
-        section_id: section_id,
-        user_sys_id: user_sys_id,
-        position: position,
-        flag_valid: flag_valid,
+    const data = await fetchDataApi(`PUT`, "section/enrollment/update", {
+        section_id,
+        user_sys_id,
+        flag_valid,
     });
 
     return data;
-}
+};
 
-export const createSectionEnrollment = async (input: sectionFields) => {
+// ========== Delete Endpoints ==========
+
+// DELETE /section/:id - ลบ section
+export const deleteSection = async (id: number) => {
+    const data = await fetchDataApi(`DELETE`, `section/${id}`, {});
+    return data;
+};
+
+// DELETE /section/schedule/:id - ลบ schedule
+export const deleteSchedule = async (id: number) => {
+    const data = await fetchDataApi(`DELETE`, `section/schedule/${id}`, {});
+    return data;
+};
+
+// DELETE /section/educator - ลบ section educator
+export const deleteSectionEducator = async (input: sectionFields) => {
     const {
         section_id,
         user_sys_id,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "section.enrollment.create", {
-        section_id: section_id,
-        user_sys_id: user_sys_id,
+    const data = await fetchDataApi(`DELETE`, "section/educator", {
+        section_id,
+        user_sys_id,
     });
 
     return data;
-}
+};
 
-export const createSectionSchedule = async (input: SectionSchedulePayload) => {
-
-    const {
-        subject_id,
-        semester_id,
-        section_name,
-        day_of_week,
-        start_time,
-        end_time,
-        room_location_id,
-        section_id
-    } = input;
-
-    const data = await fetchDataApi(`POST`, "section.schedule.create", {
-        semester_id: semester_id,
-        section_name: section_name,
-        day_of_week: day_of_week,
-        start_time: start_time,
-        end_time: end_time,
-        room_location_id: room_location_id,
-        section_id: section_id,
-        subject_id: subject_id
-
-    });
-
-    return data;
-}
-
-export const createSchedule = async (input: SectionSchedulePayload) => {
-
+// DELETE /section/enrollment - ลบ enrollment
+export const deleteSectionEnrollment = async (input: sectionFields) => {
     const {
         section_id,
-        day_of_week,
-        start_time,
-        end_time,
-        room_location_id,
+        user_sys_id,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "schedule.create", {
-        day_of_week: day_of_week,
-        start_time: start_time,
-        end_time: end_time,
-        room_location_id: room_location_id,
-        section_id: section_id
+    const data = await fetchDataApi(`DELETE`, "section/enrollment", {
+        section_id,
+        user_sys_id,
     });
 
     return data;
-}
+};

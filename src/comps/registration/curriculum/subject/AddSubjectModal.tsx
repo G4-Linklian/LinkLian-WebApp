@@ -33,7 +33,6 @@ export default function AddSubjectModal({
   });
 
   const handleSubmit = (values: subjectFields) => {
-    console.log("add subject:", values);
     onSubmit?.(values);
     form.reset();
     close();

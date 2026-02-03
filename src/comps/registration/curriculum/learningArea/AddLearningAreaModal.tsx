@@ -28,7 +28,6 @@ export default function AddLearningAreaModal({
     },
   });
   const handleSubmit = (values: learningAreaFields) => {
-    console.log("add learning area:", values);
     onSubmit?.(values);
     form.reset();
     close();

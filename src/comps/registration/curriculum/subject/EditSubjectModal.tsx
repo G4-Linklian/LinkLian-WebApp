@@ -56,7 +56,6 @@ export default function SubjectEditModal({
 
 
   const handleSubmit = (values: subjectFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };

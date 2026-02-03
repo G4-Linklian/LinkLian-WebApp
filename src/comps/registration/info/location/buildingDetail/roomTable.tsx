@@ -16,7 +16,8 @@ import { Modal, Button, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
 import { useNotification } from '@/comps/noti/notiComp';
-import { getBuilding, getRoomLocation, createRoomLocationBatch, updateRoomLocation } from '@/utils/api/building';
+import { getBuilding } from '@/utils/api/building';
+import { getRoomLocation, createRoomLocationBatch, updateRoomLocation } from '@/utils/api/roomLocation';
 import EditRoomLocationModal from '@/comps/registration/info/location/buildingDetail/EditRoomLocationModal';
 import AddRoomLocationModal from '@/comps/registration/info/location/buildingDetail/AddRoomLocationModal';
 
@@ -42,7 +43,6 @@ export default function roomTable() {
 
     const openEditModals = (room: buildingFields) => {
         setSelectedRoomLocation(room);
-        console.log("Selected room for edit:", room);
         openEditModal();
     };
 
@@ -167,8 +167,6 @@ export default function roomTable() {
                 room_location_id: Number(selectedRoomLocation?.room_location_id),
             };
 
-            console.log("Edit room location payload:", payload);
-
             const res = await updateRoomLocation(payload);
 
             setRoomData([]);
@@ -182,7 +180,6 @@ export default function roomTable() {
                 showNotification("แก้ไขห้องเรียนล้มเหลว!", res.message, "error");
             }
 
-            console.log("Created room location:", res.data);
         } catch (error) {
             console.error("Update room location failed:", error);
             showNotification("แก้ไขห้องเรียนล้มเหลว!", "An error occurred while updating the room location.", "error");

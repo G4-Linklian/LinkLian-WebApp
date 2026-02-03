@@ -79,9 +79,6 @@ export function MainLinks() {
 
   useEffect(() => {
     const token = decodeToken();
-
-    console.log("token", token)
-
     setToken("token")
   }, [router.isReady]);
 

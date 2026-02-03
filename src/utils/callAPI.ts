@@ -8,18 +8,37 @@ interface ApiRequestOptions {
     from: string;
 }
 
-export async function fetchDataApi(method: string, from: string, body: {}): Promise<any> {
+// Helper function to build query string from object
+function buildQueryString(params: Record<string, any>): string {
+    const query = Object.entries(params)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join('&');
+    return query ? `?${query}` : '';
+}
+
+export async function fetchDataApi(
+    method: string, 
+    endpoint: string, 
+    body: Record<string, any> = {}
+): Promise<any> {
     const urls = process.env.NEXT_PUBLIC_BASE_URL;
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 
-    console.log("urls", urls, basePath);
 
     if (!urls) {
         throw new Error('BACKEND_PATH environment variable is not set');
     }
 
     try {
-        const response = await fetch(`${urls}${basePath}/${from}`, {
+        let url = `${urls}${basePath}/${endpoint}`;
+        
+        // For GET requests, convert body to query parameters
+        if (method === 'GET' && Object.keys(body).length > 0) {
+            url += buildQueryString(body);
+        }
+
+        const response = await fetch(url, {
             method,
             headers: {
                 'Content-Type': 'application/json',

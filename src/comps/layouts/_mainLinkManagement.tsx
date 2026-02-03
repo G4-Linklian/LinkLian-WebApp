@@ -24,9 +24,6 @@ function SidebarLink({ label, route, icon }: MainLinkProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // console.log("pathname", pathname, route);
-
-  // เช็คว่า Route ปัจจุบันตรงกับปุ่มนี้ไหม เพื่อทำ Highlight
   const isActive = pathname === "" + route || pathname?.startsWith("" + route);
 
   const changeRoute = () => {
@@ -80,7 +77,6 @@ export function Sidebar() {
 
   useEffect(() => {
     const token = decodeRegistrationToken();
-    console.log("Decoded Registration Token:", token);
     setToken(token);
   }, [router.isReady]);
 

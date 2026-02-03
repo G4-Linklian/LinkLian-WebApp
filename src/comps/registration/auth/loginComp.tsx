@@ -37,7 +37,6 @@ const RegistrationLoginPage = () => {
     const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
     useEffect(() => {
-        console.log("Router pathname changed:", router.pathname);
         const token = decodeRegistrationToken();
 
         if (router.pathname == "/registration/login" && token) {
@@ -48,7 +47,6 @@ const RegistrationLoginPage = () => {
 
     const handleVerificationComplete = (verified: boolean) => {
         setVerificationResult(verified);
-        console.log(`Verification ${verified ? 'successful' : 'failed'} for ${form.values.email}`);
     };
 
 
@@ -57,7 +55,6 @@ const RegistrationLoginPage = () => {
         setLoging(true);
 
         try {
-            // console.log('Login attempt:', { email, password, rememberMe });
 
             const loginField: any = {
                 inst_email: values.email,

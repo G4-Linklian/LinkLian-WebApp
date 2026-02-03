@@ -19,7 +19,6 @@ const LayoutShellManagement = ({ children }: any) => {
     const [activeTab, setActiveTab] = useState<string | null>("tab3");
 
     useEffect(() => {
-        console.log("Router pathname changed:", router.pathname);
         const token = decodeRegistrationToken();
         
         if (router.pathname.startsWith("/registration") && !token){

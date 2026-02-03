@@ -116,7 +116,6 @@ export default function AddRoomLocationModal({
       }
     }
 
-    console.log("Generated Payloads:", payloads);
     onSubmit?.(payloads);
     close();
   };

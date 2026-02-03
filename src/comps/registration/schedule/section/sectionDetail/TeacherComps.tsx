@@ -115,7 +115,6 @@ export default function TeacherComps() {
                 user_sys_id: Number(values.user_sys_id),
             };
 
-            console.log("Edit building payload:", payload);
 
             const res = await updateSectionEducator(payload);
 

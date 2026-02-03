@@ -23,7 +23,6 @@ const scheduleComp = () => {
 
         const fetchSemesters = async () => {
             try {
-                console.log("instId", instId);
                 setLoading(true);
                 const semesterData = await getSemester({
                     inst_id: instId,

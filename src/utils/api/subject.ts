@@ -1,75 +1,78 @@
 import { fetchDataApi } from "@/utils/callAPI"
 import { subjectFields } from "@/utils/interface/subject.types"
 
+// GET /subject/:id - ดึงข้อมูลตาม ID
+export const getSubjectById = async (id: number) => {
+    const data = await fetchDataApi(`GET`, `subject/${id}`, {});
+    return data;
+};
 
+// GET /subject - ค้นหาพร้อม pagination
 export const getSubject = async (input: subjectFields) => {
-
     const {
-        subject_id = "",
-        learning_area_id = "",
-        subject_code = "",
-        name_th = "",
-        name_en = "",
+        subject_id,
+        learning_area_id,
+        subject_code,
+        name_th,
+        name_en,
         credit,
         hour_per_week,
-        flag_valid = "",
-        inst_id = "",
+        flag_valid,
+        inst_id,
         offset,
         limit,
-        sort_by = "",
+        sort_by,
         sort_order,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "subject.get", {
-        subject_id: subject_id,
-        learning_area_id: learning_area_id,
-        subject_code: subject_code,
-        name_th: name_th,
-        name_en: name_en,
-        credit: credit,
-        hour_per_week: hour_per_week,
-        flag_valid: flag_valid,
-        inst_id: inst_id,
-        offset: offset,
-        limit: limit,
-        sort_by: sort_by,
-        sort_order: sort_order,
+    const data = await fetchDataApi(`GET`, "subject", {
+        subject_id,
+        learning_area_id,
+        subject_code,
+        name_th,
+        name_en,
+        credit,
+        hour_per_week,
+        flag_valid,
+        inst_id,
+        offset,
+        limit,
+        sort_by,
+        sort_order,
     });
 
     return data;
 };
 
-
+// POST /subject - สร้างใหม่
 export const createSubject = async (input: subjectFields) => {
-
     const {
-        learning_area_id = "",
-        subject_code = "",
-        name_th = "",
-        name_en = "",
-        credit = 0,
-        hour_per_week = 0,
-        flag_valid = "",
-        inst_id = "",
+        learning_area_id,
+        subject_code,
+        name_th,
+        name_en,
+        credit,
+        hour_per_week,
+        flag_valid,
+        inst_id,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "subject.create", {
-        learning_area_id: learning_area_id,
-        subject_code: subject_code,
-        name_th: name_th,
-        name_en: name_en,
-        credit: credit,
-        hour_per_week: hour_per_week,
-        flag_valid: flag_valid,
-        inst_id: inst_id,
+    const data = await fetchDataApi(`POST`, "subject", {
+        learning_area_id,
+        subject_code,
+        name_th,
+        name_en,
+        credit,
+        hour_per_week,
+        flag_valid,
+        inst_id,
     });
 
     return data;
 };
 
-
+// PUT /subject/:id - อัปเดต
 export const updateSubject = async (input: subjectFields) => {
-
     const {
         subject_id,
         learning_area_id,
@@ -82,17 +85,22 @@ export const updateSubject = async (input: subjectFields) => {
         inst_id,
     } = input;
 
-    const data = await fetchDataApi(`POST`, "subject.update", {
-        subject_id: subject_id,
-        learning_area_id: learning_area_id,
-        subject_code: subject_code,
-        name_th: name_th,
-        name_en: name_en,
-        credit: credit,
-        hour_per_week: hour_per_week,
-        flag_valid: flag_valid,
-        inst_id: inst_id,
+    const data = await fetchDataApi(`PUT`, `subject/${subject_id}`, {
+        learning_area_id,
+        subject_code,
+        name_th,
+        name_en,
+        credit,
+        hour_per_week,
+        flag_valid,
+        inst_id,
     });
 
+    return data;
+};
+
+// DELETE /subject/:id - ลบ
+export const deleteSubject = async (id: number) => {
+    const data = await fetchDataApi(`DELETE`, `subject/${id}`, {});
     return data;
 };

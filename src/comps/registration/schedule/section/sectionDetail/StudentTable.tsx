@@ -78,7 +78,6 @@ export default function StudentTable() {
         setLoading(true);
 
         if (sectionId) {
-            console.log(sectionId)
             const userData = await getSectionEnrollment({
                 section_id: Number(sectionId),
                 offset: offset,
@@ -127,8 +126,6 @@ export default function StudentTable() {
                 user_sys_id: Number(values.user_sys_id),
                 section_id: Number(sectionId),
             };
-
-            console.log("Edit semester payload:", payload);
 
             const res = await updateSectionEnrollment(payload);
 

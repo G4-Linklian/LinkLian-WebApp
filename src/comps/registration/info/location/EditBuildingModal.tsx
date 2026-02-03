@@ -44,7 +44,6 @@ export default function EditBuildingModal({
   }, [building]);
 
   const handleSubmit = (values: buildingFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };

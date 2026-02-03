@@ -40,7 +40,6 @@ export default function learningAreaTable() {
 
     const openEditModals = (learningArea: learningAreaFields) => {
         setSelectedLearningArea(learningArea);
-        console.log("Selected learning area for edit:", learningArea);
         openEditModal();
     };
 
@@ -74,7 +73,6 @@ export default function learningAreaTable() {
             })
 
             setLearningAreaData((prev) => [...prev, ...learningAreaData.data]);
-            // console.log("Fetched semester data:", semesterData.data);
 
             if (learningAreaData.data.length < BATCH_SIZE) {
                 setHasMore(false);
@@ -116,8 +114,6 @@ export default function learningAreaTable() {
                 ...values,
                 inst_id: Number(values.inst_id),
             };
-
-            console.log("Edit learning area payload:", payload);
 
             const res = await updateLearningArea(payload);
 

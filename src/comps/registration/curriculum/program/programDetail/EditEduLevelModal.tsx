@@ -46,7 +46,6 @@ export default function EduLevelEditModal({
   }, [eduLevel]);
 
   const handleSubmit = (values: eduLevelFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };

@@ -47,7 +47,6 @@ export default function LearningAreaEditModal({
   }, [learningArea]);
 
   const handleSubmit = (values: learningAreaFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };

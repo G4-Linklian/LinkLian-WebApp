@@ -236,7 +236,6 @@ export default function eduLevelTable({programData} : any) {
                 close={closeAddEduLevel}
                 onSubmit={async (values) => {
                     await addEduLevelData(values);
-                    // console.log("Add semester values:", values);
                     closeAddEduLevel();
                 }}
                 token={token}

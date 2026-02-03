@@ -76,8 +76,6 @@ export default function AddStudentSectionModal({
         sort_order: "desc",
       });
 
-      console.log("Fetched user data:", userData);
-
       const options: UserOption[] = userData.data.map((users: any) => ({
         value: users.user_sys_id,
         label: `${users.code} - ${users.first_name} ${users.last_name}`,

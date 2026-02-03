@@ -67,7 +67,6 @@ export default function EditStaffModal({
   }, [staff]);
 
   const handleSubmit = (values: UserSysFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };

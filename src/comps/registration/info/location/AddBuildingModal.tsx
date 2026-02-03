@@ -28,7 +28,6 @@ export default function AddBuildingModal({
   });
 
   const handleSubmit = (values: buildingFields) => {
-    console.log("add building:", values);
     onSubmit?.(values);
     form.reset();
     close();

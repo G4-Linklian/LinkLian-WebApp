@@ -329,7 +329,6 @@ export default function StudentTable() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateStudentData(values);
-                    //console.log("Edit student values:", values);
                     closeEditModal();
                 }}
                 eduLevelOptions={eduLevelOptions}
@@ -341,7 +340,6 @@ export default function StudentTable() {
                 close={closeAddStudent}
                 onSubmit={async (values) => {
                     await addStudentData(values);
-                    // console.log("Add student values:", values);
                     closeAddStudent();
                 }}
                 eduLevelOptions={eduLevelOptions}

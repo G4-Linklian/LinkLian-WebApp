@@ -133,7 +133,6 @@ const SectionDetail = () => {
                                 semesterOptions={semesterOptions} 
                                 sectionId={sectionId}
                                 onFetch={(reset = false) => {
-                                    console.log("Fetch triggered from CourseSectionHeader");
                                     fetchData(0, reset);
                                 }}
                             />

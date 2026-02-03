@@ -98,7 +98,6 @@ export default function AddStudentModal({
   }, [debouncedSearch]);
 
   const handleSubmit = (values: UserSysFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };

@@ -59,7 +59,6 @@ export default function EditStudentModal({
 
   useEffect(() => {
     if (!student) return;
-    console.log("Editing student:", student);
 
     form.setValues({
       email: student.email ?? "",
@@ -87,7 +86,6 @@ export default function EditStudentModal({
 
 
   const fetchProgram = async (keyword: string) => {
-    console.log("Fetching programs with keyword:", keyword);
 
     if (!token) return;
 
@@ -136,7 +134,6 @@ export default function EditStudentModal({
   }, [debouncedSearch]);
 
   const handleSubmit = (values: UserSysFields) => {
-    console.log("submit values:", values);
     onSubmit?.(values);
     close();
   };
