@@ -1,0 +1,181 @@
+name: LINKLIAN-WEBAPP CI
+
+on:
+  push:
+    branches: ["main", "staging"]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "test/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".yarn/**"
+      - ".yarnrc.yml"
+      - "tsconfig.json"
+      - "eslint.config.mjs"
+      - "next.config.ts"
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "go-ci.sh"
+      - ".github/workflows/ci-webapp.yml"
+
+  pull_request:
+    branches: ["main", "staging"]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "test/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".yarn/**"
+      - ".yarnrc.yml"
+      - "tsconfig.json"
+      - "eslint.config.mjs"
+      - "next.config.ts"
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "go-ci.sh"
+      - ".github/workflows/ci-webapp.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ci-webapp-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  secret-scan:
+    name: Secret Scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lint:
+    name: Lint (go-ci.sh lint)
+    runs-on: ubuntu-latest
+    needs: [secret-scan]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
+
+      - name: Run lint
+        shell: bash
+        run: bash ./go-ci.sh lint
+
+  unit-test:
+    name: Unit Test (go-ci.sh test)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
+
+      - name: Run unit tests
+        shell: bash
+        run: bash ./go-ci.sh test
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-coverage
+          path: coverage
+          if-no-files-found: warn
+          retention-days: 7
+
+  sca:
+    name: SCA (go-ci.sh sca)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
+
+      - name: Run SCA
+        shell: bash
+        run: bash ./go-ci.sh sca
+
+  build:
+    name: Build (go-ci.sh build)
+    runs-on: ubuntu-latest
+    needs: [unit-test, sca]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
+
+      - name: Build webapp
+        shell: bash
+        run: bash ./go-ci.sh build
+
+  docker-and-scan:
+    name: Docker Build + Trivy Scan
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
+
+      - name: Build docker images
+        shell: bash
+        run: bash ./go-ci.sh docker
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Trivy scan (HIGH/CRITICAL)
+        shell: bash
+        run: trivy image --severity HIGH,CRITICAL --ignore-unfixed linklian-webapp:local
