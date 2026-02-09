@@ -8,9 +8,7 @@ on:
       - "public/**"
       - "test/**"
       - "package.json"
-      - "yarn.lock"
-      - ".yarn/**"
-      - ".yarnrc.yml"
+      - "package-lock.json"
       - "tsconfig.json"
       - "eslint.config.mjs"
       - "next.config.ts"
@@ -26,9 +24,7 @@ on:
       - "public/**"
       - "test/**"
       - "package.json"
-      - "yarn.lock"
-      - ".yarn/**"
-      - ".yarnrc.yml"
+      - "package-lock.json"
       - "tsconfig.json"
       - "eslint.config.mjs"
       - "next.config.ts"
@@ -75,9 +71,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack (Yarn)
-        run: corepack enable
+          cache: npm
 
       - name: Run lint
         shell: bash
@@ -94,9 +88,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack (Yarn)
-        run: corepack enable
+          cache: npm
 
       - name: Run unit tests
         shell: bash
@@ -121,9 +113,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack (Yarn)
-        run: corepack enable
+          cache: npm
 
       - name: Run SCA
         shell: bash
@@ -140,9 +130,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack (Yarn)
-        run: corepack enable
+          cache: npm
 
       - name: Build webapp
         shell: bash
@@ -154,14 +142,6 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack (Yarn)
-        run: corepack enable
 
       - name: Build docker images
         shell: bash
