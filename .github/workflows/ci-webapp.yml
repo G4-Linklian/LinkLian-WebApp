@@ -6,15 +6,13 @@ on:
     paths:
       - "src/**"
       - "public/**"
-      - "test/**"
       - "package.json"
       - "package-lock.json"
       - "tsconfig.json"
       - "eslint.config.mjs"
-      - "next.config.ts"
+      - "next.config.*"
       - "Dockerfile"
       - "docker-compose.yml"
-      - "go-ci.sh"
       - ".github/workflows/ci-webapp.yml"
 
   pull_request:
@@ -22,15 +20,13 @@ on:
     paths:
       - "src/**"
       - "public/**"
-      - "test/**"
       - "package.json"
       - "package-lock.json"
       - "tsconfig.json"
       - "eslint.config.mjs"
-      - "next.config.ts"
+      - "next.config.*"
       - "Dockerfile"
       - "docker-compose.yml"
-      - "go-ci.sh"
       - ".github/workflows/ci-webapp.yml"
 
   workflow_dispatch:
@@ -60,10 +56,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  lint:
-    name: Lint (go-ci.sh lint)
+  sast:
+    name: SAST (CodeQL)
     runs-on: ubuntu-latest
-    needs: [secret-scan]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+
+  ci:
+    name: App CI (npm run ci)
+    runs-on: ubuntu-latest
+    needs: [secret-scan, sast]
     steps:
       - uses: actions/checkout@v4
 
@@ -73,26 +90,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Run lint
-        shell: bash
-        run: bash ./go-ci.sh lint
+      - name: Install deps
+        run: npm ci
 
-  unit-test:
-    name: Unit Test (go-ci.sh test)
-    runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Run unit tests
-        shell: bash
-        run: bash ./go-ci.sh test
+      - name: Run CI (lint + typecheck + jest + sca + build)
+        run: npm run ci
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
@@ -102,60 +104,19 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-  sca:
-    name: SCA (go-ci.sh sca)
-    runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Run SCA
-        shell: bash
-        run: bash ./go-ci.sh sca
-
-  build:
-    name: Build (go-ci.sh build)
-    runs-on: ubuntu-latest
-    needs: [unit-test, sca]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Build webapp
-        shell: bash
-        run: bash ./go-ci.sh build
-
-  docker-and-scan:
+  container-scan:
     name: Docker Build + Trivy Scan
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [ci]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build docker images
-        shell: bash
-        run: bash ./go-ci.sh docker
-
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
+      - name: Docker build
+        run: docker build -t linklian-webapp:local -f Dockerfile .
 
       - name: Trivy scan (HIGH/CRITICAL)
-        shell: bash
-        run: trivy image --severity HIGH,CRITICAL --ignore-unfixed linklian-webapp:local
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: linklian-webapp:local
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true

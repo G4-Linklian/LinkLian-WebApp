@@ -6,7 +6,10 @@
     "dev": "next dev -p 4100",
     "build": "next build",
     "start": "next start -p 4100",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "sca": "npm audit --audit-level=high",
+    "ci": "npm run lint && npm run typecheck && npm run sca && npm run build"
   },
   "dependencies": {
     "@mantine/core": "^8.3.14",
@@ -23,6 +26,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
@@ -31,7 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8"
+    "typescript": "^5",
+    "typescript-eslint": "^8.54.0"
+  }
 }
