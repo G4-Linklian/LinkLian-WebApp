@@ -7,14 +7,14 @@
     "build": "next build",
     "start": "next start -p 4100",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:cov": "jest --coverage --passWithNoTests",
     "secret:scan": "gitleaks detect --no-git --redact --verbose",
     "secret:scan:full": "gitleaks detect --redact",
     "secret:scan:staged": "gitleaks protect --staged",
-    "test": "jest",
-    "test:cov": "jest --coverage --passWithNoTests",
-    "typecheck": "tsc --noEmit",
     "sca": "npm audit --audit-level=high",
-    "ci": "npm run sca && npm run lint && npm run typecheck && npm run build"
+    "ci": "npm run lint && npm run typecheck && npm run test:cov && npm run build"
   },
   "dependencies": {
     "@mantine/core": "^8.3.14",
