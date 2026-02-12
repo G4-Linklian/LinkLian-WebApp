@@ -20,12 +20,6 @@ import { teacherLogin, verifyTeacherOtp } from '@/utils/auth/teacherLogin';
 import { OtpModalEx } from '../public/otpModal';
 
 const TeacherLoginPage = () => {
-    // const [email, setEmail] = useState('');
-    // const [userEmail, setUserEmail] = useState('');
-    // const [password, setPassword] = useState('');
-    // const [rememberMe, setRememberMe] = useState(false);
-
-    // const [token, setToken] = useState('');
     const [logging, setLogging] = useState(false);
     const { showNotification } = useNotification();
     const router = useRouter();
@@ -42,27 +36,19 @@ const TeacherLoginPage = () => {
         },
     });
 
-    // useEffect(() => {
-    //     if (!router.isReady) return;
+    useEffect(() => {
+        const token = decodeTeacherToken();
 
-    //     const token = decodeTeacherToken();
-
-    //     if (token) {
-    //         router.push("/classes");
-    //     }
-    // }, [router.isReady, router]);
+        if (token) {
+            router.push("/classes");
+        }
+    }, [router]);
 
     // otp
     const [otpPage, setOtpPage] = useState<boolean>(false);
     const [otpOpened, setOtpOpened] = useState(false);
     const [otpLoading, setOtpLoading] = useState(false);
     const [otpSessionId, setOtpSessionId] = useState<string>('');
-
-    const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
-
-    const handleVerificationComplete = (verified: boolean) => {
-        setVerificationResult(verified);
-    };
 
     // เก็บ token ลง localStorage
     const saveTeacherToken = (accessToken: string, rememberMe: boolean) => {
@@ -104,7 +90,7 @@ const TeacherLoginPage = () => {
             if (loginData.success) {
                 // otp
                 if (loginData.otp_session_id) {
-                    // showNotification("รอการยืนยัน OTP", "กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ", "success");
+                    showNotification("รอการยืนยัน OTP", "กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ", "success");
 
                     setOtpSessionId(loginData.otp_session_id);
                     setOtpPage(true);
@@ -148,7 +134,7 @@ const TeacherLoginPage = () => {
                     showNotification("ยืนยัน OTP ไม่สำเร็จ", "บัญชีนี้ไม่ใช่ผู้สอน", "error");
                 }
             } else {
-                showNotification("ผิดพลาด", afterOtpData.message || "รหัส OTP ไม่ถูกต้อง", "error");
+                showNotification("ยืนยัน OTP ไม่สำเร็จ", "รหัส OTP ไม่ถูกต้อง", "error");
             }
         } catch (error) {
             showNotification("Error", "ไม่สามารถเชื่อมต่อระบบยืนยันรหัสได้", "error");
@@ -160,108 +146,75 @@ const TeacherLoginPage = () => {
     const isLargerThanSm = useMediaQuery("(min-width: 768px)");
 
     return (
-        <div className="flex min-h-screen bg-linear-to-br from-[#FFE3BB] to-[#7EC8E3] relative overflow-hidden">
-
-            {/* Right side wavy pattern */}
-            {isLargerThanSm ? (
-                <>
-                    <div className={`absolute right-20 h-[120%] w-[90%] opacity-95 z-0 -top-48`}
-                        style={{
-                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
-                            transform: 'translateX(30%)'
-                        }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className={`w-full h-[130%] rotate-3`} />
-
-                    </div>
-
-                    <div className={`absolute right-10 h-[120%] w-[90%] opacity-55 z-0 top-24`}
-                        style={{
-                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
-                            transform: 'translateX(30%)'
-                        }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-full h-[130%] ' />
-
-                    </div>
-
-                    <div className={`absolute right-10 h-[120%] w-[90%] opacity-35 z-0 -top-10`}
-                        style={{
-                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
-                            transform: 'translateX(30%)'
-                        }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-full h-[130%] ' />
-
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className={`absolute right-0 h-[110%] w-[200%] opacity-95 z-0 top-0`}
-                        style={{
-                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
-                            transform: 'translateX(20%)',
-                        }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className={`w-[120%] h-[120%] rotate-90`} />
-
-                    </div>
-
-                    <div className={`absolute right-0 h-[110%] w-[150%] opacity-55 z-0 top-0`}
-                        style={{
-                            transform: 'translateX(-10%)'
-                        }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-full rotate-90' />
-
-                    </div>
-
-                    <div className={`absolute right-0 h-[110%] w-[160%] opacity-35 z-0 top-0`}
-                        style={{
-                            transform: 'translateX(30%)'
-                        }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-full rotate-90' />
-
-                    </div>
-                </>
-            )}
-
+        <div className="flex min-h-screen bg-[#FFCF9A] justify-center items-center p-4">
             {/* Login Form */}
             {!otpPage ? (
                 <div className={`
-                    flex flex-col justify-center w-full z-10
-                    ${isLargerThanSm ? 'items-end' : 'items-center'}
+                    flex flex-col justify-center w-full z-10 items-center
                 `}>
                     <div className={`
-                        flex flex-col w-full max-w-md p-8 rounded-lg
-                        ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}
+                        flex flex-col w-full max-w-md p-8 rounded-lg bg-[#FFF2DD] shadow-lg border border-gray-200
                     `}>
-                        <h1 className="text-2xl font-bold text-center mb-8 text-[#000000]">เข้าสู่ระบบ</h1>
+                        <Image
+                            src="/image/banner-black.png"
+                            alt="profile"
+                            width={150}
+                            height={80}
+                            style={{ margin: '0 auto 20px auto' }}
+                        />
+                        <h2 className="text-xl font-bold text-center mb-5 text-[#7A2310]">เข้าสู่ระบบ</h2>
 
                         <form onSubmit={form.onSubmit(handleSubmit)}>
                             <TextInput
-                                label="ชื่อผู้ใช้"
-                                placeholder="ชื่อผู้ใช้"
+                                label="อีเมล"
                                 leftSection={<IconUser size={18} stroke={1.5} />}
                                 required
                                 radius="md"
                                 mb="md"
                                 size='md'
+                                styles={{
+                                    input: {
+                                        backgroundColor: 'white',
+                                        borderColor: '#FFCF9A'
+                                    }
+                                }}
                                 {...form.getInputProps('email')}
                             />
 
                             <PasswordInput
                                 label="รหัสผ่าน"
-                                placeholder="รหัสผ่าน"
                                 required
                                 radius="md"
                                 mb="md"
                                 leftSection={<IconLock size={18} stroke={1.5} />}
                                 size='md'
+                                styles={{
+                                    input: {
+                                        backgroundColor: 'white',
+                                        borderColor: '#FFCF9A'
+                                    }
+                                }}
                                 {...form.getInputProps('password')}
                             />
 
                             <Group justify="space-between" mb="lg" mt="md">
-                                <Checkbox
-                                    label="Remember me"
+                                <Checkbox 
+                                    label="จดจำการเข้าสู่ระบบ"
+                                    color="#FF9C57"
+                                    styles={{
+                                        input: {
+                                            borderColor: '#FFCF9A',
+                                            '&:checked': {
+                                                backgroundColor: '#FFCF9A !important',
+                                                borderColor: '#FFCF9A !important'
+                                            }
+                                        },
+                                        label: {
+                                            color: '#7A2310'
+                                        }
+                                    }}
                                     {...form.getInputProps('rememberMe', { type: 'checkbox' })}
                                 />
-
                             </Group>
 
                             <Button
@@ -270,25 +223,28 @@ const TeacherLoginPage = () => {
                                 mt="xl"
                                 radius="md"
                                 loading={logging}
-                                color="blue"
+                                styles={{
+                                    root: {
+                                        backgroundColor: '#FFCF9A'
+                                    },
+                                    label: {
+                                        color: '#7A2310'
+                                    }
+                                }}
                             >
-                                {logging ? 'Logging in...' : 'Login'}
+                                {logging ? 'กำลังเข้าสู่ระบบ' : 'เข้าสู่ระบบ'}
                             </Button>
                         </form>
-
-                        <div className="mt-4 text-center">
-                            <span className="text-gray-600">No account yet?</span>{' '}
-                            {/* ขึ้น modal ให้ไปสมัครสมาชิกที่แอปก่อน */}
-                        </div>
                     </div>
                 </div>
             ) : (
                 <OtpModalEx
                     opened={otpPage}
                     onClose={() => setOtpPage(false)}
-                    email={form.values.email}
                     loading={otpLoading}
                     handleConfirm={handleSubmitOtp}
+                    expiresIn={120}
+                    otpSessionId={otpSessionId}
                 />
             )}
         </div>

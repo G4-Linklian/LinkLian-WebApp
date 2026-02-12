@@ -100,3 +100,9 @@ export const decodeTeacherToken = (): any => {
     return null;
   }
 };
+
+export const removeTeacherToken = (): void => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("linklian_teacher_access_token");
+  }
+};

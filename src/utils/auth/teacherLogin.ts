@@ -25,3 +25,11 @@ export const verifyTeacherOtp = async (otp: string, otpSessionId: string) => {
 
     return data;
 }
+
+export const resendTeacherOtp = async (otpSessionId: string) => {
+    const data = await fetchDataApi(`POST`, "auth/resend-otp", {
+        otp_session_id: otpSessionId
+    });
+
+    return data;
+}
