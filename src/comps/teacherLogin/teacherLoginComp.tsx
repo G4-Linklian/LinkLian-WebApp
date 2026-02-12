@@ -146,107 +146,172 @@ const TeacherLoginPage = () => {
     const isLargerThanSm = useMediaQuery("(min-width: 768px)");
 
     return (
-        <div className="flex min-h-screen bg-[#FFCF9A] justify-center items-center p-4">
+        <div className="flex min-h-screen bg-linear-to-br from-[#FFF2DD] to-[#FFCF9A] relative overflow-hidden">
+
+            {/* Right side wavy pattern */}
+            {isLargerThanSm ? (
+                <>
+                    <div className={`absolute right-20 h-[120%] w-[90%] opacity-95 z-0 -top-48`}
+                        style={{
+                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
+                            transform: 'translateX(30%)'
+                        }} >
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className={`w-full h-[130%] rotate-3`} />
+
+                    </div>
+
+                    <div className={`absolute right-10 h-[120%] w-[90%] opacity-55 z-0 top-24`}
+                        style={{
+                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
+                            transform: 'translateX(30%)'
+                        }} >
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-full h-[130%] ' />
+
+                    </div>
+
+                    <div className={`absolute right-10 h-[120%] w-[90%] opacity-35 z-0 -top-10`}
+                        style={{
+                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
+                            transform: 'translateX(30%)'
+                        }} >
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-full h-[130%] ' />
+
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className={`absolute right-0 h-[110%] w-[200%] opacity-95 z-0 top-0`}
+                        style={{
+                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
+                            transform: 'translateX(20%)',
+                        }} >
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className={`w-[120%] h-[120%] rotate-90`} />
+
+                    </div>
+
+                    <div className={`absolute right-0 h-[110%] w-[150%] opacity-55 z-0 top-0`}
+                        style={{
+                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
+                            transform: 'translateX(-10%)'
+                        }} >
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-full rotate-90' />
+
+                    </div>
+
+                    <div className={`absolute right-0 h-[110%] w-[160%] opacity-35 z-0 top-0`}
+                        style={{
+                            // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
+                            transform: 'translateX(30%)'
+                        }} >
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-full rotate-90' />
+
+                    </div>
+                </>
+            )}
+
             {/* Login Form */}
-            {!otpPage ? (
+            <div className={`
+                flex flex-col justify-center w-full z-10
+                ${isLargerThanSm ? 'items-end' : 'items-center'}
+            `}>
                 <div className={`
-                    flex flex-col justify-center w-full z-10 items-center
+                    w-full max-w-md p-8 rounded-lg
+                    ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}
                 `}>
-                    <div className={`
-                        flex flex-col w-full max-w-md p-8 rounded-lg bg-[#FFF2DD] shadow-lg border border-gray-200
-                    `}>
+                    {!isLargerThanSm && (
                         <Image
                             src="/image/banner-black.png"
-                            alt="profile"
-                            width={150}
-                            height={80}
+                            alt="logo"
+                            width={120}
+                            height={60}
                             style={{ margin: '0 auto 20px auto' }}
                         />
-                        <h2 className="text-xl font-bold text-center mb-5 text-[#7A2310]">เข้าสู่ระบบ</h2>
+                    )}
+                    <h2 className="text-2xl font-bold text-center mb-8 text-[#7A2310]">เข้าสู่ระบบผู้สอน</h2>
 
-                        <form onSubmit={form.onSubmit(handleSubmit)}>
-                            <TextInput
-                                label="อีเมล"
-                                leftSection={<IconUser size={18} stroke={1.5} />}
-                                required
-                                radius="md"
-                                mb="md"
-                                size='md'
+                    <form onSubmit={form.onSubmit(handleSubmit)}>
+                        <TextInput
+                            label="อีเมล"
+                            leftSection={<IconUser size={18} stroke={1.5} />}
+                            required
+                            radius="md"
+                            mb="md"
+                            size='md'
+                            styles={{
+                                input: {
+                                    backgroundColor: 'white',
+                                    borderColor: '#FFCF9A'
+                                }
+                            }}
+                            {...form.getInputProps('email')}
+                        />
+
+                        <PasswordInput
+                            label="รหัสผ่าน"
+                            required
+                            radius="md"
+                            mb="md"
+                            leftSection={<IconLock size={18} stroke={1.5} />}
+                            size='md'
+                            styles={{
+                                input: {
+                                    backgroundColor: 'white',
+                                    borderColor: '#FFCF9A'
+                                }
+                            }}
+                            {...form.getInputProps('password')}
+                        />
+
+                        <Group mb="lg" mt="md">
+                            <Checkbox
+                                label="จดจำการเข้าสู่ระบบ"
+                                color="#FF9C57"
                                 styles={{
                                     input: {
-                                        backgroundColor: 'white',
-                                        borderColor: '#FFCF9A'
-                                    }
-                                }}
-                                {...form.getInputProps('email')}
-                            />
-
-                            <PasswordInput
-                                label="รหัสผ่าน"
-                                required
-                                radius="md"
-                                mb="md"
-                                leftSection={<IconLock size={18} stroke={1.5} />}
-                                size='md'
-                                styles={{
-                                    input: {
-                                        backgroundColor: 'white',
-                                        borderColor: '#FFCF9A'
-                                    }
-                                }}
-                                {...form.getInputProps('password')}
-                            />
-
-                            <Group justify="space-between" mb="lg" mt="md">
-                                <Checkbox 
-                                    label="จดจำการเข้าสู่ระบบ"
-                                    color="#FF9C57"
-                                    styles={{
-                                        input: {
-                                            borderColor: '#FFCF9A',
-                                            '&:checked': {
-                                                backgroundColor: '#FFCF9A !important',
-                                                borderColor: '#FFCF9A !important'
-                                            }
-                                        },
-                                        label: {
-                                            color: '#7A2310'
+                                        borderColor: '#FFCF9A',
+                                        '&:checked': {
+                                            backgroundColor: '#FFCF9A !important',
+                                            borderColor: '#FFCF9A !important'
                                         }
-                                    }}
-                                    {...form.getInputProps('rememberMe', { type: 'checkbox' })}
-                                />
-                            </Group>
-
-                            <Button
-                                type="submit"
-                                fullWidth
-                                mt="xl"
-                                radius="md"
-                                loading={logging}
-                                styles={{
-                                    root: {
-                                        backgroundColor: '#FFCF9A'
                                     },
                                     label: {
                                         color: '#7A2310'
                                     }
                                 }}
-                            >
-                                {logging ? 'กำลังเข้าสู่ระบบ' : 'เข้าสู่ระบบ'}
-                            </Button>
-                        </form>
-                    </div>
+                                {...form.getInputProps('rememberMe', { type: 'checkbox' })}
+                            />
+                        </Group>
+
+                        <Button
+                            type="submit"
+                            fullWidth
+                            mt="xl"
+                            radius="md"
+                            loading={logging}
+                            styles={{
+                                root: {
+                                    backgroundColor: '#FFCF9A'
+                                },
+                                label: {
+                                    color: '#7A2310'
+                                }
+                            }}
+                        >
+                            {logging ? 'กำลังเข้าสู่ระบบ' : 'เข้าสู่ระบบ'}
+                        </Button>
+                    </form>
                 </div>
-            ) : (
-                <OtpModalEx
-                    opened={otpPage}
-                    onClose={() => setOtpPage(false)}
-                    loading={otpLoading}
-                    handleConfirm={handleSubmitOtp}
-                    expiresIn={120}
-                    otpSessionId={otpSessionId}
-                />
-            )}
+            </div>
+
+            {/* OTP Modal */}
+            <OtpModalEx
+                opened={otpPage}
+                onClose={() => setOtpPage(false)}
+                loading={otpLoading}
+                handleConfirm={handleSubmitOtp}
+                expiresIn={120}
+                otpSessionId={otpSessionId}
+            />
         </div>
     );
 };

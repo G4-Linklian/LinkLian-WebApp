@@ -1,6 +1,6 @@
 import { resendTeacherOtp } from '@/utils/auth/teacherLogin';
 import { Modal, Button, Text, Title, PinInput, Group, Stack, UnstyledButton } from '@mantine/core';
-import { IconMessageDots } from '@tabler/icons-react';
+import { IconMessageDots, IconX } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 
 export type OtpModalProps = {
@@ -77,85 +77,89 @@ export const OtpModalEx = ({
             opened={opened}
             onClose={onClose}
             centered
-            radius="md"
-            padding="xl"
-            withCloseButton={false}
-        >
-            <Stack align="center" gap="md">
-                <IconMessageDots size={60} color="#7A2310" stroke={1.5} />
+            padding="16px"
+            withCloseButton={true}
+            styles={{
+                content: {
+                    backgroundColor: "#FFF2DD",
+                    borderRadius: "16px"
+                },
+                header: {
+                    backgroundColor: "#FFF2DD",
+                    marginBottom: 0,
+                    paddingBottom: 0,
+                    minHeight: "40px"
+                },
+                close: {
+                    backgroundColor: "transparent",
+                    color: "#7A2310"
+                }
+            }}
+                >
+                <Stack align="center" gap="2xl" p="16px">
+                    <IconMessageDots
+                        size={60} color="#7A2310" stroke={2} style={{ marginBottom: "2px"}} />
 
-                <Title order={1} size="h2" ta="center" fw={700}>
-                    ยืนยันรหัส
-                </Title>
+                    <Title order={1} size="h2" ta="center" fw={700}>
+                        ยืนยันรหัส
+                    </Title>
 
-                <Text ta="center" size="sm" c="#7A2310">
-                    หมดอายุใน{' '}
-                    <Text span fw={700} c="#7A2310">
-                        {formatTime(timeLeft)}
+                    <Text ta="center" size="sm" c="#7A2310">
+                        หมดอายุใน{' '}
+                        <Text span fw={700} c="#7A2310">
+                            {formatTime(timeLeft)}
+                        </Text>
                     </Text>
-                </Text>
 
-                <Group justify="center" my="lg">
                     <PinInput
                         length={6}
                         size="xl"
+                        radius="md"
                         type="number"
                         placeholder=""
                         manageFocus
                         autoFocus
                         value={otpValue}
                         onChange={setOtpValue}
+                        my="sm"
+                        w="100%"
                         styles={{
                             input: {
                                 backgroundColor: 'white',
-                                borderColor: '#FFCF9A'
+                                borderColor: '#FFB366',
+                                flex: 1
                             }
                         }}
                     />
-                </Group>
 
-                <Group grow w="100%" mt="xl">
-                    <Button
-                        variant="default"
-                        radius="md"
-                        onClick={onClose}
-                        disabled={loading}
-                        styles={{
-                            root: {
-                                backgroundColor: '#E0E0E0',
-                            },
-                            label: {
-                                color: '#7A2310'
-                            }
-                        }}
-                    >
-                        ยกเลิก
-                    </Button>
                     <Button
                         radius="md"
                         color="#7A2310"
                         onClick={() => handleConfirm(otpValue)}
                         loading={loading}
                         disabled={otpValue.length < 6}
+                        w="100%"
+                        mt="lg"
                         styles={{
                             root: {
                                 backgroundColor: '#FFCF9A',
+                                cursor: otpValue.length < 6 ? 'not-allowed' : 'pointer',
+                                opacity: otpValue.length < 6 ? 0.5 : 1,
                             },
                             label: {
-                                color: otpValue.length < 6 ? '#ADB5BD' : '#7A2310'
+                                color: '#7A2310'
                             }
                         }}
                     >
                         ยืนยัน
                     </Button>
-                </Group>
 
-                <UnstyledButton onClick={handleResendOtp}>
-                    <Text size="sm" c="dimmed" fw={400} style={{ cursor: 'pointer' }}>
-                        ส่งรหัสอีกครั้ง
-                    </Text>
-                </UnstyledButton>
-            </Stack>
-        </Modal>
+                    <UnstyledButton onClick={handleResendOtp} disabled={resendLoading}>
+                        <Text size="sm" c="dimmed" fw={400} style={{ cursor: 'pointer' }}>
+                            ส่งรหัสอีกครั้ง
+                        </Text>
+                    </UnstyledButton>
+                </Stack>
+        </Modal >
     );
 };
