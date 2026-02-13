@@ -137,7 +137,7 @@ export const deleteEduLevelNorm = async (input: eduLevelFields) => {
         program_id,
     } = input;
 
-    const data = await fetchDataApi(`DELETE`, "edu-level/normalize", {
+    const data = await fetchDataApi(`POST`, "edu-level/normalize/delete", {
         edu_lev_id,
         program_id,
     });

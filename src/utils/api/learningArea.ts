@@ -19,6 +19,7 @@ export const getLearningArea = async (input: learningAreaFields) => {
         sort_by,
         sort_order,
         subject_count,
+        keyword
     } = input;
 
     const data = await fetchDataApi(`GET`, "learning-area", {
@@ -31,6 +32,7 @@ export const getLearningArea = async (input: learningAreaFields) => {
         sort_by,
         sort_order,
         subject_count,
+        keyword
     });
 
     return data;

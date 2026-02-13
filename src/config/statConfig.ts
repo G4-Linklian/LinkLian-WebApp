@@ -13,7 +13,9 @@ import {
   IconChalkboard,
   IconClockCheck,
   IconClockCancel,
-  IconCashEdit
+  IconCashEdit,
+  IconUserCheck,
+  IconUserHeart,
 } from "@tabler/icons-react";
 
 // export const STAT_UI_CONFIG = {
@@ -116,16 +118,34 @@ export const STAT_UI_CONFIG = {
     iconColor: "bg-[#FFF7EE] text-[#FF9C57]",
     borderColor: "border-[#FFE3BB]",
   },
-  clockX : {
+  clockX: {
     icon: IconClockCancel,
     bgColor: "bg-white",
     iconColor: "bg-[#FFF7EE] text-[#FF9C57]",
     borderColor: "border-[#FFE3BB]",
   },
-  sectionEdit: {
+  sectionSchedule: {
     icon: IconCashEdit,
     bgColor: "bg-white",
     iconColor: "bg-[#FFF7EE] text-[#FF9C57]",
     borderColor: "border-[#FFE3BB]",
   },
-} as const;
+  allStudent: {
+    icon: IconUsers,
+    bgColor: "bg-white",
+    iconColor: "bg-[#FFF7EE] text-[#FF9C57]",
+    borderColor: "border-[#FFE3BB]",
+  },
+  activeStudent: {
+    icon: IconUserHeart,
+    bgColor: "bg-white",
+    iconColor: "bg-[#FFF7EE] text-[#FF9C57]",
+    borderColor: "border-[#FFE3BB]",
+  },
+  graduatedStudent: {
+    icon: IconUserCheck,
+    bgColor: "bg-white",
+    iconColor: "bg-[#FFF7EE] text-[#FF9C57]",
+    borderColor: "border-[#FFE3BB]",
+  }
+} as const ;

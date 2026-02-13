@@ -16,11 +16,13 @@ export const getSectionMaster = async (input: sectionFields) => {
         end_time,
         room_location_id,
         inst_id,
+        keyword,
         offset,
         limit,
         sort_by,
         sort_order,
-        section_name
+        section_name,
+        hour_per_week,
     } = input;
 
     const data = await fetchDataApi(`GET`, "section/master", {
@@ -34,11 +36,13 @@ export const getSectionMaster = async (input: sectionFields) => {
         end_time,
         room_location_id,
         inst_id,
+        keyword,
         offset,
         limit,
         sort_by,
         sort_order,
-        section_name
+        section_name,
+        hour_per_week,
     });
 
     return data;
@@ -131,6 +135,11 @@ export const getSectionEnrollment = async (input: sectionFields) => {
         section_id,
         user_sys_id,
         flag_valid,
+        keyword,
+        learning_area_id,
+        program_id,
+        edu_lev_id,
+        user_status,
         offset,
         limit,
         sort_by,
@@ -141,6 +150,11 @@ export const getSectionEnrollment = async (input: sectionFields) => {
         section_id,
         user_sys_id,
         flag_valid,
+        learning_area_id,
+        program_id,
+        edu_lev_id,
+        user_status,
+        keyword,
         offset,
         limit,
         sort_by,
@@ -357,7 +371,7 @@ export const deleteSectionEducator = async (input: sectionFields) => {
         user_sys_id,
     } = input;
 
-    const data = await fetchDataApi(`DELETE`, "section/educator", {
+    const data = await fetchDataApi(`POST`, "section/educator/delete", {
         section_id,
         user_sys_id,
     });
@@ -372,7 +386,7 @@ export const deleteSectionEnrollment = async (input: sectionFields) => {
         user_sys_id,
     } = input;
 
-    const data = await fetchDataApi(`DELETE`, "section/enrollment", {
+    const data = await fetchDataApi(`POST`, "section/enrollment/delete", {
         section_id,
         user_sys_id,
     });

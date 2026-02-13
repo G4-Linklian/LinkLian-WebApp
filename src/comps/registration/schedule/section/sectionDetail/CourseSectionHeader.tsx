@@ -14,7 +14,7 @@ import { dayOfWeekFormatter, timeFormatter, normalizeTime } from '@/config/forma
 import { sectionFields } from '@/utils/interface/section.types';
 import EditSectionModal from '@/comps/registration/schedule/section/EditSectionModal';
 import SectionDetailEditModal from '@/comps/registration/schedule/section/sectionDetail/EditSectionDetailModal';
-import { getSectionMaster, updateSectionSchedule, createSectionSchedule, createSchedule, getSchedule } from '@/utils/api/section';
+import { getSectionMaster, updateSectionSchedule, createSectionSchedule, createSchedule, getSchedule, deleteSchedule } from '@/utils/api/section';
 import { useNotification } from '@/comps/noti/notiComp';
 import AddSectionDetailModal from '@/comps/registration/schedule/section/sectionDetail/AddSectionDetailModal';
 
@@ -118,6 +118,10 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
       console.error("Update section failed:", error);
       showNotification("เพิ่มกลุ่มเรียนล้มเหลว!", "An error occurred while adding the section.", "error");
     }
+  };
+
+  const deleteScheduleData = async () => {
+    onFetch(true);
   };
 
 
@@ -299,6 +303,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
           await updateSectionData(values);
           closeSectionDetailEditModal();
         }}
+        onDelete={deleteScheduleData}
         token={token}
         semesterData={semesterOptions}
       />

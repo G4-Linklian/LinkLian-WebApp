@@ -20,6 +20,8 @@ export const getUserSys = async (input: UserSysFields) => {
         code,
         edu_lev_id,
         inst_id,
+        learning_area_id,
+        program_id,
         flag_valid,
         user_status,
         offset,
@@ -40,6 +42,8 @@ export const getUserSys = async (input: UserSysFields) => {
         code,
         edu_lev_id,
         inst_id,
+        learning_area_id,
+        program_id,
         flag_valid,
         user_status,
         offset,
@@ -110,6 +114,7 @@ export const updateUserSys = async (input: UserSysFields) => {
         profile_pic,
         code,
         edu_lev_id,
+        learning_area_id,
     } = input;
 
     const data = await fetchDataApi(`PUT`, `users/${user_sys_id}`, {
@@ -126,6 +131,7 @@ export const updateUserSys = async (input: UserSysFields) => {
         profile_pic,
         code,
         edu_lev_id,
+        learning_area_id,
     });
 
     return data;

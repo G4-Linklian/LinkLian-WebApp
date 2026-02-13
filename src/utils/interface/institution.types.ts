@@ -20,4 +20,7 @@ export interface institutionFields {
     flag_valid?: boolean;
     created_at?: string;
     updated_at?: string;
+    student_count?: string;
+    teacher_count?: string;
+    open_semester?: string;
 }

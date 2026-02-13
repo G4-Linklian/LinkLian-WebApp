@@ -16,6 +16,8 @@ export type ConfirmModalProps = {
     handleConfirm: () => void;
     color: string;
     form?: any;
+    disableConfirm?: boolean;
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
 export const ConfirmModalEx = ({
@@ -27,6 +29,8 @@ export const ConfirmModalEx = ({
     handleConfirm,
     color,
     form,
+    disableConfirm = false,
+    size = 'xs',
 }: ConfirmModalProps) => {
     return (
         <Modal
@@ -38,8 +42,9 @@ export const ConfirmModalEx = ({
             //         <Title order={2}>{title}</Title>
             //     </div>
             // }
-            radius="md"
+            radius="lg"
             padding="lg"
+            size={size}
             className='text-center flex flex-col justify-center items-center'
         >
             <Title order={2} className="text-center text-lg font-semibold"
@@ -70,7 +75,12 @@ export const ConfirmModalEx = ({
                 <Button radius={'md'} variant="default" onClick={onClose}>
                     ยกเลิก
                 </Button>
-                <Button radius={'md'} color={`${color}`} onClick={handleConfirm}>
+                <Button 
+                    radius={'md'} 
+                    color={`${color}`} 
+                    onClick={handleConfirm}
+                    disabled={disableConfirm}
+                >
                     ยืนยัน
                 </Button>
             </div>

@@ -12,6 +12,7 @@ import { UserSysFields } from "@/utils/interface/user.types";
 import { useEffect, useState } from "react";
 import { useDebouncedValue } from '@mantine/hooks';
 import { getProgram } from "@/utils/api/program";
+import { studentStatusOptions } from "@/enums/userStatus";
 
 interface AddStudentModalProps {
   opened: boolean;
@@ -188,12 +189,7 @@ export default function AddStudentModal({
           className="w-[100%] mt-3"
           label="สถานะผู้ใช้"
           placeholder="เลือกสถานะ"
-          data={[
-            { value: "Active", label: "Active (ใช้งาน)" },
-            { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-            // { value: "Resigned", label: "Resigned (ลาออก)" },
-            // { value: "Graduated", label: "Graduated (สำเร็จการศึกษา)" },
-          ]}
+          data={studentStatusOptions}
           {...form.getInputProps("user_status")}
           radius={8}
           required
