@@ -19,16 +19,20 @@ import {
 import { useForm } from "@mantine/form";
 import { sectionFields } from "@/utils/interface/section.types";
 import { useRouter } from "next/router";
-import { getBuilding, getRoomLocation } from "@/utils/api/building";
+import { getBuilding } from "@/utils/api/building";
+import { getRoomLocation } from '@/utils/api/roomLocation';
 import { dayOptions } from "@/utils/function/options";
 import { useNotification } from '@/comps/noti/notiComp';
 import { timeFormatter } from '@/config/formatters';
+import { deleteSchedule } from '@/utils/api/section';
+import { ConfirmModalEx } from '@/comps/public/ConfirmModal';
 
 interface SectionEditModalProps {
   section: sectionFields | null;
   opened: boolean;
   close: () => void;
   onSubmit?: (values: sectionFields) => void;
+  onDelete?: (schedule_id: number) => void;
   semesterData?: { value: string; label: string }[];
   token?: any;
 }
@@ -38,17 +42,20 @@ export default function SectionDetailEditModal({
   opened,
   close,
   onSubmit,
+  onDelete,
   semesterData,
   token
 }: SectionEditModalProps) {
   if (!section) return null;
   const router = useRouter();
 
+  const { showNotification } = useNotification();
+  const [confirmDeleteOpened, setConfirmDeleteOpened] = useState(false);
+
   const [buildingOptions, setBuildingOptions] = useState<any[]>([]);
   const [roomOptions, setRoomOptions] = useState<any[]>([]);
   const [loadingBuilding, setLoadingBuilding] = useState(false);
   const [loadingRoom, setLoadingRoom] = useState(false);
-  const { showNotification } = useNotification();
 
   const form = useForm<sectionFields>({
     initialValues: {
@@ -151,6 +158,42 @@ export default function SectionDetailEditModal({
     close();
   };
 
+  const handleDelete = async () => {
+    setConfirmDeleteOpened(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!section?.schedule_id) return;
+    
+    try {
+      const result = await deleteSchedule(section.schedule_id);
+      
+      if (result.success) {
+        showNotification(
+          'ลบเวลาเรียนสำเร็จ',
+          '',
+          'success',
+        );
+        onDelete?.(section.schedule_id);
+        setConfirmDeleteOpened(false);
+        close();
+      } else {
+        showNotification(
+          'ลบเวลาเรียนไม่สำเร็จ',
+          result.message || 'เกิดข้อผิดพลาดในการลบข้อมูล',
+          'error',
+        );
+      }
+    } catch (error) {
+      console.error('Error deleting schedule:', error);
+      showNotification(
+        'ลบเวลาเรียนไม่สำเร็จ',
+        'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+        'error',
+      );
+    }
+  };
+
 
   const startTimeRef = useRef<HTMLInputElement>(null);
   const endTimeRef = useRef<HTMLInputElement>(null);
@@ -162,13 +205,14 @@ export default function SectionDetailEditModal({
   );
 
   return (
-    <Modal
-      opened={opened}
-      onClose={close}
-      centered
-      size="md"
-      radius={16}
-    >
+    <>
+      <Modal
+        opened={opened}
+        onClose={close}
+        centered
+        size="md"
+        radius={16}
+      >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไขเวลาเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
 
@@ -241,11 +285,14 @@ export default function SectionDetailEditModal({
 
 
         <Group justify="flex-end" className="mt-4">
-
-          <Button color="blue" variant="outline" radius={8}
-            onClick={() => close()}
+          <Button
+            color="red"
+            variant="outline"
+            radius={8}
+            onClick={handleDelete}
+            type="button"
           >
-            ยกเลิก
+            ลบ
           </Button>
 
           <Button type="submit" radius={8}>
@@ -254,5 +301,19 @@ export default function SectionDetailEditModal({
         </Group>
       </form>
     </Modal>
+
+    <ConfirmModalEx
+      opened={confirmDeleteOpened}
+      onClose={() => setConfirmDeleteOpened(false)}
+      title="ยืนยันการลบเวลาเรียน"
+      description={
+        <div className="text-center">
+          คุณต้องการลบเวลาเรียนนี้ใช่หรือไม่?
+        </div>
+      }
+      handleConfirm={handleConfirmDelete}
+      color="red"
+    />
+    </>
   );
 }

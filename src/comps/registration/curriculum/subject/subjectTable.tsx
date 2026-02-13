@@ -4,19 +4,23 @@ import {
     ScrollArea,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from '@mantine/core';
 import {
     IconEdit,
+    IconSearch,
+    IconFilter
 } from '@tabler/icons-react';
 import { subjectFields } from '@/utils/interface/subject.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { getSubject, createSubject, updateSubject } from '@/utils/api/subject';
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
+import { getSubject, createSubject, updateSubject, deleteSubject } from '@/utils/api/subject';
 import AddSubjectModal from '@/comps/registration/curriculum/subject/AddSubjectModal';
 import SubjectEditModal from '@/comps/registration/curriculum/subject/EditSubjectModal';
+import FilterSubjectModal from '@/comps/registration/curriculum/subject/FilterSubjectModal';
 import { getLearningArea } from '@/utils/api/learningArea';
 import { useNotification } from '@/comps/noti/notiComp';
 
@@ -33,12 +37,26 @@ export default function subjectTable() {
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddSubject, { open: openAddSubject, close: closeAddSubject }] = useDisclosure(false);
+    const [openedFilterModal, { open: openFilterModal, close: closeFilterModal }] = useDisclosure(false);
     const [selectedSubject, setSelectedSubject] =
         useState<subjectFields | null>(null);
 
     const { showNotification } = useNotification();
     
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
+    const [filterParams, setFilterParams] = useState<subjectFields>({});
+
     const [learningAreaOptions, setLearningAreaOptions] = useState<{ value: string; label: string }[]>([]);
+
+    // Sync debounced search term with filterParams
+    useEffect(() => {
+        setFilterParams((prev) => ({
+            ...prev,
+            keyword: debouncedSearchTerm
+        }));
+    }, [debouncedSearchTerm]);
 
     const openEditModals = (subject: subjectFields) => {
         setSelectedSubject(subject);
@@ -71,10 +89,15 @@ export default function subjectTable() {
                 sort_order: "desc",
                 limit: BATCH_SIZE,
                 offset: offset,
+                ...filterParams
             })
 
-            setSubjectData((prev) => [...prev, ...subjectData.data]);
-
+            if (offset === 0) {
+                setSubjectData(subjectData.data);
+            } else {
+                setSubjectData((prev) => [...prev, ...subjectData.data]);
+            }
+            
             if (subjectData.data.length < BATCH_SIZE) {
                 setHasMore(false);
             }
@@ -83,8 +106,10 @@ export default function subjectTable() {
     };
 
     useEffect(() => {
-        fetchData(0);
-    }, [instId]);
+        if (instId) {
+            fetchData(0);
+        }
+    }, [instId, filterParams]);
 
     const addSubjectData = async (values: subjectFields) => {
         if (!instId) return;
@@ -134,6 +159,12 @@ export default function subjectTable() {
             console.error("Update subject failed:", error);
             showNotification("แก้ไขวิชาล้มเหลว!", "An error occurred while updating the subject.", "error");
         }
+    };
+
+    const deleteSubjectData = async () => {
+        setSubjectData([]);
+        setHasMore(true);
+        fetchData(0);
     };
 
     useEffect(() => {
@@ -208,15 +239,40 @@ export default function subjectTable() {
                 <Text size="xl" fw={500}>
                     รายวิชาทั้งหมด
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddSubjectModal();
-                    }}
-                >
-                    เพิ่มรายวิชา
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+
+                    <Button
+                        variant="default"
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconFilter size={14} />}
+                        onClick={() => {
+                            // logic เปิด Modal หรือ Dropdown filter
+                            openFilterModal();
+                        }}
+                    >
+                        ตัวกรอง
+                    </Button>
+
+                    <Button
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddSubjectModal();
+                        }}
+                    >
+                        เพิ่มรายวิชา
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -266,6 +322,7 @@ export default function subjectTable() {
                     await updateSubjectData(values);
                     closeEditModal();
                 }}
+                onDelete={deleteSubjectData}
                 learningAreaOptions={learningAreaOptions}
             />
 
@@ -277,6 +334,19 @@ export default function subjectTable() {
                     closeAddSubject();
                 }}
                 learningAreaOptions={learningAreaOptions}
+            />
+
+            <FilterSubjectModal
+                opened={openedFilterModal}
+                close={closeFilterModal}
+                onSubmit={(values) => {
+                    setFilterParams(values);
+                }}
+                onClear={() => {
+                   setFilterParams({});
+                }}
+                learningAreaOptions={learningAreaOptions}
+                initialValues={filterParams}
             />
 
         </div>

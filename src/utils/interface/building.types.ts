@@ -14,6 +14,8 @@ export interface buildingFields {
 
     total_count?: number;
 
+    keyword?: string;
+
     offset?: number;
     limit?: number;
     sort_by?: string;

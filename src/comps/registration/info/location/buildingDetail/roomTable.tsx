@@ -186,6 +186,14 @@ export default function roomTable() {
         }
     };
 
+    const deleteRoomLocationData = async (room_location_id: number) => {
+        // Refresh data after delete (actual deletion is handled in EditRoomLocationModal)
+        setRoomData([]);
+        setHasMore(true);
+        fetchData(0);
+        setOffset(0);
+    };
+
     const onScroll = () => {
         if (viewportRef.current) {
             const { scrollHeight, scrollTop, clientHeight } = viewportRef.current;
@@ -291,6 +299,10 @@ export default function roomTable() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateRoomLocationData(values);
+                    closeEditModal();
+                }}
+                onDelete={async (room_location_id) => {
+                    await deleteRoomLocationData(room_location_id);
                     closeEditModal();
                 }}
             />

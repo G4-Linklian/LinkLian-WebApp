@@ -25,6 +25,7 @@ export interface UserSysFields {
   learning_area_id?: number;
   learning_area_name?: string;
   total_count?: number;
+  position?: string;
 
   program_id?: number;
   offset?: number;

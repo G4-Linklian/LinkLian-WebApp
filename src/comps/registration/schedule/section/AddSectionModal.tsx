@@ -20,7 +20,8 @@ import { useForm } from "@mantine/form";
 import { sectionFields } from "@/utils/interface/section.types";
 import { useRouter } from "next/router";
 import { getSubject } from "@/utils/api/subject";
-import { getBuilding, getRoomLocation } from "@/utils/api/building";
+import { getBuilding } from "@/utils/api/building";
+import { getRoomLocation } from '@/utils/api/roomLocation';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useDebouncedValue } from '@mantine/hooks';
 
@@ -207,7 +208,7 @@ export default function AddSectionModal({
           </Button>
  
           <Button type="submit" radius={8}>
-            บันทึก
+            เพิ่มกลุ่มเรียน
           </Button>
         </Group>
       </form>

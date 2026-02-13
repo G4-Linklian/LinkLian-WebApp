@@ -4,16 +4,18 @@ import {
     ScrollArea,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from '@mantine/core';
 import {
     IconEdit,
+    IconSearch,
 } from '@tabler/icons-react';
 import { programFields } from '@/utils/interface/program.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
 import { getProgram, createProgram, updateProgram } from '@/utils/api/program';
 import ProgramEditModal from '@/comps/registration/curriculum/program/EditProgramModal';
@@ -31,6 +33,9 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
     const [programName, setProgramName] = useState<string>("");
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddProgram, { open: openAddProgram, close: closeAddProgram }] = useDisclosure(false);
@@ -78,12 +83,21 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                 parent_id: twig_id ? Number(twig_id) : Number(root_id),
                 tree_type: "leaf",
                 limit: BATCH_SIZE,
+                offset: offset,
+                keyword: debouncedSearchTerm
             })
 
-            setProgramData((prev) => [...prev, ...programDatas.data]);
-            onDataUpdate([...programData, ...programDatas.data]);
+            const newData = programDatas.data || [];
 
-            if (programDatas.data.length < BATCH_SIZE) {
+            if (offset === 0) {
+                setProgramData(newData);
+                onDataUpdate(newData);
+            } else {
+                setProgramData((prev) => [...prev, ...newData]);
+                onDataUpdate([...programData, ...newData]);
+            }
+
+            if (newData.length < BATCH_SIZE) {
                 setHasMore(false);
             }
         }
@@ -92,7 +106,7 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
 
     useEffect(() => {
         fetchData(0);
-    }, [router.isReady, instId]);
+    }, [router.isReady, instId, debouncedSearchTerm]);
 
     useEffect(() => {
         const fetchProgramNameData = async (offset: number) => {
@@ -214,15 +228,26 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                 <Text size="xl" fw={500}>
                     {programName}
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddProgramModal();
-                    }}
-                >
-                    เพิ่ม{programName}
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+                    <Button
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddProgramModal();
+                        }}
+                    >
+                        เพิ่ม{programName}
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -269,6 +294,11 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                 onSubmit={async (values) => {
                     await updateProgramData(values);
                     closeEditModal();
+                }}
+                onDelete={(program_id) => {
+                    setProgramData([]);
+                    setHasMore(true);
+                    fetchData(0);
                 }}
             />
 

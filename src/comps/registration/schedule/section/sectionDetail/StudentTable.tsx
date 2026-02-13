@@ -5,23 +5,29 @@ import {
     Text,
     Loader,
     Center,
-    ActionIcon
+    ActionIcon,
+    TextInput,
+    Button
 } from '@mantine/core';
 
 import {
     IconDots,
-    IconEye
+    IconEye,
+    IconSearch,
+    IconFilter
 } from "@tabler/icons-react";
 import { getUserSys, updateUserSys, createUserSys } from '@/utils/api/userData';
 import { UserSysFields } from '@/utils/interface/user.types';
 import { sectionFieldsForm } from '@/utils/interface/section.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
-import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
+import { useEduLevelOptions } from "@/hooks/eduLevel";
 import { useNotification } from '@/comps/noti/notiComp';
 import AddStudentSectionModal from '@/comps/registration/schedule/section/sectionDetail/Student/AddStudentSectionModal';
-import { getSectionEnrollment, createSectionEnrollment, updateSectionEnrollment} from '@/utils/api/section';
+import ViewStudentDetailModal from '@/comps/registration/schedule/section/sectionDetail/Student/ViewStudentDetailModal';
+import FilterStudentModal from '@/comps/registration/registration/student/FilterStudentModal';
+import { getSectionEnrollment, createSectionEnrollment, updateSectionEnrollment, deleteSectionEnrollment } from '@/utils/api/section';
 
 const BATCH_SIZE = 20;
 
@@ -36,11 +42,27 @@ export default function StudentTable() {
     const [offset, setOffset] = useState<number>(0);
     const { showNotification } = useNotification();
     const [sectionId, setSectionId] = useState<number | null>(null);
+    const { options: eduLevelOptions, isLoading: eduLevelLoading } = useEduLevelOptions();
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddStudent, { open: openAddStudent, close: closeAddStudent }] = useDisclosure(false);
+    const [openedViewDetail, { open: openViewDetail, close: closeViewDetail }] = useDisclosure(false);
+    const [openedFilterModal, { open: openFilterModal, close: closeFilterModal }] = useDisclosure(false);
     const [selectedStudent, setSelectedStudent] =
         useState<UserSysFields | null>(null);
+    const [filterParams, setFilterParams] = useState<UserSysFields>({});
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
+
+    // Sync debounced search term with filterParams
+    useEffect(() => {
+        setFilterParams((prev) => ({
+            ...prev,
+            keyword: debouncedSearchTerm
+        }));
+    }, [debouncedSearchTerm]);
 
     const openEditModals = (student: UserSysFields) => {
         setSelectedStudent(student);
@@ -49,6 +71,11 @@ export default function StudentTable() {
 
     const openAddStudentModal = () => {
         openAddStudent();
+    };
+
+    const openViewDetailModal = (student: UserSysFields) => {
+        setSelectedStudent(student);
+        openViewDetail();
     };
 
 
@@ -78,15 +105,28 @@ export default function StudentTable() {
         setLoading(true);
 
         if (sectionId) {
+            console.log({
+                section_id: Number(sectionId),
+                offset: offset,
+                sort_by: "user_sys_id",
+                sort_order: "asc",
+                limit: BATCH_SIZE,
+                ...filterParams
+            });
             const userData = await getSectionEnrollment({
                 section_id: Number(sectionId),
                 offset: offset,
                 sort_by: "user_sys_id",
                 sort_order: "asc",
-                limit: BATCH_SIZE
+                limit: BATCH_SIZE,
+                ...filterParams
             })
 
-            setStudentData((prev) => [...prev, ...userData.data]);
+            if (offset === 0) {
+                setStudentData(userData.data);
+            } else {
+                setStudentData((prev) => [...prev, ...userData.data]);
+            }
 
             if (userData.data.length < BATCH_SIZE) {
                 setHasMore(false);
@@ -94,6 +134,14 @@ export default function StudentTable() {
         }
         setLoading(false);
     };
+
+    useEffect(() => {
+        if (sectionId) {
+            setStudentData([]);
+            setHasMore(true);
+            fetchData(0);
+        }
+    }, [sectionId, filterParams]);
 
     const addStudentData = async (values: sectionFieldsForm) => {
 
@@ -143,11 +191,6 @@ export default function StudentTable() {
             showNotification("แก้ไขนักเรียนล้มเหลว!", "An error occurred while editing the student.", "error");
         }
     };
-
-
-    useEffect(() => {
-        fetchData(0);
-    }, [instId]);
 
 
     const onScroll = () => {
@@ -200,22 +243,24 @@ export default function StudentTable() {
             <Table.Td ta="center">{element.email}</Table.Td>
 
             <Table.Td ta="center" className='flex justify-center items-center'>
-                <ActionIcon variant="subtle" color="gray"
-                // onClick={(e) => {
-                //     e.stopPropagation();
-                //     openEditModals(element);
-                // }}
+                <ActionIcon 
+                    variant="subtle" 
+                    color="gray"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        openViewDetailModal(element);
+                    }}
                 >
                     <IconEye size={16} />
                 </ActionIcon>
-                <ActionIcon variant="subtle" color="gray"
+                {/* <ActionIcon variant="subtle" color="gray"
                 // onClick={(e) => {
                 //     e.stopPropagation();
                 //     openEditModals(element);
                 // }}
                 >
                     <IconDots size={16} />
-                </ActionIcon>
+                </ActionIcon> */}
             </Table.Td>
 
         </Table.Tr>
@@ -229,15 +274,39 @@ export default function StudentTable() {
                 <Text size="xl" fw={500} className='flex items-center gap-2'>
                     รายชื่อนักเรียน
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddStudentModal();
-                    }}
-                >
-                    เพิ่มนักเรียน
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+
+                    <Button
+                        variant="default"
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconFilter size={14} />}
+                        onClick={() => {
+                            openFilterModal();
+                        }}
+                    >
+                        ตัวกรอง
+                    </Button>
+
+                    <Button
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddStudentModal();
+                        }}
+                    >
+                        เพิ่มนักเรียน
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -302,6 +371,31 @@ export default function StudentTable() {
                 }}
                 token={token}
                 roleID={Number(roleID)}
+            />
+
+            <ViewStudentDetailModal
+                opened={openedViewDetail}
+                close={closeViewDetail}
+                student={selectedStudent}
+                sectionId={sectionId || undefined}
+                onDelete={async () => {
+                    setStudentData([]);
+                    setHasMore(true);
+                    fetchData(0);
+                }}
+            />
+
+            <FilterStudentModal
+                opened={openedFilterModal}
+                close={closeFilterModal}
+                onSubmit={(values) => {
+                    setFilterParams(values);
+                }}
+                onClear={() => {
+                    setFilterParams({});
+                }}
+                eduLevelOptions={eduLevelOptions}
+                initialValues={filterParams}
             />
 
         </div>

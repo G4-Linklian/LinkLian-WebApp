@@ -19,7 +19,8 @@ import {
 import { useForm } from "@mantine/form";
 import { sectionFields } from "@/utils/interface/section.types";
 import { useRouter } from "next/router";
-import { getBuilding, getRoomLocation } from "@/utils/api/building";
+import { getBuilding } from "@/utils/api/building";
+import { getRoomLocation } from '@/utils/api/roomLocation';
 import { dayOptions } from "@/utils/function/options";
 import { useNotification } from '@/comps/noti/notiComp';
 import { timeFormatter } from '@/config/formatters';

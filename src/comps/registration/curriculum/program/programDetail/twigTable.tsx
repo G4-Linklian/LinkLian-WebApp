@@ -288,6 +288,11 @@ export default function twigTable() {
                         await updateProgramData(values);
                         closeEditModal();
                     }}
+                    onDelete={(program_id) => {
+                        setProgramData([]);
+                        setHasMore(true);
+                        fetchData(0);
+                    }}
                 />
             )}
 

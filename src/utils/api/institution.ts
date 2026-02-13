@@ -7,6 +7,12 @@ export const getInstitutionById = async (id: number) => {
     return data;
 };
 
+// GET /institution/detail/:id - ดึงข้อมูลตาม ID
+export const getInstitutionDetailById = async (id: number) => {
+    const data = await fetchDataApi(`GET`, `institution/detail/${id}`, {});
+    return data;
+};
+
 // GET /institution - ค้นหาสถาบัน
 export const getInstitution = async (input: institutionFields) => {
     const {

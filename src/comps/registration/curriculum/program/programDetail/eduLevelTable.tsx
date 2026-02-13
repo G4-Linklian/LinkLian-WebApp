@@ -16,13 +16,13 @@ import { Modal, Button, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from '@/comps/noti/notiComp';
 import { useEduLevelOptions } from "@/hooks/eduLevel";
-import { getEduLevel, getEduLevelMaster, createEduLevelNorm, deleteEduLevelNorm  } from '@/utils/api/eduLevel';
+import { getEduLevel, getEduLevelMaster, createEduLevelNorm, deleteEduLevelNorm } from '@/utils/api/eduLevel';
 import AddEduLevelModal from '@/comps/registration/curriculum/program/programDetail/AddEduLevelModal';
 import EduLevelEditModal from '@/comps/registration/curriculum/program/programDetail/EditEduLevelModal';
 
 const BATCH_SIZE = 20;
 
-export default function eduLevelTable({programData} : any) {
+export default function eduLevelTable({ programData }: any) {
     const [eduLevelData, setEduLevelData] = useState<eduLevelFields[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
@@ -229,6 +229,11 @@ export default function eduLevelTable({programData} : any) {
                 }}
                 eduLevelData={eduLevelOptions}
                 ProgramData={programData}
+                onDelete={(edu_lev_id) => {
+                    setEduLevelData([]);
+                    setHasMore(true);
+                    fetchData(0);
+                }}
             />
 
             <AddEduLevelModal

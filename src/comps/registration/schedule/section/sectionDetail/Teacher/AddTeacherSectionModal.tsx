@@ -18,6 +18,7 @@ import { UserSysFields, UserSysFieldsForm } from "@/utils/interface/user.types";
 import { useEffect, useState } from "react";
 import { useDebouncedValue } from '@mantine/hooks';
 import { getUserSys } from "@/utils/api/userData";
+import { teacherPositionOptions } from "@/enums/teacher";
 
 interface AddTeacherSectionModalProps {
   opened: boolean;
@@ -205,12 +206,14 @@ export default function AddTeacherSectionModal({
 
         {renderUserInfoCard()}
 
-        <TextInput
+        <Select
           label="ตำแหน่งใน Section"
-          placeholder="เช่น หัวหน้าผู้สอน, ผู้ช่วยสอน"
+          placeholder="เลือกตำแหน่ง"
+          data={teacherPositionOptions}
           {...form.getInputProps("position")}
           radius={8}
           required
+          clearable
         />
 
         <Divider label="ตรวจสอบข้อมูล (Auto-filled)" labelPosition="center" mb="sm" />
@@ -245,16 +248,6 @@ export default function AddTeacherSectionModal({
               variant={selectedUserObj ? "filled" : "default"}
             />
           </Grid.Col>
-
-          <Grid.Col span={6}>
-            <TextInput
-              label="ชื่อกลาง"
-              {...form.getInputProps("middle_name")}
-              radius={8}
-              readOnly={!!selectedUserObj}
-              variant={selectedUserObj ? "filled" : "default"}
-            />
-          </Grid.Col>
           <Grid.Col span={6}>
             <TextInput
               label="เบอร์โทร"
@@ -266,7 +259,7 @@ export default function AddTeacherSectionModal({
             />
           </Grid.Col>
 
-          <Grid.Col span={12}>
+          <Grid.Col span={6}>
             <TextInput
               label="รหัสบุคลากร"
               leftSection={<IconId size={16} />}

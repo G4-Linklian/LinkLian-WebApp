@@ -8,6 +8,7 @@ import {
 import { useForm } from "@mantine/form";
 import { UserSysFields } from "@/utils/interface/user.types";
 import { useEffect } from "react";
+import { teacherStatusOptions } from "@/enums/userStatus";
 
 interface EditStaffModalProps {
   staff: UserSysFields | null;
@@ -125,10 +126,7 @@ export default function EditStaffModal({
             className="w-[40%]"
             label="สถานะผู้ใช้"
             placeholder="เลือกสถานะ"
-            data={[
-              { value: "Active", label: "Active (ใช้งาน)" },
-              { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-            ]}
+            data={teacherStatusOptions}
             {...form.getInputProps("user_status")}
             radius={8}
             required
@@ -136,7 +134,7 @@ export default function EditStaffModal({
 
           <Select
             className="w-[60%]"
-            label="กลุ่มการสอน"
+            label="กลุ่มการเรียนรู้"
             placeholder="เช่น คณิตศาสตร์"
             data={learningAreaOptions}
             {...form.getInputProps("learning_area_id")}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Breadcrumb from "@/comps/breadCrumb/breadCrumb";
 import { StatCard, StatData, StatApiResponse, StatCardProps } from '@/comps/registration/shared/headerCard';
 import { STAT_UI_CONFIG } from "@/config/statConfig";
@@ -6,17 +6,47 @@ import SemesterTable from '@/comps/registration/info/semester/semesterTable';
 import BuildingComps from '@/comps/registration/info/location/buildingComps';
 import StaffTable from '@/comps/registration/info/staff/staffTable';
 import TableSection from '../shared/TableSection';
+import { SummaryType } from "@/enums/registrationSummary";
+import { getRegistrationSummary } from "@/utils/api/registrationSummary";
+import { decodeRegistrationToken } from '@/utils/authToken';
+import { Loader, Center } from '@mantine/core';
 
 
 const infoComp = () => {
+    const [statsFromApi, setStatsFromApi] = useState<StatApiResponse[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    // mock จาก API
-    const statsFromApi: StatApiResponse[] = [
-        { key: "academicYear", value: 4, label: "ปีการศึกษา" },
-        { key: "building", value: 3, label: "อาคาร" },
-        { key: "classroom", value: 95, label: "ห้องเรียน" },
-        { key: "staff", value: 68, label: "บุคลากร" },
-    ];
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const token = decodeRegistrationToken();
+                if (!token || !token.institution?.inst_id) return;
+
+                const result = await getRegistrationSummary({
+                    type: SummaryType.INFO,
+                    inst_id: token.institution.inst_id
+                });
+
+                if (result.success && result.data) {
+                    const data = result.data;
+                    const stats: StatApiResponse[] = [
+                        { key: "academicYear", value: Number(data.academicYear) || 0, label: "ปีการศึกษา" },
+                        { key: "building", value: Number(data.building) || 0, label: "อาคาร" },
+                        { key: "classroom", value: Number(data.classroom) || 0, label: "ห้องเรียน" },
+                        { key: "staff", value: Number(data.staff) || 0, label: "บุคลากร" },
+                    ];
+
+                    setStatsFromApi(stats);
+                }
+            } catch (error) {
+                console.error("Failed to fetch info summary:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSummary();
+    }, []);
 
 
     const getGridCols = (length: number) => {
@@ -49,28 +79,35 @@ const infoComp = () => {
                 ]}
             />
             <div className="w-full h-[95%] mt-4 text-black">
-                <div className="header-section">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-3">ข้อมูลพื้นฐาน</h2>
+                {loading ? (
+                    <Center style={{ minHeight: '400px' }}>
+                        <Loader size="lg" />
+                    </Center>
+                ) : (
+                    <>
+                        <div className="header-section">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-3">ข้อมูลพื้นฐาน</h2>
 
-                    <div className={`grid gap-2 ${getGridCols(mappedStats.length)}`}>
-                        {mappedStats.map((stat, index) => (
-                            <StatCard key={index} {...stat} />
-                        ))}
-                    </div>
-                </div>
+                            <div className={`grid gap-2 ${getGridCols(mappedStats.length)}`}>
+                                {mappedStats.map((stat, index) => (
+                                    <StatCard key={index} {...stat} />
+                                ))}
+                            </div>
+                        </div>
 
-                <TableSection>
-                    <StaffTable />
-                </TableSection>
+                        <TableSection>
+                            <StaffTable />
+                        </TableSection>
 
-                <TableSection>
-                    <SemesterTable />
-                </TableSection>
+                        <TableSection>
+                            <SemesterTable />
+                        </TableSection>
 
-                <TableSection>
-                    <BuildingComps />
-                </TableSection>
-
+                        <TableSection>
+                            <BuildingComps />
+                        </TableSection>
+                    </>
+                )}
             </div>
         </div>
     )

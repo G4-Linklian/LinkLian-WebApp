@@ -4,21 +4,25 @@ import {
     ScrollArea,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from '@mantine/core';
 import {
     IconEdit,
     IconEye,
+    IconSearch,
+    IconFilter,
 } from '@tabler/icons-react';
 import { sectionFields, SectionSchedulePayload } from '@/utils/interface/section.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
-import { getSectionMaster, updateSectionSchedule, createSectionSchedule } from '@/utils/api/section';
+import { getSectionMaster, updateSectionSchedule, createSectionSchedule, deleteSection } from '@/utils/api/section';
 import AddSectionModal from '@/comps/registration/schedule/section/AddSectionModal';
 import EditSectionModal from '@/comps/registration/schedule/section/EditSectionModal';
+import FilterSectionModal from '@/comps/registration/schedule/section/FilterSectionModal';
 import { useNotification } from '@/comps/noti/notiComp';
 import { dayOfWeekFormatter, timeFormatter, normalizeTime } from '@/config/formatters';
 
@@ -35,8 +39,22 @@ export default function sectionTable({ semesterData }: any) {
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddSection, { open: openAddSection, close: closeAddSection }] = useDisclosure(false);
+    const [openedFilterModal, { open: openFilterModal, close: closeFilterModal }] = useDisclosure(false);
     const [selectedSection, setSelectedSection] =
         useState<sectionFields | null>(null);
+    const [filterParams, setFilterParams] = useState<sectionFields>({});
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
+
+    // Sync debounced search term with filterParams
+    useEffect(() => {
+        setFilterParams((prev) => ({
+            ...prev,
+            keyword: debouncedSearchTerm
+        }));
+    }, [debouncedSearchTerm]);
 
     const { showNotification } = useNotification();
 
@@ -73,6 +91,7 @@ export default function sectionTable({ semesterData }: any) {
                 sort_order: "asc",
                 limit: BATCH_SIZE,
                 offset,
+                ...filterParams
             });
 
             setSectionData((prev) =>
@@ -92,7 +111,7 @@ export default function sectionTable({ semesterData }: any) {
         setSectionData([]);
         setHasMore(true);
         fetchData(0, true);
-    }, [instId, router.isReady, router.query.semester_id]);
+    }, [instId, router.isReady, router.query.semester_id, filterParams]);
 
     const addSectionData = async (values: sectionFields) => {
         const semesterId = router.query.semester_id;
@@ -184,6 +203,12 @@ export default function sectionTable({ semesterData }: any) {
         }
     };
 
+    const deleteSectionData = async () => {
+        setSectionData([]);
+        setHasMore(true);
+        fetchData(0, true);
+    };
+
 
     const onScroll = () => {
         if (viewportRef.current) {
@@ -241,15 +266,39 @@ export default function sectionTable({ semesterData }: any) {
                 <Text size="xl" fw={500}>
                     กลุ่มเรียนทั้งหมด
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddSectionModal();
-                    }}
-                >
-                    เพิ่มกลุ่มเรียน
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+
+                    <Button
+                        variant="default"
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconFilter size={14} />}
+                        onClick={() => {
+                            openFilterModal();
+                        }}
+                    >
+                        ตัวกรอง
+                    </Button>
+
+                    <Button
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddSectionModal();
+                        }}
+                    >
+                        เพิ่มกลุ่มเรียน
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -300,6 +349,7 @@ export default function sectionTable({ semesterData }: any) {
                     await updateSectionData(values);
                     closeEditModal();
                 }}
+                onDelete={deleteSectionData}
                 semesterData={semesterData}
                 token={token}
             />
@@ -313,6 +363,18 @@ export default function sectionTable({ semesterData }: any) {
                 }}
                 semesterData={semesterData}
                 token={token}
+            />
+
+            <FilterSectionModal
+                opened={openedFilterModal}
+                close={closeFilterModal}
+                onSubmit={(values) => {
+                    setFilterParams(values);
+                }}
+                onClear={() => {
+                    setFilterParams({});
+                }}
+                initialValues={filterParams}
             />
 
         </div>
