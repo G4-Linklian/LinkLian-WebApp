@@ -19,7 +19,6 @@ import { decodeRegistrationToken, decodeToken } from "@/utils/authToken";
 import { useNotification } from "@/comps/noti/notiComp"
 import { loginInstitution } from '@/utils/auth/registrationLogin';
 
-
 const RegistrationLoginPage = () => {
     const [email, setEmail] = useState('');
     const [userEmail, setUserEmail] = useState('');
