@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
-import { Stepper, Button, Paper, Text, List, ThemeIcon, Container, Group, Alert, rem, ActionIcon, ScrollArea } from "@mantine/core";
+import { useState, useEffect, useMemo } from "react";
+import { Stepper, Button, Paper, Text, List, ThemeIcon, Container, Group, Alert } from "@mantine/core";
 import { Dropzone, MS_EXCEL_MIME_TYPE } from '@mantine/dropzone';
-import { IconDownload, IconFileSpreadsheet, IconCircleCheck, IconAlertCircle, IconSend, IconUpload, IconX } from "@tabler/icons-react";
-// import ExcelJS from "exceljs"; // ไม่ได้ใช้แล้วถ้าส่งไป API
-// import { saveAs } from "file-saver"; // ไม่ได้ใช้แล้ว
+import { IconDownload, IconFileSpreadsheet, IconCircleCheck, IconAlertCircle } from "@tabler/icons-react";
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { downloadTemplate } from "@/comps/public/downloadTemplate";
-import { validateImportTeacherData, saveImportTeacherData } from "@/utils/api/import";
-import TableStaffImport from "./TableStaffImport";
-import { STAFF_IMPORT_COLUMNS, STAFF_TEMPLATE_FILENAME } from "@/config/csvHeader";
+import { validateImportProgramData, saveImportProgramData } from "@/utils/api/import";
+import TableProgramImport from "./TableProgramImport";
+import { getProgramImportConfig } from "@/config/csvHeader";
+import { useRouter } from "next/router";
 
-interface StaffRow {
+interface ProgramRow {
     row: number;
     data: Record<string, any>;
     isValid: boolean;
@@ -28,7 +27,10 @@ interface Summary {
     willSaveCount: number;
 }
 
-export default function AddStaffModalImport() {
+export default function AddProgramModalImport() {
+    const router = useRouter();
+    const { root_id, twig_id } = router.query;
+
     const [instId, setInstId] = useState<number | null>(null);
     const [instType, setInstType] = useState<string | null>(null);
 
@@ -37,25 +39,42 @@ export default function AddStaffModalImport() {
         console.log("Decoded Token:", token);
 
         const instTd = token.institution.inst_id;
-        const instType = token.institution.inst_type;
-        if (token && instTd && instType) {
+        const instTypeVal = token.institution.inst_type;
+        if (token && instTd && instTypeVal) {
             setInstId(instTd);
-            setInstType(instType);
+            setInstType(instTypeVal);
         }
     }, []);
 
+    // Get import config based on institution type
+    const importConfig = useMemo(() => {
+        return getProgramImportConfig(instType || "school");
+    }, [instType]);
+
+    // Get unit text based on inst_type and route
+    const unitText = useMemo(() => {
+        if (!instType) return "";
+        
+        const isUniversity = instType === "uni" || instType === "university";
+        
+        if (!root_id) {
+            return isUniversity ? "คณะ" : "แผนการเรียน";
+        } else if (twig_id) {
+            return isUniversity ? "สาขา" : "ห้องเรียน";
+        } else if (root_id) {
+            return isUniversity ? "ภาควิชา" : "ระดับชั้น";
+        }
+        return importConfig.label;
+    }, [instType, root_id, twig_id, importConfig.label]);
+
     const [activeStep, setActiveStep] = useState(0);
     const totalSteps = 4;
-    // const [isUploading, setIsUploading] = useState(false); // ไม่ได้ใช้
-    // const [uploadResult, setUploadResult] = useState<{ fileName: string; count: number } | null>(null); // ไม่ได้ใช้
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [validationData, setValidationData] = useState<any>(null); // State สำหรับเก็บข้อมูลจาก API
+    const [validationData, setValidationData] = useState<any>(null);
     const [isValidating, setIsValidating] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [validationToken, setValidationToken] = useState<string | null>(null); // State สำหรับเก็บ token หลัง validate สำเร็จ
-
-    // --- ลบ mockValidationData ออกแล้ว ---
+    const [validationToken, setValidationToken] = useState<string | null>(null);
 
     const nextStep = () => {
         if (activeStep < totalSteps - 1) {
@@ -73,26 +92,23 @@ export default function AddStaffModalImport() {
         if (!selectedFile || !instId || !instType) return;
 
         setIsValidating(true);
-        setValidationData(null); // เคลียร์ค่าเก่าก่อน
-        setValidationToken(null); // เคลียร์ token เก่าก่อน
+        setValidationData(null);
+        setValidationToken(null);
 
         try {
-            // เรียก API จริง
-            const data = await validateImportTeacherData(
+            const data = await validateImportProgramData(
                 selectedFile,
                 instId!,
                 instType!
             );
             console.log("Validation result from API:", data);
 
-            // บันทึกผลลัพธ์จาก API ลง State
             setValidationData(data);
             setActiveStep(2);
             setValidationToken(data?.validationToken || null);
 
         } catch (error) {
             console.error("Validate failed:", error);
-            // คุณอาจจะอยากเพิ่ม Notification แจ้งเตือน error ตรงนี้
         } finally {
             setIsValidating(false);
         }
@@ -104,10 +120,10 @@ export default function AddStaffModalImport() {
         try {
             setIsSaving(true);
 
-            const data = await saveImportTeacherData(
+            const data = await saveImportProgramData(
                 validationToken,
-                selectedFile,
-                instId!,
+                selectedFile, 
+                instId!, 
                 instType!);
             setActiveStep(3);
 
@@ -149,8 +165,8 @@ export default function AddStaffModalImport() {
                             <List size="sm" spacing="xs" c="gray.7">
                                 <List.Item>1. ไฟล์ที่นำเข้าต้องเป็นนามสกุล <b>.xlsx</b> หรือ <b>.xls</b></List.Item>
                                 <List.Item>2. ใน 1 ไฟล์ สามารถมีได้ <b>1 ชีท</b> เท่านั้น</List.Item>
-                                <List.Item>3. โปรดกรอกข้อมูลในคอลัมน์ให้ครบถ้วน ยกเว้นเบอร์โทรที่สามารถเว้นว่างได้</List.Item>
-                                <List.Item>4. <b>กลุ่มการเรียนรู้ของบุคลากรต้องตรงกับข้อมูลที่มีในระบบ</b></List.Item>
+                                <List.Item>3. โปรดกรอกข้อมูลในคอลัมน์ให้ครบถ้วน</List.Item>
+                                <List.Item>4. <b>ระบบจะเพิ่ม{unitText}ใหม่ที่ยังไม่มีในระบบ</b></List.Item>
                             </List>
                         </Paper>
 
@@ -159,7 +175,7 @@ export default function AddStaffModalImport() {
                                 radius="md"
                                 variant="default"
                                 leftSection={<IconDownload size={18} />}
-                                onClick={() => downloadTemplate(STAFF_IMPORT_COLUMNS, STAFF_TEMPLATE_FILENAME)}
+                                onClick={() => downloadTemplate(importConfig.columns, importConfig.filename)}
                                 w="fit-content"
                             >
                                 ดาวน์โหลดตัวอย่างไฟล์
@@ -245,15 +261,15 @@ export default function AddStaffModalImport() {
                             </Alert>
                         )}
 
-                        {validationData?.data?.summary?.duplicateCount > 0 &&
-                            validationData?.data?.summary?.willSaveCount === 0 &&
-                            validationData?.data?.summary?.errorCount === 0 && (
-                                <Alert variant="light" color="yellow" title="ข้อมูลซ้ำทั้งหมด" icon={<IconAlertCircle />}>
-                                    ข้อมูลทั้งหมดในไฟล์เป็นข้อมูลที่มีอยู่ในระบบแล้ว จะไม่มีการบันทึกข้อมูลใหม่
-                                </Alert>
-                            )}
+                        {validationData?.data?.summary?.duplicateCount > 0 && 
+                         validationData?.data?.summary?.willSaveCount === 0 && 
+                         validationData?.data?.summary?.errorCount === 0 && (
+                            <Alert variant="light" color="yellow" title="ข้อมูลซ้ำทั้งหมด" icon={<IconAlertCircle />}>
+                                ข้อมูลทั้งหมดในไฟล์เป็นข้อมูลที่มีอยู่ในระบบแล้ว จะไม่มีการบันทึกข้อมูลใหม่
+                            </Alert>
+                        )}
 
-                        <TableStaffImport
+                        <TableProgramImport
                             validatedData={validationData?.data?.validatedData || []}
                             summary={validationData?.data?.summary || {
                                 total: 0,
@@ -318,8 +334,8 @@ export default function AddStaffModalImport() {
                         </Text>
 
                         <Text c="dimmed" size="sm" mb={40} style={{ maxWidth: 300 }}>
-                            ระบบได้ทำการนำเข้าข้อมูลทั้งหมดเรียบร้อยแล้ว
-                            คุณสามารถตรวจสอบรายชื่อได้ที่หน้าจัดการข้อมูล
+                            ระบบได้ทำการนำเข้าข้อมูล{unitText}ทั้งหมดเรียบร้อยแล้ว
+                            สามารถตรวจสอบรายการได้ที่หน้าจัดการข้อมูล
                         </Text>
                     </div>
                 )}

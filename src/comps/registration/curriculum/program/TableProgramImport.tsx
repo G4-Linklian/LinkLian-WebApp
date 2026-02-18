@@ -1,6 +1,6 @@
 import { Table, Badge, ScrollArea, Text, Group, Paper } from "@mantine/core";
 
-interface StaffRow {
+interface ProgramRow {
   row: number;
   data: Record<string, any>;
   isValid: boolean;
@@ -19,11 +19,11 @@ interface Summary {
 }
 
 interface Props {
-  validatedData: StaffRow[];
+  validatedData: ProgramRow[];
   summary: Summary;
 }
 
-export default function TableStaffImport({
+export default function TableProgramImport({
   validatedData,
   summary,
 }: Props) {
@@ -101,12 +101,6 @@ export default function TableStaffImport({
                         ซ้ำ
                       </Badge>
                     )}
-
-                    {/* {item.warnings.length > 0 && (
-                      <Badge color="orange" size="sm">
-                        Warning
-                      </Badge>
-                    )} */}
                   </Group>
 
                   {!item.isValid && item.errors.length > 0 && (

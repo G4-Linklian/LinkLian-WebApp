@@ -38,7 +38,7 @@ export default function AddStaffModal({
       opened={opened}
       onClose={close}
       centered
-      size={tab === "manual" ? "sm" : "xl"}
+      size={tab === "manual" ? "sm" : "1200px"}
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มบุคลากร</h1>
@@ -47,8 +47,8 @@ export default function AddStaffModal({
         value={tab}
         onChange={(value) => setTab(value as "manual" | "csv")}
         data={[
-          { label: "เพิ่มแบบกรอกข้อมูล", value: "manual" },
-          { label: "นำเข้า CSV", value: "csv" },
+          { label: "กรอกข้อมูล", value: "manual" },
+          { label: "นำเข้าไฟล์", value: "csv" },
         ]}
         fullWidth
         radius="md"

@@ -1,61 +1,47 @@
 import { useState, useEffect } from "react";
-import { Stepper, Button, Paper, Text, List, ThemeIcon, Container, Group, Alert, rem, ActionIcon, ScrollArea } from "@mantine/core";
+import { useRouter } from 'next/router';
+import { Stepper, Button, Paper, Text, List, Group, Alert, ThemeIcon, Container } from "@mantine/core";
 import { Dropzone, MS_EXCEL_MIME_TYPE } from '@mantine/dropzone';
-import { IconDownload, IconFileSpreadsheet, IconCircleCheck, IconAlertCircle, IconSend, IconUpload, IconX } from "@tabler/icons-react";
-// import ExcelJS from "exceljs"; // ไม่ได้ใช้แล้วถ้าส่งไป API
-// import { saveAs } from "file-saver"; // ไม่ได้ใช้แล้ว
-import { decodeRegistrationToken } from '@/utils/authToken';
+import { IconDownload, IconFileSpreadsheet, IconCircleCheck, IconAlertCircle } from "@tabler/icons-react";
 import { downloadTemplate } from "@/comps/public/downloadTemplate";
-import { validateImportTeacherData, saveImportTeacherData } from "@/utils/api/import";
-import TableStaffImport from "./TableStaffImport";
-import { STAFF_IMPORT_COLUMNS, STAFF_TEMPLATE_FILENAME } from "@/config/csvHeader";
+import { validateImportEnrollmentData, saveImportEnrollmentData } from "@/utils/api/import";
+import TableEnrollmentImport from "./TableEnrollmentImport";
+import { ENROLLMENT_IMPORT_COLUMNS, ENROLLMENT_TEMPLATE_FILENAME } from "@/config/csvHeader";
+import { decodeRegistrationToken } from "@/utils/authToken";
 
-interface StaffRow {
-    row: number;
-    data: Record<string, any>;
-    isValid: boolean;
-    errors: string[];
-    warnings: string[];
-    isDuplicate: boolean;
+interface AddStudentSectionModalImportProps {
+    close: () => void;
+    onSubmit: () => void;
+    token?: any;
 }
 
-interface Summary {
-    total: number;
-    validCount: number;
-    errorCount: number;
-    duplicateCount: number;
-    warningCount: number;
-    willSaveCount: number;
-}
+export default function AddStudentSectionModalImport({
+    close,
+    onSubmit,
+    token,
+}: AddStudentSectionModalImportProps) {
+    const [activeStep, setActiveStep] = useState(0);
+    const totalSteps = 4;
 
-export default function AddStaffModalImport() {
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [validationData, setValidationData] = useState<any>(null);
+    const [isValidating, setIsValidating] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [validationToken, setValidationToken] = useState<string | null>(null);
+
     const [instId, setInstId] = useState<number | null>(null);
-    const [instType, setInstType] = useState<string | null>(null);
+    const router = useRouter();
+    const { section_id } = router.query;
 
     useEffect(() => {
         const token = decodeRegistrationToken();
         console.log("Decoded Token:", token);
 
         const instTd = token.institution.inst_id;
-        const instType = token.institution.inst_type;
-        if (token && instTd && instType) {
+        if (token && instTd) {
             setInstId(instTd);
-            setInstType(instType);
         }
     }, []);
-
-    const [activeStep, setActiveStep] = useState(0);
-    const totalSteps = 4;
-    // const [isUploading, setIsUploading] = useState(false); // ไม่ได้ใช้
-    // const [uploadResult, setUploadResult] = useState<{ fileName: string; count: number } | null>(null); // ไม่ได้ใช้
-
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [validationData, setValidationData] = useState<any>(null); // State สำหรับเก็บข้อมูลจาก API
-    const [isValidating, setIsValidating] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [validationToken, setValidationToken] = useState<string | null>(null); // State สำหรับเก็บ token หลัง validate สำเร็จ
-
-    // --- ลบ mockValidationData ออกแล้ว ---
 
     const nextStep = () => {
         if (activeStep < totalSteps - 1) {
@@ -63,53 +49,46 @@ export default function AddStaffModalImport() {
         }
     };
 
-    const prevStep = () => {
-        if (activeStep > 0) {
-            setActiveStep((prev) => prev - 1);
-        }
-    };
-
     const handleValidate = async () => {
-        if (!selectedFile || !instId || !instType) return;
+        if (!selectedFile || !token || !instId) return;
 
         setIsValidating(true);
-        setValidationData(null); // เคลียร์ค่าเก่าก่อน
-        setValidationToken(null); // เคลียร์ token เก่าก่อน
+        setValidationData(null);
+        setValidationToken(null);
 
         try {
-            // เรียก API จริง
-            const data = await validateImportTeacherData(
+            const data = await validateImportEnrollmentData(
                 selectedFile,
-                instId!,
-                instType!
+                instId,
+                section_id ? parseInt(section_id as string) : 0
             );
             console.log("Validation result from API:", data);
 
-            // บันทึกผลลัพธ์จาก API ลง State
             setValidationData(data);
             setActiveStep(2);
             setValidationToken(data?.validationToken || null);
 
         } catch (error) {
             console.error("Validate failed:", error);
-            // คุณอาจจะอยากเพิ่ม Notification แจ้งเตือน error ตรงนี้
         } finally {
             setIsValidating(false);
         }
     };
 
     const handleSave = async () => {
-        if (!validationToken || !instId || !instType || !selectedFile) return;
+        if (!validationToken || !token || !selectedFile || !instId) return;
 
         try {
             setIsSaving(true);
 
-            const data = await saveImportTeacherData(
+            const data = await saveImportEnrollmentData(
                 validationToken,
                 selectedFile,
-                instId!,
-                instType!);
+                instId,
+                section_id ? parseInt(section_id as string) : 0
+            );
             setActiveStep(3);
+            onSubmit();
 
             console.log("Save result from API:", data);
 
@@ -149,8 +128,8 @@ export default function AddStaffModalImport() {
                             <List size="sm" spacing="xs" c="gray.7">
                                 <List.Item>1. ไฟล์ที่นำเข้าต้องเป็นนามสกุล <b>.xlsx</b> หรือ <b>.xls</b></List.Item>
                                 <List.Item>2. ใน 1 ไฟล์ สามารถมีได้ <b>1 ชีท</b> เท่านั้น</List.Item>
-                                <List.Item>3. โปรดกรอกข้อมูลในคอลัมน์ให้ครบถ้วน ยกเว้นเบอร์โทรที่สามารถเว้นว่างได้</List.Item>
-                                <List.Item>4. <b>กลุ่มการเรียนรู้ของบุคลากรต้องตรงกับข้อมูลที่มีในระบบ</b></List.Item>
+                                <List.Item>3. โปรดกรอกข้อมูลในคอลัมน์ให้ครบถ้วน</List.Item>
+                                <List.Item>4. <b>รหัสผู้เรียนที่ถูกเพิ่มจะอยู่ในกลุ่มเรียนที่เลือกไว้ในตอนนี้เท่านั้น</b></List.Item>
                             </List>
                         </Paper>
 
@@ -159,7 +138,7 @@ export default function AddStaffModalImport() {
                                 radius="md"
                                 variant="default"
                                 leftSection={<IconDownload size={18} />}
-                                onClick={() => downloadTemplate(STAFF_IMPORT_COLUMNS, STAFF_TEMPLATE_FILENAME)}
+                                onClick={() => downloadTemplate(ENROLLMENT_IMPORT_COLUMNS, ENROLLMENT_TEMPLATE_FILENAME)}
                                 w="fit-content"
                             >
                                 ดาวน์โหลดตัวอย่างไฟล์
@@ -169,7 +148,7 @@ export default function AddStaffModalImport() {
                                 radius="md"
                                 onClick={nextStep}
                             >
-                                {activeStep === totalSteps - 1 ? "ยืนยัน" : "ถัดไป"}
+                                ถัดไป
                             </Button>
                         </div>
                     </div>
@@ -253,7 +232,7 @@ export default function AddStaffModalImport() {
                                 </Alert>
                             )}
 
-                        <TableStaffImport
+                        <TableEnrollmentImport
                             validatedData={validationData?.data?.validatedData || []}
                             summary={validationData?.data?.summary || {
                                 total: 0,
@@ -318,12 +297,11 @@ export default function AddStaffModalImport() {
                         </Text>
 
                         <Text c="dimmed" size="sm" mb={40} style={{ maxWidth: 300 }}>
-                            ระบบได้ทำการนำเข้าข้อมูลทั้งหมดเรียบร้อยแล้ว
-                            คุณสามารถตรวจสอบรายชื่อได้ที่หน้าจัดการข้อมูล
+                            ระบบได้ทำการนำเข้าข้อมูลการลงทะเบียนทั้งหมดเรียบร้อยแล้ว
+                            สามารถตรวจสอบรายการได้ที่หน้าจัดการข้อมูล
                         </Text>
                     </div>
                 )}
-
             </Paper>
         </Container>
     );

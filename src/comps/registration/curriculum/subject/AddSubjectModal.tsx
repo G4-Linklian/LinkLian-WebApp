@@ -1,12 +1,11 @@
+import { useState } from "react";
 import {
   Modal,
-  Button,
-  Group,
-  TextInput,
-  Select,
+  SegmentedControl,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
 import { subjectFields } from '@/utils/interface/subject.types';
+import AddSubjectModalForm from "./AddSubjectModalForm";
+import AddSubjectModalImport from "./AddSubjectModalImport";
 
 interface AddSubjectModalProps {
   opened: boolean;
@@ -21,20 +20,10 @@ export default function AddSubjectModal({
   onSubmit,
   learningAreaOptions
 }: AddSubjectModalProps) {
-  const form = useForm<subjectFields>({
-    initialValues: {
-      learning_area_id: undefined,
-      subject_code: "",
-      name_th: "",
-      name_en: "",
-      credit: undefined,
-      hour_per_week: undefined,
-    },
-  });
+  const [tab, setTab] = useState<"manual" | "csv">("manual");
 
   const handleSubmit = (values: subjectFields) => {
     onSubmit?.(values);
-    form.reset();
     close();
   };
 
@@ -43,79 +32,38 @@ export default function AddSubjectModal({
       opened={opened}
       onClose={close}
       centered
-      size="md"
+      size={tab === "manual" ? "md" : "1200px"}
       radius={16}
     >
       <h1 className="text-black font-bold text-2xl mb-4 text-center">
         เพิ่มวิชา
       </h1>
 
-      <form
-        onSubmit={form.onSubmit(handleSubmit)}
-        className="flex flex-col gap-2"
-      >
-        <Select
-          label="กลุ่มการเรียนรู้"
-          placeholder="เลือกกลุ่มการเรียนรู้"
-          searchable
-          clearable
-          data={learningAreaOptions}
-          {...form.getInputProps("learning_area_id")}
-          required
-          radius={8}
+      <SegmentedControl
+        value={tab}
+        onChange={(value) => setTab(value as "manual" | "csv")}
+        data={[
+          { label: "กรอกข้อมูล", value: "manual" },
+          { label: "นำเข้าไฟล์", value: "csv" },
+        ]}
+        fullWidth
+        radius="md"
+        mb="md"
+      />
+
+      {/* ================= MANUAL ================= */}
+      {tab === "manual" && (
+        <AddSubjectModalForm
+          onSubmit={handleSubmit}
+          close={close}
+          learningAreaOptions={learningAreaOptions}
         />
+      )}
 
-        <TextInput
-          label="รหัสวิชา"
-          placeholder="เช่น MATH101, ค10105"
-          {...form.getInputProps("subject_code")}
-          required
-          radius={8}
-        />
-
-        <TextInput
-          label="ชื่อวิชา (ภาษาไทย)"
-          placeholder="เช่น คณิตศาสตร์พื้นฐาน"
-          {...form.getInputProps("name_th")}
-          required
-          radius={8}
-        />
-
-        <TextInput
-          label="ชื่อวิชา (ภาษาอังกฤษ)"
-          placeholder="เช่น Basic Mathematics"
-          {...form.getInputProps("name_en")}
-          radius={8}
-        />
-
-        <TextInput
-          label="หน่วยกิต"
-          placeholder="เช่น 1.5"
-          type="number"
-          {...form.getInputProps("credit")}
-          required
-          radius={8}
-        />
-
-        <TextInput
-          label="ชั่วโมงต่อสัปดาห์"
-          placeholder="เช่น 2"
-          type="number"
-          {...form.getInputProps("hour_per_week")}
-          required
-          radius={8}
-        />
-
-        <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close} radius={8}>
-            ยกเลิก
-          </Button>
-
-          <Button type="submit" radius={8}>
-            เพิ่มวิชา
-          </Button>
-        </Group>
-      </form>
+      {/* ================= CSV UPLOAD ================= */}
+      {tab === "csv" && (
+        <AddSubjectModalImport />
+      )}
     </Modal>
   );
 }
