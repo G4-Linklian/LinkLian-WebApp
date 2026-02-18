@@ -23,7 +23,7 @@ import EditProgramModal from '@/comps/registration/curriculum/program/EditProgra
 import AddProgramModal from '@/comps/registration/curriculum/program/AddProgramModal';
 import { useNotification } from '@/comps/noti/notiComp';
 
-const BATCH_SIZE = 4;
+const BATCH_SIZE = 6;
 
 export default function programTable() {
     const [programData, setProgramData] = useState<programFields[]>([]);
