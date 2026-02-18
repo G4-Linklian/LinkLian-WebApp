@@ -1,13 +1,12 @@
 import {
   Modal,
-  Button,
-  Group,
-  TextInput,
+  SegmentedControl,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
 import { programFields } from '@/utils/interface/program.types';
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import AddProgramModalForm from "./AddProgramModalForm";
+import AddProgramModalImport from "./AddProgramModalImport";
 
 interface AddProgramModalProps {
   opened: boolean;
@@ -25,56 +24,16 @@ export default function AddProgramModal({
   const router = useRouter();
   const { root_id, twig_id } = router.query;
 
+  const [tab, setTab] = useState<"manual" | "csv">("manual");
   const [unitText, setUnitText] = useState("");
   const instType = token?.institution?.inst_type;
 
-  const form = useForm<programFields>({
-    initialValues: {
-      inst_id: undefined,
-      program_name: "",
-      program_type: "",
-      parent_id: undefined,
-      remark: "",
-      flag_valid: true,
-      tree_type: "",
-    },
-  });
-
   const handleSubmit = (values: programFields) => {
-
-    const instType = token?.institution?.inst_type;
-
-    if (!root_id && instType === "school") {
-      values.program_type = "study_plan";
-      values.tree_type = "root";
-    } else if (!root_id && instType === "uni") {
-      values.program_type = "faculty";
-      values.tree_type = "root";
-    } else if (root_id && instType === "school") {
-      values.program_type = "class";
-      values.tree_type = "leaf";
-      values.parent_id = Number(root_id);
-    } else if (twig_id && instType === "uni") {
-      values.program_type = "major";
-      values.tree_type = "leaf";
-      values.parent_id = Number(twig_id);
-    } else if (root_id && instType === "uni") {
-      values.program_type = "department";
-      values.tree_type = "twig";
-      values.parent_id = Number(root_id);
-    }
-    else {
-      values.parent_id = Number(root_id);
-    }
-
     onSubmit?.(values);
-    form.reset();
     close();
   };
 
   useEffect(() => {
-
-
     if (!instType) return;
 
     if (!root_id && instType === "school") {
@@ -95,42 +54,38 @@ export default function AddProgramModal({
       opened={opened}
       onClose={close}
       centered
-      size="md"
+      size={tab === "manual" ? "md" : "1200px"}
       radius={16}
     >
       <h1 className="text-black font-bold text-2xl mb-4 text-center">
         เพิ่ม{`${unitText}`}
       </h1>
 
-      <form
-        onSubmit={form.onSubmit(handleSubmit)}
-        className="flex flex-col gap-2"
-      >
-        <TextInput
-          label={`ชื่อ${unitText}`}
-          //placeholder={`เช่น ${unitText === "ห้องเรียน" ? "ห้อง 1" : "วิทยาการคอมพิวเตอร์"}`}
-          {...form.getInputProps("program_name")}
-          radius={8}
-          required
+      <SegmentedControl
+        value={tab}
+        onChange={(value) => setTab(value as "manual" | "csv")}
+        data={[
+          { label: "กรอกข้อมูล", value: "manual" },
+          { label: "นำเข้าไฟล์", value: "csv" },
+        ]}
+        fullWidth
+        radius="md"
+        mb="md"
+      />
+
+      {/* ================= MANUAL ================= */}
+      {tab === "manual" && (
+        <AddProgramModalForm
+          onSubmit={handleSubmit}
+          close={close}
+          token={token}
         />
+      )}
 
-        <TextInput
-          label={`หมายเหตุ${unitText}`}
-          //placeholder={`เช่น ${unitText === "ห้องเรียน" ? "ห้องเรียนสำหรับนักเรียน" : "สาขาวิทยาการคอมพิวเตอร์"}`}
-          {...form.getInputProps("remark")}
-          radius={8}
-        />
-
-        <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close} radius={8}>
-            ยกเลิก
-          </Button>
-
-          <Button type="submit" radius={8}>
-            เพิ่ม{`${unitText}`}
-          </Button>
-        </Group>
-      </form>
+      {/* ================= CSV UPLOAD ================= */}
+      {tab === "csv" && (
+        <AddProgramModalImport />
+      )}
     </Modal>
   );
 }

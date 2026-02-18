@@ -44,9 +44,9 @@ const ProgramLeafDetail = () => {
                                 <LeafTable onDataUpdate={setProgramData} onSetRootName={setRootProgramName} />
                             </TableSection>
 
-                            <TableSection>
+                            {/* <TableSection>
                                 <EduLevelTable programData={programData} />
-                            </TableSection>
+                            </TableSection> */}
 
 
                         </div>
