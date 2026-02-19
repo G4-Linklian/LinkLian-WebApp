@@ -159,13 +159,10 @@ export default function StaffTable() {
                 ...values,
                 inst_id: Number(instId),
                 user_sys_id: Number(values.user_sys_id),
+                learning_area_id: Number(values.learning_area_id),
             };
 
             const res = await updateUserSys(payload);
-            await updateLearningAreaUserSys({
-                learning_area_id: values.learning_area_id,
-                user_sys_id: values.user_sys_id,
-            });
 
             setStaffData([]);
             setHasMore(true);
