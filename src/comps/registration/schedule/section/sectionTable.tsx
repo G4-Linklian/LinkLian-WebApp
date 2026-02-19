@@ -180,7 +180,7 @@ export default function sectionTable({ semesterData }: any) {
             }
 
             const payload = {
-                section_id: values.section_id,
+                section_id: Number(values.section_id),
                 semester_id: Number(semesterId),
                 subject_id: Number(values.subject_id),
                 section_name: values.section_name,
