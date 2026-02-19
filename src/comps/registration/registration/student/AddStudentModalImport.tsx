@@ -117,7 +117,7 @@ export default function AddStudentModalImport() {
     };
 
     return (
-        <Container size="md" py="xl">
+        <Container size={1200} py="xl">
             <Stepper
                 active={activeStep}
                 onStepClick={(step) => {

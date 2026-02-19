@@ -82,9 +82,9 @@ export default function TableEnrollmentImport({
                   </Table.Td>
                 ))}
 
-                <Table.Td>
+                 <Table.Td>
                   <Group gap={5}>
-                    {item.isValid && (
+                    {item.isValid && !item.isDuplicate && (
                       <Badge color="green" size="sm">
                         ผ่าน
                       </Badge>
@@ -106,6 +106,12 @@ export default function TableEnrollmentImport({
                   {!item.isValid && item.errors.length > 0 && (
                     <Text size="xs" c="red" mt={5}>
                       {item.errors.join(", ")}
+                    </Text>
+                  )}
+
+                  {item.warnings.length > 0 && (
+                    <Text size="xs" c="yellow" mt={5}>
+                      {item.warnings.join(", ")}
                     </Text>
                   )}
                 </Table.Td>
