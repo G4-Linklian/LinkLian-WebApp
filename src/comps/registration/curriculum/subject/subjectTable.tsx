@@ -142,6 +142,9 @@ export default function subjectTable() {
             const payload = {
                 ...values,
                 inst_id: Number(values.inst_id),
+                learning_area_id: Number(values.learning_area_id),
+                credit: Number(values.credit),
+                subject_id: Number(values.subject_id),
             };
 
             const res = await updateSubject(payload);
