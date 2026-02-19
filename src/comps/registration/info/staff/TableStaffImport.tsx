@@ -82,9 +82,9 @@ export default function TableStaffImport({
                   </Table.Td>
                 ))}
 
-                <Table.Td>
+                 <Table.Td>
                   <Group gap={5}>
-                    {item.isValid && (
+                    {item.isValid && !item.isDuplicate && (
                       <Badge color="green" size="sm">
                         ผ่าน
                       </Badge>
@@ -101,17 +101,17 @@ export default function TableStaffImport({
                         ซ้ำ
                       </Badge>
                     )}
-
-                    {/* {item.warnings.length > 0 && (
-                      <Badge color="orange" size="sm">
-                        Warning
-                      </Badge>
-                    )} */}
                   </Group>
 
                   {!item.isValid && item.errors.length > 0 && (
                     <Text size="xs" c="red" mt={5}>
                       {item.errors.join(", ")}
+                    </Text>
+                  )}
+
+                  {item.warnings.length > 0 && (
+                    <Text size="xs" c="yellow" mt={5}>
+                      {item.warnings.join(", ")}
                     </Text>
                   )}
                 </Table.Td>

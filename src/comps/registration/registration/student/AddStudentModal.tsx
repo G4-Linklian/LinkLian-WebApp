@@ -34,7 +34,7 @@ export default function AddStudentModal({
       opened={opened}
       onClose={close}
       centered
-      size={tab === "manual" ? "md" : "xl"}
+      size={tab === "manual" ? "md" : "1200px"}
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มนักเรียน</h1>
