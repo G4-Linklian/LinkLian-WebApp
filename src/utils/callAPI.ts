@@ -5,18 +5,18 @@ import { getRegistrationToken } from "./authToken";
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 interface ApiRequestOptions {
-    method: RequestMethod;
-    body?: any[];
-    from: string;
+  method: RequestMethod;
+  body?: any[];
+  from: string;
 }
 
 // Helper function to build query string from object
 function buildQueryString(params: Record<string, any>): string {
-    const query = Object.entries(params)
-        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-        .join('&');
-    return query ? `?${query}` : '';
+  const query = Object.entries(params)
+    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+  return query ? `?${query}` : '';
 }
 
 export async function fetchDataApi(
@@ -44,12 +44,10 @@ export async function fetchDataApi(
 
     const response = await fetch(url, {
       method,
-      headers: isFormData
-        ? undefined
-        : {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+      headers: {
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body:
         method !== 'GET'
           ? isFormData
