@@ -101,8 +101,9 @@ export default function AddStudentModalForm({
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+    <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="add-student-form">
       <TextInput
+        id="input-student-code"
         label="รหัสนักเรียน"
         placeholder="กรอกรหัสนักเรียน"
         {...form.getInputProps("code")}
@@ -110,6 +111,7 @@ export default function AddStudentModalForm({
         required
       />
       <TextInput
+        id="input-first-name"
         label="ชื่อ"
         placeholder="กรอกชื่อ"
         {...form.getInputProps("first_name")}
@@ -117,6 +119,7 @@ export default function AddStudentModalForm({
         required
       />
       <TextInput
+        id="input-last-name"
         label="นามสกุล"
         placeholder="กรอกนามสกุล"
         {...form.getInputProps("last_name")}
@@ -124,6 +127,7 @@ export default function AddStudentModalForm({
         required
       />
       <TextInput
+        id="input-email"
         label="อีเมล"
         placeholder="กรอกอีเมล"
         {...form.getInputProps("email")}
@@ -131,6 +135,7 @@ export default function AddStudentModalForm({
         required
       />
       <TextInput
+        id="input-phone"
         label="เบอร์โทร"
         placeholder="กรอกเบอร์โทร"
         {...form.getInputProps("phone")}
@@ -138,6 +143,7 @@ export default function AddStudentModalForm({
       />
       <div className="flex gap-2 justify-between mt-3">
         <Select
+          id="select-edu-level"
           className="w-[40%]"
           label="ชั้น"
           placeholder="เช่น ม.1"
@@ -148,6 +154,7 @@ export default function AddStudentModalForm({
         />
 
         <Select
+          id="select-program"
           className="w-[60%]"
           label="ห้องเรียน"
           placeholder="ค้นหาห้องเรียน"
@@ -166,6 +173,7 @@ export default function AddStudentModalForm({
       </div>
 
       <Select
+        id="select-student-status"
         className="w-[100%] mt-3"
         label="สถานะผู้ใช้"
         placeholder="เลือกสถานะ"
@@ -176,11 +184,11 @@ export default function AddStudentModalForm({
       />
 
       <Group justify="flex-end" className="mt-8">
-        <Button color="blue" variant="outline" onClick={close} radius={8}>
+        <Button color="blue" variant="outline" onClick={close} radius={8} id="cancel-button">
           ยกเลิก
         </Button>
 
-        <Button type="submit" radius={8}>
+        <Button type="submit" radius={8} id="submit-button">
           บันทึก
         </Button>
       </Group>

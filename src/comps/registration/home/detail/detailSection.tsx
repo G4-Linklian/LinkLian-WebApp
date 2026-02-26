@@ -49,7 +49,7 @@ const DetailSection = () => {
             {/* Header row: title + date/semester */}
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-3xl font-bold text-gray-800">ยินดีต้อนรับสู่ระบบทะเบียน</h2>
-                <p className="text-gray-500 text-md">
+                <p id="current-date-semester" className="text-gray-500 text-md">
                     {today} | ปีการศึกษา {institution.open_semester || '-'}
                 </p>
             </div>
@@ -59,6 +59,7 @@ const DetailSection = () => {
                 {/* Institution info card - 50% */}
                 <div className="col-span-2 flex items-center gap-6 px-6 py-6 bg-white rounded-xl border-2 border-[#FFE3BB] min-h-[120px]">
                     <Avatar
+                        id="institution-logo"
                         src={institution.logo_url}
                         alt={institution.inst_name_th || 'logo'}
                         size={70}
@@ -70,10 +71,10 @@ const DetailSection = () => {
                         {institution.inst_name_th?.[0]}
                     </Avatar>
                     <div className="min-w-0">
-                        <p className="text-2xl font-bold text-[#FF9C57] truncate">
+                        <p id="institution-name" className="text-2xl font-bold text-[#FF9C57] truncate">
                             {institution.inst_name_th || '-'}
                         </p>
-                        <p className="text-base text-gray-500 leading-relaxed mt-1">
+                        <p id="institution-address" className="text-base text-gray-500 leading-relaxed mt-1">
                             {institution.address || '-'}
                         </p>
                     </div>
@@ -85,8 +86,8 @@ const DetailSection = () => {
                         <IconSchool className="w-8 h-8 text-[#FF9C57]" />
                     </div>
                     <div>
-                        <p className="text-base text-gray-500">จำนวนนักเรียน</p>
-                        <p className="text-4xl font-bold text-gray-800">
+                        <p id="student-count-label" className="text-base text-gray-500">จำนวนนักเรียน</p>
+                        <p id="student-count-value" className="text-4xl font-bold text-gray-800">
                             {Number(institution.student_count || 0).toLocaleString()}
                         </p>
                     </div>
@@ -98,8 +99,8 @@ const DetailSection = () => {
                         <IconUsers className="w-8 h-8 text-[#FF9C57]" />
                     </div>
                     <div>
-                        <p className="text-base text-gray-500">จำนวนบุคคลากร</p>
-                        <p className="text-4xl font-bold text-gray-800">
+                        <p id="staff-count-label" className="text-base text-gray-500">จำนวนบุคคลากร</p>
+                        <p id="staff-count-value" className="text-4xl font-bold text-gray-800">
                             {Number(institution.teacher_count || 0).toLocaleString()}
                         </p>
                     </div>

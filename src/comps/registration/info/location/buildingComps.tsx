@@ -149,6 +149,7 @@ export default function BuildingComps() {
 
     return (
         <div
+            id="building-info-section"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -158,6 +159,7 @@ export default function BuildingComps() {
                 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-building-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -167,6 +169,7 @@ export default function BuildingComps() {
                     />
 
                     <Button
+                        id="add-building-button"
                         size="xs"
                         radius="md"
                         onClick={() => {
@@ -206,10 +209,10 @@ export default function BuildingComps() {
                             </Group>
 
                             <div className="min-h-[80px]">
-                                <Text fw={700} size="lg" mt="md" lineClamp={1}>
+                                <Text fw={700} size="lg" mt="md" lineClamp={1} id="building-name">
                                     {building.building_name}
                                 </Text>
-                                <Text size="sm" c="dimmed" mt={5} lineClamp={2}>
+                                <Text size="sm" c="dimmed" mt={5} lineClamp={2} id="building-remark">
                                     {building.remark || "-"}
                                 </Text>
                             </div>
@@ -217,6 +220,7 @@ export default function BuildingComps() {
                             <Group mt="md" grow>
 
                                 <Button
+                                    id="edit-building-button"
                                     variant="default"
                                     radius="md"
                                     onClick={(e) => {
@@ -228,6 +232,7 @@ export default function BuildingComps() {
                                 </Button>
 
                                 <Button
+                                    id="view-building-button"
                                     radius="md"
                                     variant="light"
                                     rightSection={<IconArrowRight size={16} />}

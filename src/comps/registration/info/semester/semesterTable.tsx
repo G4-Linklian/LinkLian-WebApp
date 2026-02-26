@@ -253,6 +253,7 @@ export default function SemesterTable() {
 
     return (
         <div
+            id="semester-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -262,6 +263,7 @@ export default function SemesterTable() {
 
                 <div className="flex items-center gap-2">
                     <Button
+                        id="filter-button"
                         variant="default"
                         size="xs"
                         radius="md"
@@ -274,6 +276,7 @@ export default function SemesterTable() {
                     </Button>
 
                     <Button
+                        id="add-semester-button"
                         size="xs"
                         radius="md"
                         onClick={() => {
@@ -293,7 +296,7 @@ export default function SemesterTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" id="semester-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={40} ta="center">ปีการศึกษา</Table.Th>

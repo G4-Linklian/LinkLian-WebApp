@@ -72,6 +72,7 @@ export default function FilterStaffModal({
 
   return (
     <Modal
+      id="filter-staff-modal"
       opened={opened}
       onClose={close}
       centered
@@ -79,8 +80,9 @@ export default function FilterStaffModal({
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">ตัวกรองบุคลากร</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="filter-staff-form">
         <Select
+          id="select-user-status"
           label="สถานะ"
           placeholder="เลือกสถานะ"
           data={teacherStatusOptions}
@@ -89,6 +91,7 @@ export default function FilterStaffModal({
           clearable
         />
         <Select
+          id="select-learning-area"
           className="mt-2"
           label="กลุ่มการเรียนรู้"
           placeholder="เลือกกลุ่มการเรียนรู้"
@@ -100,6 +103,7 @@ export default function FilterStaffModal({
 
         <Group justify="right" mt="lg">
           <Button
+            id="clear-button"
             variant="default"
             onClick={handleClear}
             radius={8}
@@ -110,6 +114,7 @@ export default function FilterStaffModal({
             type="submit"
             radius={8}
             leftSection={<IconFilter size={16} />}
+            id="search-button"
           >
             ค้นหา
           </Button>

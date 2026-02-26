@@ -286,6 +286,7 @@ export default function StudentTable() {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-student-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -295,6 +296,7 @@ export default function StudentTable() {
                     />
 
                     <Button
+                        id="filter-student-button"
                         variant="default"
                         size="xs"
                         radius="md"
@@ -312,6 +314,7 @@ export default function StudentTable() {
                         onClick={() => {
                             openAddStudentModal();
                         }}
+                        id="add-student-button"
                     >
                         เพิ่มนักเรียน
                     </Button>
@@ -326,7 +329,7 @@ export default function StudentTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" id="student-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             {/* <Table.Th w={5} ta="center">ลำดับ</Table.Th> */}

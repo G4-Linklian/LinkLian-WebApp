@@ -43,8 +43,9 @@ export default function AddStaffModalForm({
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+    <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="add-staff-form">
       <TextInput
+        id="input-staff-code"
         label="รหัสบุคลากร"
         placeholder="กรอกรหัสบุคลากร"
         {...form.getInputProps("code")}
@@ -53,6 +54,7 @@ export default function AddStaffModalForm({
       />
 
       <TextInput
+        id="input-first-name"
         label="ชื่อ"
         placeholder="กรอกชื่อ"
         {...form.getInputProps("first_name")}
@@ -60,6 +62,7 @@ export default function AddStaffModalForm({
         required
       />
       <TextInput
+        id="input-middle-name"
         label="นามสกุล"
         placeholder="กรอกนามสกุล"
         {...form.getInputProps("last_name")}
@@ -68,6 +71,7 @@ export default function AddStaffModalForm({
       />
 
       <TextInput
+        id="input-email"
         label="อีเมล"
         placeholder="กรอกอีเมล"
         {...form.getInputProps("email")}
@@ -77,6 +81,7 @@ export default function AddStaffModalForm({
 
       <div className="flex gap-2 justify-between mt-2">
         <TextInput
+          id="input-phone"
           className="w-[50%]"
           label="เบอร์โทร"
           placeholder="กรอกเบอร์โทร"
@@ -85,6 +90,7 @@ export default function AddStaffModalForm({
         />
 
         <Select
+          id="select-learning-area"
           className="w-[60%]"
           label="กลุ่มการเรียนรู้"
           placeholder="เช่น คณิตศาสตร์"
@@ -96,6 +102,7 @@ export default function AddStaffModalForm({
       </div>
 
       <Select
+        id="select-user-status"
         label="สถานะผู้ใช้"
         placeholder="เลือกสถานะ"
         data={teacherStatusOptions}
@@ -105,11 +112,11 @@ export default function AddStaffModalForm({
       />
 
       <Group justify="flex-end" className="mt-8">
-        <Button color="blue" variant="outline" onClick={close} radius={8}>
+        <Button color="blue" variant="outline" onClick={close} radius={8} id="cancel-button">
           ยกเลิก
         </Button>
 
-        <Button type="submit" radius={8}>
+        <Button type="submit" radius={8} id="submit-button">
           เพิ่มบุคลากร
         </Button>
       </Group>

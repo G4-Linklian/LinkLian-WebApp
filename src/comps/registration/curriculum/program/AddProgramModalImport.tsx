@@ -137,8 +137,9 @@ export default function AddProgramModalImport() {
     };
 
     return (
-        <Container size={1200} py="xl">
+        <Container size={1200} py="xl" id="add-program-import-container">
             <Stepper
+                id="add-program-import-stepper"
                 active={activeStep}
                 onStepClick={(step) => {
                     if (step < activeStep) {
@@ -154,7 +155,7 @@ export default function AddProgramModalImport() {
                 <Stepper.Step label="เพิ่มข้อมูลสำเร็จ" />
             </Stepper>
 
-            <Paper withBorder p="xl" radius="md" mt="xl" >
+            <Paper withBorder p="xl" radius="md" mt="xl" id="program-import-paper">
                 {activeStep === 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <Text size="xl" fw={700} mb={2}>ดาวน์โหลดตัวอย่างไฟล์และข้อแนะนำในการนำเข้าข้อมูล</Text>
@@ -172,6 +173,7 @@ export default function AddProgramModalImport() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
                             <Button
+                                id="download-template-button"
                                 radius="md"
                                 variant="default"
                                 leftSection={<IconDownload size={18} />}
@@ -182,6 +184,7 @@ export default function AddProgramModalImport() {
                             </Button>
 
                             <Button
+                                id="next-step-button"
                                 radius="md"
                                 onClick={nextStep}
                             >
@@ -195,6 +198,7 @@ export default function AddProgramModalImport() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                         <div>
+                            id="upload-file-title"
                             <Text size="xl" fw={700}>อัปโหลดไฟล์</Text>
                             <Text c="dimmed" size="sm">
                                 เลือกไฟล์ Excel เพื่อตรวจสอบข้อมูลก่อนนำเข้า
@@ -211,6 +215,7 @@ export default function AddProgramModalImport() {
                                 accept={MS_EXCEL_MIME_TYPE}
                                 radius="md"
                                 className="cursor-pointer"
+                                id="program-import-dropzone"
                             >
                                 <div className="flex flex-col items-center py-6">
                                     <IconFileSpreadsheet size={50} stroke={1} color="var(--mantine-color-gray-5)" />
@@ -228,6 +233,7 @@ export default function AddProgramModalImport() {
                                 radius="md"
                                 variant="outline"
                                 onClick={() => setActiveStep(0)}
+                                id="back-step-button"
                             >
                                 ย้อนกลับ
                             </Button>
@@ -236,6 +242,7 @@ export default function AddProgramModalImport() {
                                 loading={isValidating}
                                 onClick={handleValidate}
                                 disabled={!selectedFile}
+                                id="validate-button"
                             >
                                 ตรวจสอบข้อมูล
                             </Button>
@@ -287,6 +294,7 @@ export default function AddProgramModalImport() {
                                     radius="md"
                                     variant="outline"
                                     onClick={() => setActiveStep(1)}
+                                    id="back-step-button"
                                 >
                                     ย้อนกลับ (เพื่ออัปโหลดใหม่)
                                 </Button>
@@ -300,6 +308,7 @@ export default function AddProgramModalImport() {
                                         (validationData?.data?.summary?.errorCount || 0) > 0 ||
                                         (validationData?.data?.summary?.willSaveCount || 0) === 0
                                     }
+                                    id="confirm-import-button"
                                 >
                                     ยืนยันการนำเข้าข้อมูล
                                 </Button>

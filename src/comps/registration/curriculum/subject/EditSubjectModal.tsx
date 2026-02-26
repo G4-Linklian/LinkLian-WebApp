@@ -139,6 +139,7 @@ export default function SubjectEditModal({
   return (
     <>
       <Modal
+        id="edit-subject-modal"
         opened={opened}
         onClose={close}
         centered
@@ -146,8 +147,9 @@ export default function SubjectEditModal({
         radius={16}
       >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการวิชา</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-subject-form">
         <Select
+          id="select-subject-learning-area"
           label="กลุ่มการเรียนรู้"
           placeholder="เลือกกลุ่มการเรียนรู้"
           data={learningAreaOptions}
@@ -157,6 +159,7 @@ export default function SubjectEditModal({
         />
 
         <TextInput
+          id="input-subject-code"
           label="รหัสวิชา"
           placeholder="เช่น MATH101"
           {...form.getInputProps("subject_code")}
@@ -165,6 +168,7 @@ export default function SubjectEditModal({
         />
 
         <TextInput
+          id="input-subject-name-th"
           label="ชื่อวิชา (ภาษาไทย)"
           placeholder="เช่น คณิตศาสตร์พื้นฐาน"
           {...form.getInputProps("name_th")}
@@ -173,6 +177,7 @@ export default function SubjectEditModal({
         />
 
         <TextInput
+          id="input-subject-name-en"
           label="ชื่อวิชา (ภาษาอังกฤษ)"
           placeholder="เช่น Basic Mathematics"
           {...form.getInputProps("name_en")}
@@ -180,6 +185,7 @@ export default function SubjectEditModal({
         />
 
         <TextInput
+          id="input-subject-credit"
           label="หน่วยกิต"
           placeholder="เช่น 3"
           type="number"
@@ -189,6 +195,7 @@ export default function SubjectEditModal({
         />
 
         <TextInput
+          id="input-subject-hour-per-week"
           label="ชั่วโมงต่อสัปดาห์"
           placeholder="เช่น 3"
           type="number"
@@ -199,6 +206,7 @@ export default function SubjectEditModal({
 
         <Group justify="flex-end" className="mt-4">
           <Button
+            id="delete-button"
             color="red"
             variant="outline"
             radius={8}
@@ -208,7 +216,7 @@ export default function SubjectEditModal({
             ลบ
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button id="save-button" type="submit" radius={8}>
             บันทึก
           </Button>
         </Group>

@@ -35,6 +35,7 @@ export default function AddStaffModal({
 
   return (
     <Modal
+      id="add-staff-modal"
       opened={opened}
       onClose={close}
       centered
@@ -44,6 +45,7 @@ export default function AddStaffModal({
       <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มบุคลากร</h1>
 
       <SegmentedControl
+        id="add-staff-tab"
         value={tab}
         onChange={(value) => setTab(value as "manual" | "csv")}
         data={[

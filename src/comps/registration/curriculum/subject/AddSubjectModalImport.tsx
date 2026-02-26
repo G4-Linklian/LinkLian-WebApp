@@ -107,8 +107,9 @@ export default function AddSubjectModalImport() {
     };
 
     return (
-        <Container size={1200} py="xl">
+        <Container size={1200} py="xl" id="add-subject-import-modal">
             <Stepper
+                id="import-subject-stepper"
                 active={activeStep}
                 onStepClick={(step) => {
                     if (step < activeStep) {
@@ -124,7 +125,7 @@ export default function AddSubjectModalImport() {
                 <Stepper.Step label="เพิ่มข้อมูลสำเร็จ" />
             </Stepper>
 
-            <Paper withBorder p="xl" radius="md" mt="xl" >
+            <Paper withBorder p="xl" radius="md" mt="xl" id="import-subject-content">
                 {activeStep === 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <Text size="xl" fw={700} mb={2}>ดาวน์โหลดตัวอย่างไฟล์และข้อแนะนำในการนำเข้าข้อมูล</Text>
@@ -142,6 +143,7 @@ export default function AddSubjectModalImport() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
                             <Button
+                                id="download-template-button"
                                 radius="md"
                                 variant="default"
                                 leftSection={<IconDownload size={18} />}
@@ -152,6 +154,7 @@ export default function AddSubjectModalImport() {
                             </Button>
 
                             <Button
+                                id="next-step-button"
                                 radius="md"
                                 onClick={nextStep}
                             >
@@ -173,6 +176,7 @@ export default function AddSubjectModalImport() {
 
                         <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-1)">
                             <Dropzone
+                                id="subject-import-dropzone"
                                 onDrop={(files) => {
                                     setSelectedFile(files[0]);
                                     setValidationData(null);
@@ -195,6 +199,7 @@ export default function AddSubjectModalImport() {
 
                         <Group justify="flex-end">
                             <Button
+                                id="back-step-button"
                                 radius="md"
                                 variant="outline"
                                 onClick={() => setActiveStep(0)}
@@ -202,6 +207,7 @@ export default function AddSubjectModalImport() {
                                 ย้อนกลับ
                             </Button>
                             <Button
+                                id="validate-button"
                                 radius="md"
                                 loading={isValidating}
                                 onClick={handleValidate}
@@ -254,6 +260,7 @@ export default function AddSubjectModalImport() {
                         {selectedFile && (
                             <Group justify="flex-end">
                                 <Button
+                                    id="back-to-upload-button"
                                     radius="md"
                                     variant="outline"
                                     onClick={() => setActiveStep(1)}
@@ -262,6 +269,7 @@ export default function AddSubjectModalImport() {
                                 </Button>
 
                                 <Button
+                                    id="confirm-import-button"
                                     color="blue"
                                     loading={isSaving}
                                     radius="md"

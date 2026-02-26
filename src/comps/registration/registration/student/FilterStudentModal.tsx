@@ -135,6 +135,7 @@ export default function FilterStudentModal({
 
   return (
     <Modal
+      id="filter-student-modal"
       opened={opened}
       onClose={close}
       centered
@@ -142,8 +143,9 @@ export default function FilterStudentModal({
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">ตัวกรองนักเรียน</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="filter-student-form">
         <Select
+          id="select-edu-level"
           className="mt-2"
           label="ระดับชั้น"
           placeholder="เลือกระดับชั้น"
@@ -154,6 +156,7 @@ export default function FilterStudentModal({
         />
 
         <Select
+          id="select-classroom" 
           className="mt-2"
           label="ห้องเรียน"
           placeholder="พิมพ์ชื่อห้องเรียน"
@@ -170,6 +173,7 @@ export default function FilterStudentModal({
         />
 
         <Select
+          id="select-student-status"
           className="mt-2"
           label="สถานะ"
           placeholder="เลือกสถานะ"
@@ -184,10 +188,12 @@ export default function FilterStudentModal({
             variant="default"
             onClick={handleClear}
             radius={8}
+            id="clear-filter-button"
           >
             ล้างค่า
           </Button>
           <Button
+            id="apply-filter-button"
             type="submit"
             radius={8}
             leftSection={<IconFilter size={16} />}

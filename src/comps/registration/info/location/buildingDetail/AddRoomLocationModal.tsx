@@ -122,6 +122,7 @@ export default function AddRoomLocationModal({
 
   return (
     <Modal
+      id="add-room-location-modal"
       opened={opened}
       onClose={close}
       centered
@@ -154,6 +155,7 @@ export default function AddRoomLocationModal({
             <>
               <Group grow>
                 <TextInput
+                  id="input-single-floor"
                   label="ชั้น"
                   placeholder="เช่น 6"
                   {...form.getInputProps("single_floor")}
@@ -161,6 +163,7 @@ export default function AddRoomLocationModal({
                   radius={8}
                 />
                 <TextInput
+                  id="input-single-room"
                   label="หมายเลขห้อง"
                   placeholder="เช่น 07"
                   {...form.getInputProps("single_room")}
@@ -175,6 +178,7 @@ export default function AddRoomLocationModal({
           {mode === "floor" && (
             <>
               <TextInput
+                id="input-floor"
                 label="ชั้นที่ต้องการสร้าง"
                 placeholder="เช่น 6"
                 description="ระบุชั้นที่ต้องการเพิ่มห้อง"
@@ -184,12 +188,14 @@ export default function AddRoomLocationModal({
               />
               <Group grow>
                 <NumberInput
+                  id="input-room-start"
                   label="เริ่มห้องเลขที่"
                   min={1}
                   {...form.getInputProps("room_start")}
                   radius={8}
                 />
                 <NumberInput
+                  id="input-room-end"
                   label="ถึงห้องเลขที่"
                   min={1}
                   {...form.getInputProps("room_end")}
@@ -208,12 +214,14 @@ export default function AddRoomLocationModal({
               <Text fw={500} size="sm">ช่วงของชั้น (Floor Range)</Text>
               <Group grow>
                 <NumberInput
+                  id="input-floor-start"
                   label="เริ่มชั้นที่"
                   min={1}
                   {...form.getInputProps("floor_start")}
                   radius={8}
                 />
                 <NumberInput
+                  id="input-floor-end"
                   label="ถึงชั้นที่"
                   min={1}
                   {...form.getInputProps("floor_end")}
@@ -224,12 +232,14 @@ export default function AddRoomLocationModal({
               <Text fw={500} size="sm" mt="xs">ช่วงของห้องในแต่ละชั้น (Room Range per Floor)</Text>
               <Group grow>
                 <NumberInput
+                  id="input-building-room-start"
                   label="เริ่มห้องเลขที่"
                   min={1}
                   {...form.getInputProps("b_room_start")}
                   radius={8}
                 />
                 <NumberInput
+                  id="input-building-room-end"
                   label="ถึงห้องเลขที่"
                   min={1}
                   {...form.getInputProps("b_room_end")}
@@ -244,6 +254,7 @@ export default function AddRoomLocationModal({
 
 
           <TextInput
+            id="input-room-remark"
             label="หมายเหตุ (ใช้ร่วมกัน)"
             placeholder="เช่น ห้องเล็คเชอร์, ห้องแล็บ"
             {...form.getInputProps("room_remark")}
@@ -251,10 +262,10 @@ export default function AddRoomLocationModal({
           />
 
           <Group justify="flex-end" mt="2xl">
-            <Button variant="default" onClick={close} radius={8}>
+            <Button variant="default" onClick={close} radius={8} id="cancel-button">
               ยกเลิก
             </Button>
-            <Button type="submit" radius={8}>
+            <Button type="submit" radius={8} id="submit-button">
               สร้างข้อมูล ({mode === 'single' ? 1 : 'Multiple'})
             </Button>
           </Group>

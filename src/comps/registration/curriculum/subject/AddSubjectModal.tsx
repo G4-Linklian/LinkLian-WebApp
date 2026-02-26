@@ -29,6 +29,7 @@ export default function AddSubjectModal({
 
   return (
     <Modal
+      id="add-subject-modal"
       opened={opened}
       onClose={close}
       centered
@@ -40,6 +41,7 @@ export default function AddSubjectModal({
       </h1>
 
       <SegmentedControl
+        id="add-subject-tab"
         value={tab}
         onChange={(value) => setTab(value as "manual" | "csv")}
         data={[

@@ -207,6 +207,7 @@ export default function SectionDetailEditModal({
   return (
     <>
       <Modal
+        id="edit-section-detail-modal"
         opened={opened}
         onClose={close}
         centered
@@ -214,9 +215,10 @@ export default function SectionDetailEditModal({
         radius={16}
       >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไขเวลาเรียน</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col" id="edit-section-detail-form">
 
         <Select
+          id="select-day-of-week"
           label="วันเรียน"
           placeholder="เลือกวัน"
           data={dayOptions}
@@ -227,6 +229,7 @@ export default function SectionDetailEditModal({
 
         <div className="flex space-x-4">
           <TimeInput
+            id="start-time-input"
             label="เวลาเริ่มเรียน"
             lang="th"
             {...form.getInputProps("start_time")}
@@ -238,6 +241,7 @@ export default function SectionDetailEditModal({
           />
 
           <TimeInput
+            id="end-time-input"
             label="เวลาสิ้นสุด"
             lang="th"
             {...form.getInputProps("end_time")}
@@ -254,6 +258,7 @@ export default function SectionDetailEditModal({
 
 
         <Select
+          id="select-building"
           label="ตึก"
           placeholder="เลือกตึก"
           data={buildingOptions}
@@ -271,6 +276,7 @@ export default function SectionDetailEditModal({
         />
 
         <Select
+          id="select-room"
           label="ห้องเรียน"
           placeholder="เลือกห้อง"
           data={roomOptions}
@@ -286,6 +292,7 @@ export default function SectionDetailEditModal({
 
         <Group justify="flex-end" className="mt-4">
           <Button
+            id="delete-button"
             color="red"
             variant="outline"
             radius={8}
@@ -295,7 +302,7 @@ export default function SectionDetailEditModal({
             ลบ
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="save-button">
             บันทึก
           </Button>
         </Group>

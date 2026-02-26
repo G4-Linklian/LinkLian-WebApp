@@ -87,10 +87,12 @@ export default function AddProgramModalForm({
 
   return (
     <form
+      id="add-program-form"
       onSubmit={form.onSubmit(handleSubmit)}
       className="flex flex-col gap-2"
     >
       <TextInput
+        id="input-program-name"
         label={`ชื่อ${unitText}`}
         {...form.getInputProps("program_name")}
         radius={8}
@@ -98,17 +100,18 @@ export default function AddProgramModalForm({
       />
 
       <TextInput
+        id="input-program-remark"
         label={`หมายเหตุ${unitText}`}
         {...form.getInputProps("remark")}
         radius={8}
       />
 
       <Group justify="flex-end" mt="md">
-        <Button variant="outline" onClick={close} radius={8}>
+        <Button variant="outline" onClick={close} radius={8} id="cancel-button">
           ยกเลิก
         </Button>
 
-        <Button type="submit" radius={8}>
+        <Button type="submit" radius={8} id="submit-button">
           เพิ่ม{`${unitText}`}
         </Button>
       </Group>

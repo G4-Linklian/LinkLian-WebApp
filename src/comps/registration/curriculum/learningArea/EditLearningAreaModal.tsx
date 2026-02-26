@@ -77,19 +77,19 @@ export default function LearningAreaEditModal({
       const userResult = await getUserSys({ learning_area_id: Number(learningArea.learning_area_id) });
       // เช็คว่ามีวิชาที่อยู่ในกลุ่มเรียนรู้นี้หรือไม่
       const subjectResult = await getSubject({ learning_area_id: Number(learningArea.learning_area_id) });
-      
+
       const users = userResult.success && userResult.data ? userResult.data : [];
       const subjects = subjectResult.success && subjectResult.data ? subjectResult.data : [];
-      
+
       const uCount = users.length;
       const sCount = subjects.length;
       const totalCount = uCount + sCount;
-      
+
       setUserCount(uCount);
       setSubjectCount(sCount);
       setRelatedUsers(users);
       setRelatedSubjects(subjects);
-      
+
       if (totalCount > 0) {
         const warnings = [];
         if (uCount > 0) warnings.push(`${uCount} รายชื่อผู้ใช้`);
@@ -98,7 +98,7 @@ export default function LearningAreaEditModal({
       } else {
         setDeleteWarning("");
       }
-      
+
       setConfirmDeleteOpened(true);
     } catch (error) {
       console.error("Error checking related data:", error);
@@ -112,10 +112,10 @@ export default function LearningAreaEditModal({
 
   const handleConfirmDelete = async () => {
     if (!learningArea?.learning_area_id) return;
-    
+
     try {
       const result = await deleteLearningArea(learningArea.learning_area_id);
-      
+
       if (result.success) {
         showNotification(
           'ลบกลุ่มเรียนรู้สำเร็จ',
@@ -145,6 +145,7 @@ export default function LearningAreaEditModal({
   return (
     <>
       <Modal
+        id="edit-learning-area-modal"
         opened={opened}
         onClose={close}
         centered
@@ -152,8 +153,13 @@ export default function LearningAreaEditModal({
         radius={16}
       >
         <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการกลุ่มการเรียนรู้</h1>
-        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+        <form
+          id="learning-area-edit-form"
+          onSubmit={form.onSubmit(handleSubmit)}
+          className="gap-2 flex flex-col"
+        >
           <TextInput
+            id="edit-learning-area-name"
             label="ชื่อกลุ่มการเรียนรู้"
             placeholder="เช่น คณิตศาสตร์"
             {...form.getInputProps("learning_area_name")}
@@ -163,6 +169,7 @@ export default function LearningAreaEditModal({
           />
 
           <TextInput
+            id="edit-learning-area-remark"
             label="หมายเหตุ"
             placeholder="เช่น ชั้นเรียนสำหรับนักเรียน"
             {...form.getInputProps("remark")}
@@ -172,6 +179,7 @@ export default function LearningAreaEditModal({
 
           <Group justify="flex-end" className="mt-4">
             <Button
+              id="delete-button"
               color="red"
               variant="outline"
               radius={8}
@@ -181,7 +189,11 @@ export default function LearningAreaEditModal({
               ลบ
             </Button>
 
-            <Button type="submit" radius={8}>
+            <Button
+              id="save-button"
+              type="submit"
+              radius={8}
+            >
               บันทึก
             </Button>
           </Group>
@@ -198,7 +210,7 @@ export default function LearningAreaEditModal({
             <div className="text-center mb-4">
               คุณต้องการลบกลุ่มการเรียนรู้ <strong>{learningArea?.learning_area_name}</strong> ใช่หรือไม่?
             </div>
-            
+
             {(userCount > 0 || subjectCount > 0) && (
               <div className="mt-4 text-left">
                 <Text size="sm" fw={600} mb="xs" c="red">

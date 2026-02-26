@@ -233,6 +233,7 @@ export default function subjectTable() {
 
     return (
         <div
+            id="subject-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -242,6 +243,7 @@ export default function subjectTable() {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-subject"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -251,6 +253,7 @@ export default function subjectTable() {
                     />
 
                     <Button
+                        id="filter-subject-button"
                         variant="default"
                         size="xs"
                         radius="md"
@@ -264,6 +267,7 @@ export default function subjectTable() {
                     </Button>
 
                     <Button
+                        id="add-subject-button"
                         size="xs"
                         radius="md"
                         onClick={() => {
@@ -283,7 +287,7 @@ export default function subjectTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="subject-table" >
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={40} ta="center">รหัสวิชา</Table.Th>

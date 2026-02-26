@@ -282,6 +282,7 @@ export default function StaffTable() {
 
     return (
         <div
+            id="staff-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -292,6 +293,7 @@ export default function StaffTable() {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -300,8 +302,8 @@ export default function StaffTable() {
                         onChange={(event) => setSearchTerm(event.currentTarget.value)}
                     />
 
-
                     <Button
+                        id="filter-button"
                         variant="default"
                         size="xs"
                         radius="md"
@@ -315,6 +317,7 @@ export default function StaffTable() {
                     </Button>
 
                     <Button
+                        id="add-staff-button"
                         size="xs"
                         radius="md"
                         // leftSection={<IconPlus size={14} />}
@@ -335,7 +338,7 @@ export default function StaffTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" id="staff-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             {/* <Table.Th w={5} ta="center">ลำดับ</Table.Th> */}

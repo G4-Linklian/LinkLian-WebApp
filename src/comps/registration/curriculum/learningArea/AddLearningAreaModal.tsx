@@ -35,6 +35,7 @@ export default function AddLearningAreaModal({
 
   return (
     <Modal
+      id="add-learning-area-modal"
       opened={opened}
       onClose={close}
       centered
@@ -46,10 +47,12 @@ export default function AddLearningAreaModal({
       </h1>
 
       <form
+        id="learning-area-form"
         onSubmit={form.onSubmit(handleSubmit)}
         className="flex flex-col gap-2"
       >
         <TextInput
+          id="input-learning-area-name"
           label="ชื่อกลุ่มการเรียนรู้"
           placeholder="เช่น คณิตศาสตร์"
           {...form.getInputProps("learning_area_name")}
@@ -58,6 +61,7 @@ export default function AddLearningAreaModal({
         />
 
         <TextInput
+          id="input-learning-area-remark"
           label="หมายเหตุ"
           placeholder="เช่น ชั้นเรียนสำหรับนักเรียน"
           {...form.getInputProps("remark")}
@@ -65,11 +69,11 @@ export default function AddLearningAreaModal({
         />
 
         <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close} radius={8}>
+          <Button id="cancel-button" variant="outline" onClick={close} radius={8}>
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button id="submit-button" type="submit" radius={8}>
             เพิ่มกลุ่มการเรียนรู้
           </Button>
         </Group>

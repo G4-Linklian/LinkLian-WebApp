@@ -53,7 +53,7 @@ const BuildingDetail = () => {
     };
 
     return (
-        <div className='pb-8'>
+        <div className='pb-8' id="building-detail-page">
             <Breadcrumb
                 items={[
                     { label: "ข้อมูลพื้นฐาน", href: "/registration/info" },
@@ -65,6 +65,7 @@ const BuildingDetail = () => {
                     <h2 className="text-2xl font-bold text-gray-800">จัดการอาคารเรียน</h2>
                     <div className="w-[180px] flex items-center">
                         <Select
+                            id="select-room-format"
                             radius={8}
                             label="รูปแบบการแสดงผลห้อง"
                             placeholder="เลือกรูปแบบ"

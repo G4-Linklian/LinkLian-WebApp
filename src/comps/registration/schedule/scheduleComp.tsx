@@ -150,6 +150,7 @@ const scheduleComp = () => {
 
                         <div className="w-32 flex items-center">
                             <Select
+                                id="select-semester"
                                 placeholder="เลือกปีการศึกษา"
                                 data={semesterOptions}
                                 value={router.query.semester_id as string || null}

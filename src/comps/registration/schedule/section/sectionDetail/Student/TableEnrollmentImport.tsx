@@ -35,7 +35,7 @@ export default function TableEnrollmentImport({
 
   return (
     <>
-      <Paper withBorder p="sm" mb="md" radius="md">
+      <Paper withBorder p="sm" mb="md" radius="md" id="enrollment-import-summary">
         <Group>
           <Badge color="blue">ทั้งหมด {summary.total}</Badge>
           <Badge color="green">ผ่าน {summary.validCount}</Badge>

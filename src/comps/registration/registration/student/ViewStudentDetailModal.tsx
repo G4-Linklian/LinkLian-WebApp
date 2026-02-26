@@ -38,6 +38,7 @@ export default function ViewStudentDetailModal({
 
   return (
     <Modal
+      id="view-student-detail-modal"
       opened={opened}
       onClose={close}
       centered
@@ -60,14 +61,14 @@ export default function ViewStudentDetailModal({
               {student.first_name?.[0]}
             </Avatar>
             <div style={{ flex: 1 }}>
-              <Text size="lg" fw={700} className="text-gray-900">
+              <Text size="lg" fw={700} className="text-gray-900" id="student-full-name">
                 {fullName}
               </Text>
               <Group gap="xs" mt={4}>
-                <Badge color="blue" variant="filled" size="sm">
+                <Badge color="blue" variant="filled" size="sm" id="student-code">
                   {student.code}
                 </Badge>
-                <Badge color={statusInfo.color} variant="light" size="sm">
+                <Badge color={statusInfo.color} variant="light" size="sm" id="student-info">
                   {statusInfo.label}
                 </Badge>
               </Group>
@@ -80,6 +81,7 @@ export default function ViewStudentDetailModal({
         <Grid gutter="sm">
           <Grid.Col span={6}>
             <TextInput
+              id="student-first-name"
               label="ชื่อ"
               leftSection={<IconUser size={16} />}
               value={student.first_name || '-'}
@@ -95,6 +97,7 @@ export default function ViewStudentDetailModal({
               radius={8}
               readOnly
               variant="filled"
+              id="student-last-name"
             />
           </Grid.Col>
 
@@ -106,12 +109,14 @@ export default function ViewStudentDetailModal({
                 radius={8}
                 readOnly
                 variant="filled"
+                id="student-middle-name"
               />
             </Grid.Col>
           )}
 
           <Grid.Col span={12}>
             <TextInput
+              id="student-email"
               label="อีเมล"
               leftSection={<IconMail size={16} />}
               value={student.email || '-'}
@@ -123,6 +128,7 @@ export default function ViewStudentDetailModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="student-phone"
               label="เบอร์โทร"
               leftSection={<IconPhone size={16} />}
               value={student.phone || '-'}
@@ -134,6 +140,7 @@ export default function ViewStudentDetailModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="student-code"
               label="รหัสนักเรียน"
               leftSection={<IconId size={16} />}
               value={student.code || '-'}
@@ -149,6 +156,7 @@ export default function ViewStudentDetailModal({
         <Grid gutter="sm">
           <Grid.Col span={6}>
             <TextInput
+              id="student-level"
               label="ระดับชั้น"
               leftSection={<IconSchool size={16} />}
               value={student.level_name || '-'}
@@ -160,6 +168,7 @@ export default function ViewStudentDetailModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="student-classroom"
               label="ห้องเรียน"
               leftSection={<IconBook size={16} />}
               value={student.program_name || '-'}
@@ -171,7 +180,7 @@ export default function ViewStudentDetailModal({
         </Grid>
 
         <Group justify="flex-end" className="mt-4">
-          <Button onClick={close} radius={8}>
+          <Button onClick={close} radius={8} id="close-button">
             ปิด
           </Button>
         </Group>

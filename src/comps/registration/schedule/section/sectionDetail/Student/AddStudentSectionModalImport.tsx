@@ -100,8 +100,9 @@ export default function AddStudentSectionModalImport({
     };
 
     return (
-        <Container size={1200} py="xl">
+        <Container size={1200} py="xl" id="add-student-import-container">
             <Stepper
+                id="add-student-import-stepper"
                 active={activeStep}
                 onStepClick={(step) => {
                     if (step < activeStep) {
@@ -117,7 +118,7 @@ export default function AddStudentSectionModalImport({
                 <Stepper.Step label="เพิ่มข้อมูลสำเร็จ" />
             </Stepper>
 
-            <Paper withBorder p="xl" radius="md" mt="xl" >
+            <Paper withBorder p="xl" radius="md" mt="xl" id="add-student-import-paper">
                 {activeStep === 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <Text size="xl" fw={700} mb={2}>ดาวน์โหลดตัวอย่างไฟล์และข้อแนะนำในการนำเข้าข้อมูล</Text>
@@ -135,6 +136,7 @@ export default function AddStudentSectionModalImport({
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
                             <Button
+                                id="download-template-button"
                                 radius="md"
                                 variant="default"
                                 leftSection={<IconDownload size={18} />}
@@ -145,6 +147,7 @@ export default function AddStudentSectionModalImport({
                             </Button>
 
                             <Button
+                                id="next-step-button"
                                 radius="md"
                                 onClick={nextStep}
                             >
@@ -166,6 +169,7 @@ export default function AddStudentSectionModalImport({
 
                         <Paper withBorder p="lg" radius="md" bg="var(--mantine-color-gray-1)">
                             <Dropzone
+                                id="enrollment-import-dropzone"
                                 onDrop={(files) => {
                                     setSelectedFile(files[0]);
                                     setValidationData(null);
@@ -191,6 +195,7 @@ export default function AddStudentSectionModalImport({
                                 radius="md"
                                 variant="outline"
                                 onClick={() => setActiveStep(0)}
+                                id="back-step-button"
                             >
                                 ย้อนกลับ
                             </Button>
@@ -199,6 +204,7 @@ export default function AddStudentSectionModalImport({
                                 loading={isValidating}
                                 onClick={handleValidate}
                                 disabled={!selectedFile}
+                                id="validate-button"
                             >
                                 ตรวจสอบข้อมูล
                             </Button>
@@ -250,11 +256,13 @@ export default function AddStudentSectionModalImport({
                                     radius="md"
                                     variant="outline"
                                     onClick={() => setActiveStep(1)}
+                                    id="back-step-button"
                                 >
                                     ย้อนกลับ (เพื่ออัปโหลดใหม่)
                                 </Button>
 
                                 <Button
+                                    id="confirm-import-button"
                                     color="blue"
                                     loading={isSaving}
                                     radius="md"

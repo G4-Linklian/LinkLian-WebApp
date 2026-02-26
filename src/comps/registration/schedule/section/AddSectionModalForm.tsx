@@ -142,9 +142,10 @@ export default function AddSectionModalForm({
   }, [debouncedSearch]);
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
+    <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col" id="add-section-form">
 
       <Select
+        id="select-subject"
         label="เลือกรายวิชา"
         placeholder="พิมพ์รหัสหรือชื่อวิชา (อย่างน้อย 2 ตัวอักษร)"
         data={subjectOptions}
@@ -161,6 +162,7 @@ export default function AddSectionModalForm({
       />
 
       <Select
+        id="select-semester"
         label="ปีการศึกษา"
         placeholder="เลือกปีการศึกษา"
         data={semesterData}
@@ -172,6 +174,7 @@ export default function AddSectionModalForm({
       />
 
       <TextInput
+        id="section-name"
         label="ชื่อกลุ่มเรียน"
         placeholder="เช่น S1"
         {...form.getInputProps("section_name")}
@@ -182,11 +185,12 @@ export default function AddSectionModalForm({
       <Group justify="flex-end" className="mt-4">
         <Button color="blue" variant="outline" radius={8}
           onClick={() => close()}
+          id="cancel-button"
         >
           ยกเลิก
         </Button>
 
-        <Button type="submit" radius={8}>
+        <Button type="submit" radius={8} id="submit-button">
           เพิ่มกลุ่มเรียน
         </Button>
       </Group>

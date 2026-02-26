@@ -205,6 +205,7 @@ export default function learningAreaTable() {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-learning-area"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -214,6 +215,7 @@ export default function learningAreaTable() {
                     />
 
                     <Button
+                        id="add-learning-area-button"
                         size="xs"
                         radius="md"
                         onClick={() => {
@@ -233,7 +235,7 @@ export default function learningAreaTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="learning-area-table" >
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={10} ta="center">ลำดับ</Table.Th>

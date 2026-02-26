@@ -222,15 +222,17 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
 
     return (
         <div
+            id="leaf-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
-                <Text size="xl" fw={500}>
+                <Text size="xl" fw={500} id="program-table-title">
                     {programName}
                 </Text>
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-program-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -239,6 +241,7 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                         onChange={(event) => setSearchTerm(event.currentTarget.value)}
                     />
                     <Button
+                        id="add-program-button"
                         size="xs"
                         radius="md"
                         onClick={() => {
@@ -258,7 +261,7 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="program-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={10} ta="center">ลำดับ</Table.Th>

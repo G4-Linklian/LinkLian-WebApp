@@ -269,6 +269,7 @@ export default function sectionTable({ semesterData }: any) {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-section-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
@@ -278,6 +279,7 @@ export default function sectionTable({ semesterData }: any) {
                     />
 
                     <Button
+                        id="filter-button"
                         variant="default"
                         size="xs"
                         radius="md"
@@ -290,6 +292,7 @@ export default function sectionTable({ semesterData }: any) {
                     </Button>
 
                     <Button
+                        id="add-section-button"
                         size="xs"
                         radius="md"
                         onClick={() => {
@@ -309,7 +312,7 @@ export default function sectionTable({ semesterData }: any) {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="section-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={5} ta="center">ลำดับ</Table.Th>
