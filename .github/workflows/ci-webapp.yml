@@ -82,11 +82,11 @@ jobs:
 
       - name: Run Container Scan
         run: |
-          docker build -t linklian-core:local -f Dockerfile .
+          docker build -t linklian-webapp:local -f Dockerfile .
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy image \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
-            linklian-core:local
+            linklian-webapp:local
         #--exit-code 1 \
