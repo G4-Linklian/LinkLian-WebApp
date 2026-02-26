@@ -187,6 +187,7 @@ export default function EditProgramModal({
   return (
     <>
     <Modal
+      id="edit-program-modal"
       opened={opened}
       onClose={close}
       centered
@@ -200,6 +201,7 @@ export default function EditProgramModal({
 
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
         <TextInput
+          id="input-program-name"
           label={`ชื่อ${unitText}`}
           //placeholder={`เช่น คณิตศาสตร์`}
           {...form.getInputProps("program_name")}
@@ -209,6 +211,7 @@ export default function EditProgramModal({
         />
 
         <TextInput
+          id="input-program-remark"
           label={`หมายเหตุ${unitText}`}
           //placeholder={`เช่น ${unitText === "ห้องเรียน" ? "ห้องเรียนสำหรับนักเรียน" : "สาขาวิทยาการคอมพิวเตอร์"}`}
           {...form.getInputProps("remark")}
@@ -219,6 +222,7 @@ export default function EditProgramModal({
 
         <Group justify="flex-end" className="mt-4">
           <Button
+            id="delete-button"
             color="red"
             variant="outline"
             radius={8}
@@ -228,7 +232,7 @@ export default function EditProgramModal({
             ลบ
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button id="save-button" type="submit" radius={8}>
             บันทึก
           </Button>
         </Group>

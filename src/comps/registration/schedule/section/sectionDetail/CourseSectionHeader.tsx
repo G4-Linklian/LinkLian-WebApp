@@ -150,15 +150,15 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
 
           <div className="z-10">
             {/* Header Tags */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4" id="course-header">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="px-3 py-1 text-xs font-bold tracking-wide text-blue-400 uppercase bg-blue-50 rounded-full">
+                <span className="px-3 py-1 text-xs font-bold tracking-wide text-blue-400 uppercase bg-blue-50 rounded-full" id="semester-tag">
                   ภาคเรียนที่ {course.semester}
                 </span>
-                <span className="px-3 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full border border-gray-200">
+                <span className="px-3 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full border border-gray-200" id="course-code-tag">
                   {course.subject_code}
                 </span>
-                <span className="px-3 py-1 text-xs font-medium text-purple-400 bg-purple-50 rounded-full">
+                <span className="px-3 py-1 text-xs font-medium text-purple-400 bg-purple-50 rounded-full" id="learning-area-tag">
                   กลุ่มการเรียนรู้ : {course.learning_area_name}
                 </span>
               </div>
@@ -169,21 +169,22 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
                     openSectionEditModals(course);
                   }}
                   style={{ cursor: "pointer" }}
+                  id="edit-section-button"
                 />
               </div>
             </div>
 
             {/* Title Section */}
             <div className="mb-3">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight leading-snug mb-1">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight leading-snug mb-1" id="course-name">
                 {course.name_th}
               </h1>
-              <p className="text-lg text-gray-500 font-normal">
+              <p className="text-lg text-gray-500 font-normal" id="course-name-en">
                 {course.name_en}
               </p>
               <div className="mt-3 inline-flex items-center gap-2 text-gray-600 font-medium">
                 <IconSchool className="w-5 h-5 text-gray-400" />
-                <span>{course.section_name}</span>
+                <span id="course-section-name">{course.section_name}</span>
               </div>
             </div>
           </div>
@@ -191,6 +192,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
           {/* Bottom Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatItem
+              id="credit-stat"
               icon={IconBook}
               label="หน่วยกิต"
               value={course.credit}
@@ -198,6 +200,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
               colorClass="text-[#FF9C57]"
             />
             <StatItem
+              id="hour-per-week-stat"
               icon={IconClock}
               label="ชั่วโมง/สัปดาห์"
               value={course.hour_per_week}
@@ -205,6 +208,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
               colorClass="text-[#FF9C57]"
             />
             <StatItem
+              id="student-count-stat"
               icon={IconUsers}
               label="จำนวนนักเรียน"
               value={course.student_count}
@@ -224,6 +228,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
               <h3 className="text-base font-bold text-gray-900">ตารางเวลาเรียน</h3>
             </div>
             <Button
+              id="add-schedule-button"
               size="xs"
               radius="md"
               onClick={() => {
@@ -254,14 +259,15 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
                         }}
                         style={{ cursor: "pointer" }}
                         size={"xs"}
+                        id="edit-schedule-button"
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 text-gray-800 font-bold text-base mb-1">
+                    <div className="flex items-center gap-2 text-gray-800 font-bold text-base mb-1" id="schedule-time">
                       {timeFormatter(String(item.start_time))} - {timeFormatter(String(item.end_time))}
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500" id="schedule-location">
                       <IconMapPin className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
                       <span className="truncate">
                         {item.building_name} ห้อง{" "}

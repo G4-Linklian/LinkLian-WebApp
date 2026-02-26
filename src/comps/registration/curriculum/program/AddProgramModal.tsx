@@ -51,6 +51,7 @@ export default function AddProgramModal({
 
   return (
     <Modal
+      id="add-program-modal"
       opened={opened}
       onClose={close}
       centered
@@ -62,6 +63,7 @@ export default function AddProgramModal({
       </h1>
 
       <SegmentedControl
+        id="add-program-tab-control"
         value={tab}
         onChange={(value) => setTab(value as "manual" | "csv")}
         data={[

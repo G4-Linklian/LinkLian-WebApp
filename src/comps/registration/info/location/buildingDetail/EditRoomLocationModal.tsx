@@ -126,6 +126,7 @@ export default function EditRoomLocationModal({
   return (
     <>
       <Modal
+        id="edit-room-location-modal"
         opened={opened}
         onClose={close}
         centered
@@ -133,8 +134,9 @@ export default function EditRoomLocationModal({
         radius={16}
       >
         <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการห้องเรียน</h1>
-        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-room-location-form">
           <TextInput
+            id="input-floor"
             label="ชั้น"
             placeholder="เช่น 1"
             {...form.getInputProps("floor")}
@@ -144,6 +146,7 @@ export default function EditRoomLocationModal({
           />
 
           <TextInput
+            id="input-room-number"
             label="หมายเลขห้อง"
             placeholder="เช่น 01, 02, 11"
             {...form.getInputProps("room_number")}
@@ -153,6 +156,7 @@ export default function EditRoomLocationModal({
           />
 
           <TextInput
+            id="input-room-remark"
             label="หมายเหตุ"
             placeholder="เช่น ห้องปฏิบัติการคอมพิวเตอร์"
             {...form.getInputProps("room_remark")}
@@ -162,6 +166,7 @@ export default function EditRoomLocationModal({
 
           <Group justify="flex-end" className="mt-4">
             <Button
+              id="delete-button"
               color="red"
               variant="outline"
               radius={8}
@@ -171,7 +176,7 @@ export default function EditRoomLocationModal({
               ลบ
             </Button>
 
-            <Button type="submit" radius={8}>
+            <Button type="submit" radius={8} id="save-button">
               บันทึก
             </Button>
           </Group>

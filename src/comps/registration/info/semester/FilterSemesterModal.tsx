@@ -70,6 +70,7 @@ export default function FilterSemesterModal({
 
   return (
     <Modal
+      id="filter-semester-modal"
       opened={opened}
       onClose={close}
       centered
@@ -77,14 +78,16 @@ export default function FilterSemesterModal({
       radius={16}
     >
       <h1 className="color-black font-bold text-xl mb-4 text-center">ตัวกรองภาคเรียน</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="filter-semester-form">
           <TextInput
+            id="input-semester"
             label="ปีการศึกษา"
             placeholder="เช่น 1/2568"
             {...form.getInputProps("semester")}
             radius={8}
           />
           <DateInput
+            id="input-start-date"
             label="วันที่เริ่มต้น"
             valueFormat="DD/MM/YYYY"
             placeholder="เลือกวันที่เริ่มต้น"
@@ -93,6 +96,7 @@ export default function FilterSemesterModal({
             clearable
           />
           <DateInput
+            id="input-end-date"
             label="วันที่สิ้นสุด"
             valueFormat="DD/MM/YYYY"
             placeholder="เลือกวันที่สิ้นสุด"
@@ -101,6 +105,7 @@ export default function FilterSemesterModal({
             clearable
           />
           <Select
+            id="input-status"
             label="สถานะ"
             placeholder="เลือกสถานะ"
             data={[
@@ -115,6 +120,7 @@ export default function FilterSemesterModal({
 
         <Group justify="right" mt="lg">
             <Button
+                id="clear-button"
                 variant="default"
                 onClick={handleClear}
                 radius={8}
@@ -122,6 +128,7 @@ export default function FilterSemesterModal({
                 ล้างค่า
             </Button>
             <Button
+                id="search-button"
                 type="submit"
                 radius={8}
                 leftSection={<IconFilter size={16} />}

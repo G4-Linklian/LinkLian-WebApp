@@ -37,10 +37,12 @@ export default function AddSubjectModalForm({
 
   return (
     <form
+      id="add-subject-form"
       onSubmit={form.onSubmit(handleSubmit)}
       className="flex flex-col gap-2"
     >
       <Select
+        id="select-learning-area"
         label="กลุ่มการเรียนรู้"
         placeholder="เลือกกลุ่มการเรียนรู้"
         searchable
@@ -52,6 +54,7 @@ export default function AddSubjectModalForm({
       />
 
       <TextInput
+        id="input-subject-code"
         label="รหัสวิชา"
         placeholder="เช่น MATH101, ค10105"
         {...form.getInputProps("subject_code")}
@@ -60,6 +63,7 @@ export default function AddSubjectModalForm({
       />
 
       <TextInput
+        id="input-subject-name-th"
         label="ชื่อวิชา (ภาษาไทย)"
         placeholder="เช่น คณิตศาสตร์พื้นฐาน"
         {...form.getInputProps("name_th")}
@@ -68,6 +72,7 @@ export default function AddSubjectModalForm({
       />
 
       <TextInput
+        id="input-subject-name-en"
         label="ชื่อวิชา (ภาษาอังกฤษ)"
         placeholder="เช่น Basic Mathematics"
         {...form.getInputProps("name_en")}
@@ -75,6 +80,7 @@ export default function AddSubjectModalForm({
       />
 
       <TextInput
+        id="input-subject-credit"
         label="หน่วยกิต"
         placeholder="เช่น 1.5"
         type="number"
@@ -84,6 +90,7 @@ export default function AddSubjectModalForm({
       />
 
       <TextInput
+        id="input-subject-hour-per-week"
         label="ชั่วโมงต่อสัปดาห์"
         placeholder="เช่น 2"
         type="number"
@@ -93,11 +100,11 @@ export default function AddSubjectModalForm({
       />
 
       <Group justify="flex-end" mt="md">
-        <Button variant="outline" onClick={close} radius={8}>
+        <Button variant="outline" onClick={close} radius={8} id="cancel-button">
           ยกเลิก
         </Button>
 
-        <Button type="submit" radius={8}>
+        <Button type="submit" radius={8} id="submit-button">
           เพิ่มวิชา
         </Button>
       </Group>

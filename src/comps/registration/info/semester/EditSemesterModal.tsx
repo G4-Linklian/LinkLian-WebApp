@@ -152,6 +152,7 @@ export default function SemesterEditModal({
   return (
     <>
       <Modal
+        id="edit-semester-modal"
         opened={opened}
         onClose={close}
         centered
@@ -159,8 +160,9 @@ export default function SemesterEditModal({
         radius={16}
       >
         <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการภาคเรียน</h1>
-        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-semester-form"> 
           <TextInput
+            id="input-semester"
             label="ปีการศึกษา"
             placeholder="เช่น 2567/1"
             {...form.getInputProps("semester")}
@@ -170,6 +172,7 @@ export default function SemesterEditModal({
           />
 
           <DateInput
+            id="input-start-date"
             label="วันที่เริ่มต้น"
             valueFormat="DD/MM/YYYY"
             {...form.getInputProps("start_date")}
@@ -179,6 +182,7 @@ export default function SemesterEditModal({
           />
 
           <DateInput
+            id="input-end-date"
             label="วันที่สิ้นสุด"
             valueFormat="DD/MM/YYYY"
             {...form.getInputProps("end_date")}
@@ -189,6 +193,7 @@ export default function SemesterEditModal({
 
           <Group justify="flex-end" className="mt-4">
             <Button
+              id="delete-button"
               color="red"
               variant="outline"
               radius={8}
@@ -198,7 +203,7 @@ export default function SemesterEditModal({
               ลบ
             </Button>
 
-            <Button type="submit" radius={8}>
+            <Button type="submit" radius={8} id="save-button">
               บันทึก
             </Button>
           </Group>

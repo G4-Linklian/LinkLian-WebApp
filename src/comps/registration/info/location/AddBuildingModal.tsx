@@ -35,6 +35,7 @@ export default function AddBuildingModal({
 
   return (
     <Modal
+      id="add-building-modal"
       opened={opened}
       onClose={close}
       centered
@@ -46,10 +47,12 @@ export default function AddBuildingModal({
       </h1>
 
       <form
+        id="add-building-form"
         onSubmit={form.onSubmit(handleSubmit)}
         className="flex flex-col gap-2"
       >
         <TextInput
+          id="input-building-name"
           label="ชื่ออาคาร"
           placeholder="เช่น อาคารเรียนรวม"
           {...form.getInputProps("building_name")}
@@ -58,6 +61,7 @@ export default function AddBuildingModal({
         />
 
         <TextInput
+          id="input-building-no"
           label="หมายเลขอาคาร"
           placeholder="เช่น 1"
           {...form.getInputProps("building_no")}
@@ -66,6 +70,7 @@ export default function AddBuildingModal({
         />
 
         <TextInput
+          id="input-building-remark"
           label="หมายเหตุ"
           placeholder="เช่น เป็นอาคารเรียนสำหรับ"
           {...form.getInputProps("remark")}
@@ -73,11 +78,11 @@ export default function AddBuildingModal({
         />
 
         <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close} radius={8}>
+          <Button variant="outline" onClick={close} radius={8} id="cancel-button">
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="submit-button">
             เพิ่มอาคาร
           </Button>
         </Group>

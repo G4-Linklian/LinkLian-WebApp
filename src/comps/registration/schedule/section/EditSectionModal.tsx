@@ -272,6 +272,7 @@ export default function SectionEditModal({
   return (
     <>
       <Modal
+        id="edit-section-modal"
         opened={opened}
         onClose={close}
         centered
@@ -279,9 +280,10 @@ export default function SectionEditModal({
         radius={16}
       >
         <h1 className="color-black font-bold text-2xl mb-4 text-center">แก้ไขกลุ่มเรียน</h1>
-        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
+        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col" id="edit-section-form">
 
           <Select
+            id="select-subject"
             label="เลือกรายวิชา"
             placeholder="พิมพ์รหัสหรือชื่อวิชา (อย่างน้อย 2 ตัวอักษร)"
             data={subjectOptions}
@@ -298,6 +300,7 @@ export default function SectionEditModal({
           />
 
           <Select
+            id="select-semester"
             label="ปีการศึกษา"
             placeholder="เลือกปีการศึกษา"
             data={semesterData}
@@ -309,6 +312,7 @@ export default function SectionEditModal({
           />
 
           <TextInput
+            id="section-name"
             label="ชื่อกลุ่มเรียน"
             placeholder="เช่น S1"
             {...form.getInputProps("section_name")}
@@ -318,6 +322,7 @@ export default function SectionEditModal({
 
           <Group justify="flex-end" className="mt-4">
             <Button
+              id="delete-button"
               color="red"
               variant="outline"
               radius={8}
@@ -327,7 +332,7 @@ export default function SectionEditModal({
               ลบ
             </Button>
 
-            <Button type="submit" radius={8}>
+            <Button id="save-button" type="submit" radius={8}>
               บันทึก
             </Button>
           </Group>

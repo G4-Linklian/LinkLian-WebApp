@@ -83,6 +83,7 @@ export default function EduLevelEditModal({
   return (
     <>
       <Modal
+        id="edit-edu-level-modal"
         opened={opened}
         onClose={close}
         centered

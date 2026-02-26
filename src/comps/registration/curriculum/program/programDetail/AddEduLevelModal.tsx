@@ -44,6 +44,7 @@ export default function AddEduLevelModal({
 
   return (
     <Modal
+      id="add-edu-level-modal"
       opened={opened}
       onClose={close}
       centered
@@ -55,10 +56,12 @@ export default function AddEduLevelModal({
       </h1>
 
       <form
+        id="add-edu-level-form"
         onSubmit={form.onSubmit(handleSubmit)}
         className="flex flex-col gap-2"
       >
         <Select
+          id="select-edu-level"
           label="ระดับการศึกษา"
           placeholder="เลือกระดับการศึกษา"
           data={eduLevelData}
@@ -68,6 +71,7 @@ export default function AddEduLevelModal({
         />
 
         <Select
+          id="select-program-for-edu-level"
           label="เลือกห้องเรียน"
           placeholder="เลือกห้องเรียน"
           data={ProgramData.map((program: any) => ({
@@ -80,11 +84,11 @@ export default function AddEduLevelModal({
         />
 
         <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close} radius={8}>
+          <Button variant="outline" onClick={close} radius={8} id="cancel-add-edu-level-button">
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="submit-add-edu-level-button">
             เพิ่มชั้นเรียน
           </Button>
         </Group>

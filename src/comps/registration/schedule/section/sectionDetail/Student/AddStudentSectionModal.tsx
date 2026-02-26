@@ -35,6 +35,7 @@ export default function AddStudentSectionModal({
 
   return (
     <Modal
+      id="add-student-modal"
       opened={opened}
       onClose={close}
       centered
@@ -44,6 +45,7 @@ export default function AddStudentSectionModal({
       <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มนักเรียน</h1>
 
       <SegmentedControl
+        id="add-student-tab"
         value={tab}
         onChange={(value) => setTab(value as "manual" | "csv")}
         data={[

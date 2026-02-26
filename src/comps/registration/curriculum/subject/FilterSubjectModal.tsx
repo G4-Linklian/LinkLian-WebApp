@@ -65,6 +65,7 @@ export default function FilterSubjectModal({
 
   return (
     <Modal
+      id="filter-subject-modal"
       opened={opened}
       onClose={close}
       centered
@@ -72,8 +73,9 @@ export default function FilterSubjectModal({
       radius={16}
     >
       <h1 className="color-black font-bold text-xl mb-4 text-center">ตัวกรองรายวิชา</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="filter-subject-form">
          <Select
+          id="select-filter-learning-area"
           label="กลุ่มการเรียนรู้"
           placeholder="เลือกกลุ่มการเรียนรู้"
           data={learningAreaOptions}
@@ -84,6 +86,7 @@ export default function FilterSubjectModal({
 
         <div className="flex gap-2 justify-between">
             <TextInput
+            id="input-filter-credit"
             className="w-[50%]"
             label="หน่วยกิต"
             placeholder="เช่น 3"
@@ -92,6 +95,7 @@ export default function FilterSubjectModal({
             radius={8}
             />
             <TextInput
+            id="input-filter-hour-per-week"
             className="w-[50%]"
             label="ชั่วโมง/สัปดาห์"
             placeholder="เช่น 3"
@@ -103,6 +107,7 @@ export default function FilterSubjectModal({
 
         <Group justify="right" mt="lg">
             <Button
+                id="clear-filter-button"
                 variant="default"
                 onClick={handleClear}
                 radius={8}
@@ -110,6 +115,7 @@ export default function FilterSubjectModal({
                 ล้างค่า
             </Button>
             <Button
+                id="apply-filter-button"
                 type="submit"
                 radius={8}
                 leftSection={<IconFilter size={16} />}

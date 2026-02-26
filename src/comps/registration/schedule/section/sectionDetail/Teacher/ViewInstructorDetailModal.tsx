@@ -101,6 +101,7 @@ export default function ViewInstructorDetailModal({
   return (
     <>
       <Modal
+      id="view-instructor-detail-modal"
       opened={opened}
       onClose={close}
       centered
@@ -110,7 +111,7 @@ export default function ViewInstructorDetailModal({
     >
       <div className="gap-3 flex flex-col">
         {/* Instructor Info Card */}
-        <Paper withBorder p="md" radius="md" className="border-orange-200">
+        <Paper withBorder p="md" radius="md" className="border-orange-200" id="instructor-info-card">
           <Group>
             <Avatar
               src={instructor.profile_pic}
@@ -123,17 +124,17 @@ export default function ViewInstructorDetailModal({
               {instructor.first_name?.[0]}
             </Avatar>
             <div style={{ flex: 1 }}>
-              <Text size="lg" fw={700} className="text-gray-900">
+              <Text size="lg" fw={700} className="text-gray-900" id="teacher-full-name">
                 {fullName}
               </Text>
               <Group gap="xs" mt={4}>
-                <Badge color="orange" variant="filled" size="sm">
+                <Badge color="orange" variant="filled" size="sm" id="teacher-code">
                   {instructor.code}
                 </Badge>
-                <Badge color={getStatusColor(instructor.position)} variant="light" size="sm">
+                <Badge color={getStatusColor(instructor.position)} variant="light" size="sm" id="teacher-position">
                   {positionLabel}
                 </Badge>
-                <Badge color={statusInfo.color} variant="light" size="sm">
+                <Badge color={statusInfo.color} variant="light" size="sm" id="teacher-status">
                   {statusInfo.label}
                 </Badge>
               </Group>
@@ -146,6 +147,7 @@ export default function ViewInstructorDetailModal({
         <Grid gutter="sm">
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-first-name-input"
               label="ชื่อ"
               leftSection={<IconUser size={16} />}
               value={instructor.first_name || '-'}
@@ -156,6 +158,7 @@ export default function ViewInstructorDetailModal({
           </Grid.Col>
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-last-name-input"
               label="นามสกุล"
               value={instructor.last_name || '-'}
               radius={8}
@@ -167,6 +170,7 @@ export default function ViewInstructorDetailModal({
           {instructor.middle_name && (
             <Grid.Col span={12}>
               <TextInput
+                id="teacher-middle-name-input"
                 label="ชื่อกลาง"
                 value={instructor.middle_name || '-'}
                 radius={8}
@@ -178,6 +182,7 @@ export default function ViewInstructorDetailModal({
 
           <Grid.Col span={12}>
             <TextInput
+              id="teacher-email-input"
               label="อีเมล"
               leftSection={<IconMail size={16} />}
               value={instructor.email || '-'}
@@ -189,6 +194,7 @@ export default function ViewInstructorDetailModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-phone-input"
               label="เบอร์โทร"
               leftSection={<IconPhone size={16} />}
               value={instructor.phone || '-'}
@@ -200,6 +206,7 @@ export default function ViewInstructorDetailModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-code-input"
               label="รหัสครู"
               leftSection={<IconId size={16} />}
               value={instructor.code || '-'}
@@ -215,6 +222,7 @@ export default function ViewInstructorDetailModal({
         <Grid gutter="sm">
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-position-input"
               label="ตำแหน่งผู้สอน"
               leftSection={<IconUserPin size={16} />}
               value={positionLabel}
@@ -226,6 +234,7 @@ export default function ViewInstructorDetailModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-status-input"
               label="กลุ่มสาระการเรียนรู้"
               leftSection={<IconSchool size={16} />}
               value={instructor.learning_area_name || '-'}
@@ -238,6 +247,7 @@ export default function ViewInstructorDetailModal({
 
         <Group justify="flex-end" className="mt-4">
           <Button
+            id="delete-button"
             color="red"
             variant="outline"
             radius={8}

@@ -35,7 +35,7 @@ export default function TableProgramImport({
 
   return (
     <>
-      <Paper withBorder p="sm" mb="md" radius="md">
+      <Paper withBorder p="sm" mb="md" radius="md" id="import-summary">
         <Group>
           <Badge color="blue">ทั้งหมด {summary.total}</Badge>
           <Badge color="green">ผ่าน {summary.validCount}</Badge>
@@ -51,6 +51,7 @@ export default function TableProgramImport({
           highlightOnHover
           withTableBorder
           withColumnBorders
+          id="program-import-table"
         >
           <Table.Thead>
             <Table.Tr>

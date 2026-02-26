@@ -121,8 +121,9 @@ export default function AddStaffModalImport() {
     };
 
     return (
-        <Container size={1200} py="xl">
+        <Container size={1200} py="xl" id="add-staff-import-modal">
             <Stepper
+                id="add-staff-import-stepper"
                 active={activeStep}
                 onStepClick={(step) => {
                     if (step < activeStep) {
@@ -138,7 +139,7 @@ export default function AddStaffModalImport() {
                 <Stepper.Step label="เพิ่มข้อมูลสำเร็จ" />
             </Stepper>
 
-            <Paper withBorder p="xl" radius="md" mt="xl" >
+            <Paper withBorder p="xl" radius="md" mt="xl" id="add-staff-import-paper">
                 {activeStep === 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                         <Text size="xl" fw={700} mb={2}>ดาวน์โหลดตัวอย่างไฟล์และข้อแนะนำในการนำเข้าข้อมูล</Text>
@@ -156,6 +157,7 @@ export default function AddStaffModalImport() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
                             <Button
+                                id="download-template-button"
                                 radius="md"
                                 variant="default"
                                 leftSection={<IconDownload size={18} />}
@@ -166,6 +168,7 @@ export default function AddStaffModalImport() {
                             </Button>
 
                             <Button
+                                id="next-step-button"
                                 radius="md"
                                 onClick={nextStep}
                             >
@@ -195,6 +198,7 @@ export default function AddStaffModalImport() {
                                 accept={MS_EXCEL_MIME_TYPE}
                                 radius="md"
                                 className="cursor-pointer"
+                                id="staff-import-dropzone"
                             >
                                 <div className="flex flex-col items-center py-6">
                                     <IconFileSpreadsheet size={50} stroke={1} color="var(--mantine-color-gray-5)" />
@@ -209,6 +213,7 @@ export default function AddStaffModalImport() {
 
                         <Group justify="flex-end">
                             <Button
+                                id="back-step-button"
                                 radius="md"
                                 variant="outline"
                                 onClick={() => setActiveStep(0)}
@@ -216,6 +221,7 @@ export default function AddStaffModalImport() {
                                 ย้อนกลับ
                             </Button>
                             <Button
+                                id="validate-button"
                                 radius="md"
                                 loading={isValidating}
                                 onClick={handleValidate}
@@ -268,6 +274,7 @@ export default function AddStaffModalImport() {
                         {selectedFile && (
                             <Group justify="flex-end">
                                 <Button
+                                    id="back-edit-button"
                                     radius="md"
                                     variant="outline"
                                     onClick={() => setActiveStep(1)}
@@ -276,6 +283,7 @@ export default function AddStaffModalImport() {
                                 </Button>
 
                                 <Button
+                                    id="confirm-import-button"
                                     color="blue"
                                     loading={isSaving}
                                     radius="md"

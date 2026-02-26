@@ -127,6 +127,7 @@ export default function EditBuildingModal({
   return (
     <>
       <Modal
+        id="edit-building-modal"
         opened={opened}
         onClose={close}
         centered
@@ -134,8 +135,9 @@ export default function EditBuildingModal({
         radius={16}
       >
         <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการอาคาร</h1>
-        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+        <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-building-form">
           <TextInput
+            id="input-building-name"
             label="ชื่ออาคาร"
             placeholder="เช่น อาคารเรียนรวม"
             {...form.getInputProps("building_name")}
@@ -145,6 +147,7 @@ export default function EditBuildingModal({
           />
 
           <TextInput
+            id="input-building-no"  
             label="หมายเลขอาคาร"
             placeholder="เช่น 101"
             {...form.getInputProps("building_no")}
@@ -154,6 +157,7 @@ export default function EditBuildingModal({
           />
 
           <TextInput
+            id="input-building-remark"
             label="หมายเหตุ"
             placeholder="เช่น อาคารใหม่"
             {...form.getInputProps("remark")}
@@ -163,6 +167,7 @@ export default function EditBuildingModal({
 
           <Group justify="flex-end" className="mt-4">
             <Button
+              id="delete-building-button"
               color="red"
               variant="outline"
               radius={8}
@@ -172,7 +177,7 @@ export default function EditBuildingModal({
               ลบ
             </Button>
 
-            <Button type="submit" radius={8}>
+            <Button type="submit" radius={8} id="save-building-button">
               บันทึก
             </Button>
           </Group>

@@ -145,6 +145,7 @@ export default function TeacherComps() {
                     ผู้สอน
                 </Text>
                 <Button
+                    id="add-teacher-button"
                     size="xs"
                     radius="md"
                     onClick={() => {

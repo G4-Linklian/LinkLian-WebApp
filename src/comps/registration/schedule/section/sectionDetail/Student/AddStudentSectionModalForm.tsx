@@ -140,7 +140,7 @@ export default function AddStudentSectionModalForm({
   const renderUserInfoCard = () => {
     if (!selectedUserObj) return null;
     return (
-      <Paper withBorder p="md" radius="md" className="bg-gray-50 mb-1 border-blue-100">
+      <Paper withBorder p="md" radius="md" className="bg-gray-50 mb-1 border-blue-100" id="selected-user-info-card">
         <Group>
           <Avatar
             src={selectedUserObj.profile_pic}
@@ -152,14 +152,14 @@ export default function AddStudentSectionModalForm({
             {selectedUserObj.first_name?.[0]}
           </Avatar>
           <div style={{ flex: 1 }}>
-            <Text size="sm" fw={700} className="text-gray-900">
+            <Text size="sm" fw={700} className="text-gray-900" id="selected-user-name">
               {selectedUserObj.first_name} {selectedUserObj.last_name}
             </Text>
-            <Text c="dimmed" size="xs">
+            <Text c="dimmed" size="xs" id="selected-user-email">
               {selectedUserObj.email}
             </Text>
           </div>
-          <Badge color="blue" variant="light">
+          <Badge color="blue" variant="light" id="selected-user-code">
             {selectedUserObj.code}
           </Badge>
         </Group>
@@ -171,6 +171,7 @@ export default function AddStudentSectionModalForm({
     <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
 
       <Select
+        id="select-user"
         label="เลือกนักเรียน"
         placeholder="ค้นหาชื่อ หรือ รหัสนักเรียน"
         data={userOptions}
@@ -202,6 +203,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-email-input"
           />
         </Grid.Col>
 
@@ -212,6 +214,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-first-name-input"
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -221,6 +224,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-last-name-input"
           />
         </Grid.Col>
 
@@ -231,6 +235,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-middle-name-input"
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -241,6 +246,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-phone-input"
           />
         </Grid.Col>
 
@@ -252,6 +258,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-code-input"
           />
         </Grid.Col>
 
@@ -263,6 +270,7 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-level-input"
           />
         </Grid.Col>
 
@@ -274,16 +282,17 @@ export default function AddStudentSectionModalForm({
             radius={8}
             readOnly={!!selectedUserObj}
             variant={selectedUserObj ? "filled" : "default"}
+            id="student-program-input"
           />
         </Grid.Col>
       </Grid>
 
       <Group justify="flex-end" className="mt-6">
-        <Button color="gray" variant="outline" onClick={close} radius={8}>
+        <Button color="gray" variant="outline" onClick={close} radius={8} id="cancel-button">
           ยกเลิก
         </Button>
 
-        <Button type="submit" radius={8}>
+        <Button type="submit" radius={8} id="submit-button">
           เพิ่มนักเรียน
         </Button>
       </Group>

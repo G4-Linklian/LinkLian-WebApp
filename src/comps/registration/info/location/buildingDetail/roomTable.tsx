@@ -237,6 +237,7 @@ export default function roomTable() {
 
     return (
         <div
+            id="room-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -244,6 +245,7 @@ export default function roomTable() {
                     ห้องเรียนของ : {buildingName}
                 </Text>
                 <Button
+                    id="add-room-button"
                     size="xs"
                     radius="md"
                     onClick={() => {
@@ -262,7 +264,7 @@ export default function roomTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="room-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={5} ta="center">ลำดับ</Table.Th>

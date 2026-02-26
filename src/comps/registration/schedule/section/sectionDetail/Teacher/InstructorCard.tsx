@@ -28,10 +28,10 @@ function InstructorCard({ instructor, sectionId, onDelete } : any) {
       
       <div className='pb-2'>
         <Group justify="space-between" mb="xs">
-            <Badge color={getStatusColor(instructor.position)} variant="light">
+            <Badge color={getStatusColor(instructor.position)} variant="light" id="teacher-position-badge">
                 {TeacherPositionLabel[instructor.position as TeacherPosition] || instructor.position || 'Unknown'}
             </Badge>
-            <ActionIcon variant="subtle" color="gray" onClick={handleOpenDetailModal}>
+            <ActionIcon variant="subtle" color="gray" onClick={handleOpenDetailModal} id="teacher-card-detail-button">
                 <IconDots size={16} />
             </ActionIcon>
         </Group>
@@ -51,13 +51,13 @@ function InstructorCard({ instructor, sectionId, onDelete } : any) {
 
           {/* Name & Code */}
           <div style={{ flex: 1 }}>
-            <Text size="lg" fw={700} lineClamp={1} title={fullName}>
+            <Text size="lg" fw={700} lineClamp={1} title={fullName} id="teacher-full-name">
               {fullName}
             </Text>
             
             <Group gap={5} mt={4}>
                 <IconId size={14} className="text-gray-500" />
-                <Text size="sm" c="dimmed">
+                <Text size="sm" c="dimmed" id="teacher-email">
                  {instructor.email}
                 </Text>
             </Group>

@@ -120,7 +120,7 @@ const RegistrationLoginPage = () => {
     const isLargerThanSm = useMediaQuery("(min-width: 768px)");
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-[#FFE3BB] to-[#7EC8E3] relative overflow-hidden">
+        <div className="flex min-h-screen bg-linear-to-br from-[#FFF2DD] to-[#FFCF9A] relative overflow-hidden">
 
             {/* Right side wavy pattern */}
             {isLargerThanSm ? (
@@ -168,7 +168,7 @@ const RegistrationLoginPage = () => {
                             // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
                             transform: 'translateX(-10%)'
                         }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-[100%] rotate-90' />
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-full rotate-90' />
 
                     </div>
 
@@ -177,7 +177,7 @@ const RegistrationLoginPage = () => {
                             // borderRadius: '50% 0 0 50% / 100% 0 0 100%',
                             transform: 'translateX(30%)'
                         }} >
-                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-[100%] rotate-90' />
+                        <Image src={"/image/clevDT.png"} alt={"clev"} width={1000} height={1000} className='w-[120%] h-full rotate-90' />
 
                     </div>
                 </>
@@ -185,18 +185,13 @@ const RegistrationLoginPage = () => {
 
             {/* Login Form */}
             {!otpPage ? (
-                <div className={`
-          flex flex-col justify-center w-full z-10
-          ${isLargerThanSm ? 'items-end' : 'items-center'}
-       `}>
-                    <div className={`
-            flex flex-col w-full max-w-md p-8 rounded-lg
-            ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}
-          `}>
-                        <h1 className="text-2xl font-bold text-center mb-8 text-[#000000]">การเข้าสู่ระบบ</h1>
+                <div className={`flex flex-col justify-center w-full z-10 ${isLargerThanSm ? 'items-end' : 'items-center'}`}>
+                    <div className={`flex flex-col w-full max-w-md p-8 rounded-lg ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}`}>
+                        <h1 className="text-2xl font-bold text-center mb-8 text-[#7A2310]">การเข้าสู่ระบบ</h1>
 
-                        <form onSubmit={form.onSubmit(handleSubmit)}>
+                        <form onSubmit={form.onSubmit(handleSubmit)} id="login-form">
                             <TextInput
+                                id="input-email"
                                 label="อีเมล"
                                 placeholder="อีเมล"
                                 leftSection={<IconUser size={18} stroke={1.5} />}
@@ -208,6 +203,7 @@ const RegistrationLoginPage = () => {
                             />
 
                             <PasswordInput
+                                id="input-password"
                                 label="รหัสผ่าน"
                                 placeholder="รหัสผ่าน"
                                 required
@@ -216,35 +212,39 @@ const RegistrationLoginPage = () => {
                                 leftSection={<IconLock size={18} stroke={1.5} />}
                                 size='md'
                                 {...form.getInputProps('password')}
-                            // Mantine มีปุ่มเปิด/ปิดตาให้อัตโนมัติอยู่แล้วครับ
                             />
 
                             <Group justify="space-between" mb="lg" mt="md">
                                 <Checkbox
-                                    label="Remember me"
+                                    id="rememberMe"
+                                    label="จดจำการเข้าสู่ระบบ"
                                     {...form.getInputProps('rememberMe', { type: 'checkbox' })}
                                 />
 
                             </Group>
 
                             <Button
+                                id="submit-button"
                                 type="submit"
                                 fullWidth
                                 mt="xl"
                                 radius="md"
                                 loading={loging}
-                                color="blue"
+                                color="#FFCF9A"
+                                styles={{
+                                    label: { color: '#7A2310' },
+                                }}
                             >
-                                {loging ? 'Logging in...' : 'Login'}
+                                {loging ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
                             </Button>
                         </form>
 
-                        <div className="mt-4 text-center">
-                            <span className="text-gray-600">No account yet?</span>{' '}
+                        {/* <div className="mt-4 text-center">
+                            <span className="text-gray-600">ยังไม่มีบัญชี?</span>{' '}
                             <Link href="/auth/register" className="text-blue-500 hover:text-blue-600 font-medium">
                                 Register
                             </Link>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             ) : (
