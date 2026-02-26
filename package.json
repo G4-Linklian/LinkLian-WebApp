@@ -6,7 +6,19 @@
     "dev": "next dev -p 4100",
     "build": "next build",
     "start": "next start -p 4100",
-    "lint": "eslint"
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:ci": "jest --testPathIgnorePatterns=/test/ --ci --coverage --maxWorkers=50% --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "docker:build": "docker build -t linklian-core:local -f Dockerfile .",
+    "docker:scan": "trivy image --severity HIGH,CRITICAL --ignore-unfixed linklian-core:local",
+    "container:scan": "npm run docker:build && npm run docker:scan"
   },
   "dependencies": {
     "@mantine/core": "^8.3.14",
