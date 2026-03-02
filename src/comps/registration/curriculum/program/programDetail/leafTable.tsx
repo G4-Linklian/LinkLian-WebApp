@@ -26,6 +26,7 @@ const BATCH_SIZE = 20;
 
 export default function leafTable({ onDataUpdate, onSetRootName }: any) {
     const [programData, setProgramData] = useState<programFields[]>([]);
+    const [rootProgramData, setRootProgramData] = useState<programFields | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const router = useRouter();
@@ -117,10 +118,11 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
                 const rootProgramDatas = await getProgram({
                     inst_id: instId,
                     program_id: twig_id ? Number(twig_id) : Number(root_id),
-                    tree_type: "root",
+                    tree_type: twig_id ? "twig" : "root",
                     limit: 1,
                 })
 
+                setRootProgramData(rootProgramDatas.data[0] || null);
                 onSetRootName(rootProgramDatas.data[0]?.program_name || "");
             }
         };
@@ -227,7 +229,7 @@ export default function leafTable({ onDataUpdate, onSetRootName }: any) {
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
                 <Text size="xl" fw={500} id="program-table-title">
-                    {programName}
+                    {programName}ของ: {rootProgramData?.program_name}
                 </Text>
 
                 <div className="flex items-center gap-2">

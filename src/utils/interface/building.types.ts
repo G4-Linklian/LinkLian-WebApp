@@ -3,7 +3,7 @@ export interface buildingFields {
     inst_id?: number;
     building_name?: string;
     building_no?: string;
-    room_format?: string;
+    // room_format?: string;
     room_remark?: string;
 
     room_location_id?: number;

@@ -224,7 +224,7 @@ export default function SemesterEditModal({
             {sectionCount > 0 && (
               <div className="mt-4 text-left">
                 <Text size="sm" fw={600} mb="xs" c="red">
-                  พบข้อมูลที่เกี่ยวข้อง :
+                  พบข้อมูลที่เกี่ยวข้อง:
                 </Text>
                 <div className="max-h-48 overflow-y-auto rounded-lg p-2 px-4 bg-gray-50">
                   <Text size="sm" fw={600} mb="xs" c="red">

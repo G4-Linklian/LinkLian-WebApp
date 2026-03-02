@@ -237,10 +237,10 @@ export default function SubjectEditModal({
           {sectionCount > 0 && (
             <div className="mt-4 text-left">
               <Text size="sm" fw={600} mb="xs" c="red">
-                พบกลุ่มเรียน (Section) ที่เกี่ยวข้อง:
+                พบข้อมูลที่เกี่ยวข้อง:
               </Text>
               <div className="max-h-48 overflow-y-auto rounded-lg p-2 px-4 bg-gray-50">
-                <Text size="sm" fw={600} mb="xs">
+                <Text size="sm" fw={600} mb="xs" c="red">
                   กลุ่มเรียน ({sectionCount} กลุ่ม):
                 </Text>
                 {relatedSections.slice(0, 10).map((section, index) => (

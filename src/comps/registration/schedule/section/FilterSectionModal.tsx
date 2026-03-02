@@ -24,8 +24,8 @@ interface FilterSectionModalProps {
 }
 
 type SubjectOption = {
-    value: string;
-    label: string;
+  value: string;
+  label: string;
 };
 
 export default function FilterSectionModal({
@@ -84,38 +84,38 @@ export default function FilterSectionModal({
     if (debouncedSearch.length >= 1) {
       fetchSubject(debouncedSearch);
     } else if (debouncedSearch.length === 0 && initialValues.subject_id && initialValues.name_th) {
-       const subjectOption = {
+      const subjectOption = {
         value: String(initialValues.subject_id),
-        label: `${initialValues.subject_code} - ${initialValues.name_th}`, 
+        label: `${initialValues.subject_code} - ${initialValues.name_th}`,
       };
-       setSubjectOptions([subjectOption]);
+      setSubjectOptions([subjectOption]);
     }
   }, [debouncedSearch, token]);
 
   useEffect(() => {
     const fetchLearningAreas = async () => {
-        try {
-            if (token?.institution?.inst_id) {
-                const learningAreaData = await getLearningArea({
-                    inst_id: token.institution.inst_id,
-                });
+      try {
+        if (token?.institution?.inst_id) {
+          const learningAreaData = await getLearningArea({
+            inst_id: token.institution.inst_id,
+          });
 
-                const options = learningAreaData.data.map((area: any) => ({
-                    value: area.learning_area_id.toString(),
-                    label: area.learning_area_name,
-                }));
+          const options = learningAreaData.data.map((area: any) => ({
+            value: area.learning_area_id.toString(),
+            label: area.learning_area_name,
+          }));
 
-                setLearningAreaOptions(options);
-            }
-        } catch (error) {
-            console.error("Failed to fetch learning areas:", error);
+          setLearningAreaOptions(options);
         }
+      } catch (error) {
+        console.error("Failed to fetch learning areas:", error);
+      }
     };
 
     if (token) {
-        fetchLearningAreas();
+      fetchLearningAreas();
     }
-}, [token]);
+  }, [token]);
 
   const form = useForm<sectionFields>({
     initialValues: {
@@ -128,7 +128,15 @@ export default function FilterSectionModal({
   // Sync form values with initialValues when modal opens or initialValues changes
   useEffect(() => {
     if (opened) {
-        form.setValues(initialValues);
+      form.setValues({
+        ...initialValues,
+        learning_area_id: initialValues.learning_area_id
+          ? (String(initialValues.learning_area_id) as any)
+          : undefined,
+        subject_id: initialValues.subject_id
+          ? (String(initialValues.subject_id) as any)
+          : undefined,
+      });
     }
   }, [opened, initialValues]);
 
@@ -147,11 +155,11 @@ export default function FilterSectionModal({
   };
 
   const handleClear = () => {
-      form.reset();
-      setSubjectOptions([]); 
-      setSearchValue('');
-      onClear();
-      close();
+    form.reset();
+    setSubjectOptions([]);
+    setSearchValue('');
+    onClear();
+    close();
   }
 
   return (
@@ -165,8 +173,8 @@ export default function FilterSectionModal({
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">ตัวกรองกลุ่มเรียน</h1>
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="filter-section-form">
-         
-         <Select
+
+        <Select
           id="select-learning-area"
           className="mt-2"
           label="กลุ่มการเรียนรู้"
@@ -178,20 +186,20 @@ export default function FilterSectionModal({
         />
 
         <Select
-            id="select-subject"
-            className="mt-2"
-            label="วิชา"
-            placeholder="พิมพ์ชื่อวิชาหรือรหัสวิชา"
-            data={subjectOptions}
-            searchable
-            nothingFoundMessage={loadingSubject ? "กำลังค้นหา..." : "ไม่พบรายวิชา"}
-            onSearchChange={setSearchValue}
-            searchValue={searchValue}
-            clearable
-            {...form.getInputProps("subject_id")}
-            filter={({ options }) => options}
-            radius={8}
-            rightSection={loadingSubject ? <Loader size={16} /> : <IconSelector size={16} />}
+          id="select-subject"
+          className="mt-2"
+          label="วิชา"
+          placeholder="พิมพ์ชื่อวิชาหรือรหัสวิชา"
+          data={subjectOptions}
+          searchable
+          nothingFoundMessage={loadingSubject ? "กำลังค้นหา..." : "ไม่พบรายวิชา"}
+          onSearchChange={setSearchValue}
+          searchValue={searchValue}
+          clearable
+          {...form.getInputProps("subject_id")}
+          filter={({ options }) => options}
+          radius={8}
+          rightSection={loadingSubject ? <Loader size={16} /> : <IconSelector size={16} />}
         />
 
         <TextInput
@@ -205,22 +213,22 @@ export default function FilterSectionModal({
         />
 
         <Group justify="right" mt="lg">
-            <Button
-                id="clear-filter-button"
-                variant="default"
-                onClick={handleClear}
-                radius={8}
-            >
-                ล้างค่า
-            </Button>
-            <Button
-                id="submit-button"
-                type="submit"
-                radius={8}
-                leftSection={<IconFilter size={16} />}
-            >
-                ค้นหา
-            </Button>
+          <Button
+            id="clear-filter-button"
+            variant="default"
+            onClick={handleClear}
+            radius={8}
+          >
+            ล้างค่า
+          </Button>
+          <Button
+            id="submit-button"
+            type="submit"
+            radius={8}
+            leftSection={<IconFilter size={16} />}
+          >
+            ค้นหา
+          </Button>
         </Group>
       </form>
     </Modal>

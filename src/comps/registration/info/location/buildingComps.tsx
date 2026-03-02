@@ -197,7 +197,7 @@ export default function BuildingComps() {
                             radius={16}
                             withBorder
                             className="transition-all duration-200 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-                            onClick={() => router.push(`/registration/info/building?building_id=${building.building_id}&room_format=${router.query.room_format || "by_building_no"}`)}
+                            onClick={() => router.push(`/registration/info/building?building_id=${building.building_id}`)}
                         >
                             <Group justify="space-between" mb="xs">
                                 <ThemeIcon size="xl" radius={8} variant="light" color="orange">

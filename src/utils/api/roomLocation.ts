@@ -13,7 +13,7 @@ export const getRoomLocation = async (input: buildingFields) => {
         room_location_id,
         building_id,
         room_number,
-        floor,
+        // floor,
         flag_valid,
         offset,
         limit,
@@ -25,7 +25,7 @@ export const getRoomLocation = async (input: buildingFields) => {
         room_location_id,
         building_id,
         room_number,
-        floor,
+        // floor,
         flag_valid,
         offset,
         limit,
@@ -41,7 +41,7 @@ export const createRoomLocation = async (input: buildingFields) => {
     const {
         building_id,
         room_number,
-        floor,
+        // floor,
         room_remark,
         flag_valid,
     } = input;
@@ -49,7 +49,7 @@ export const createRoomLocation = async (input: buildingFields) => {
     const data = await fetchDataApi(`POST`, "room-location", {
         building_id,
         room_number,
-        floor,
+        // floor,
         room_remark,
         flag_valid,
     });
@@ -77,7 +77,7 @@ export const updateRoomLocation = async (input: buildingFields) => {
         room_location_id,
         building_id,
         room_number,
-        floor,
+        // floor,
         room_remark,
         flag_valid
     } = input;
@@ -85,7 +85,7 @@ export const updateRoomLocation = async (input: buildingFields) => {
     const data = await fetchDataApi(`PUT`, `room-location/${room_location_id}`, {
         building_id,
         room_number,
-        floor,
+        // floor,
         room_remark,
         flag_valid
     });
