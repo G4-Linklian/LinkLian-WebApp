@@ -111,6 +111,7 @@ export default function sectionTable({ semesterData }: any) {
         setSectionData([]);
         setHasMore(true);
         fetchData(0, true);
+        
     }, [instId, router.isReady, router.query.semester_id, filterParams]);
 
     const addSectionData = async (values: sectionFields) => {
@@ -180,7 +181,7 @@ export default function sectionTable({ semesterData }: any) {
             }
 
             const payload = {
-                section_id: Number(values.section_id),
+                section_id: values.section_id,
                 semester_id: Number(semesterId),
                 subject_id: Number(values.subject_id),
                 section_name: values.section_name,
@@ -320,7 +321,7 @@ export default function sectionTable({ semesterData }: any) {
                             <Table.Th w={40} ta="center">ชื่อวิชา</Table.Th>
                             <Table.Th w={40} ta="center">กลุ่มการเรียนรู้</Table.Th>
                             <Table.Th w={30} ta="center">ชั่วโมง/สัปดาห์</Table.Th>
-                            <Table.Th w={40} ta="center">ชื่อ Section</Table.Th>
+                            <Table.Th w={40} ta="center">ชื่อกลุ่มเรียน</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
@@ -335,7 +336,7 @@ export default function sectionTable({ semesterData }: any) {
 
                 {!hasMore && (
                     <Center p="md" mt="xs">
-                        <Text size="sm" c="dimmed">Section การเรียนทั้งหมดถูกโหลดแล้ว</Text>
+                        <Text size="sm" c="dimmed">กลุ่มการเรียนทั้งหมดถูกโหลดแล้ว</Text>
                     </Center>
                 )}
             </ScrollArea>

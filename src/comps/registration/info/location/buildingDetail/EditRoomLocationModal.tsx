@@ -135,15 +135,6 @@ export default function EditRoomLocationModal({
       >
         <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการห้องเรียน</h1>
         <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-room-location-form">
-          <TextInput
-            id="input-floor"
-            label="ชั้น"
-            placeholder="เช่น 1"
-            {...form.getInputProps("floor")}
-            required
-            mb="sm"
-            radius={8}
-          />
 
           <TextInput
             id="input-room-number"
@@ -197,11 +188,11 @@ export default function EditRoomLocationModal({
             {scheduleCount > 0 && (
               <div className="mt-4 text-left">
                 <Text size="sm" fw={600} mb="xs" c="red">
-                  พบตารางเรียนที่เกี่ยวข้อง ({scheduleCount} รายการ):
+                  พบข้อมูลที่เกี่ยวข้อง:
                 </Text>
                 <div className="max-h-48 overflow-y-auto rounded-lg p-2 px-4 bg-gray-50">
                   <Text size="sm" fw={600} mb="xs" c="red">
-                    กลุ่มเรียน ({scheduleCount} รายการ):
+                    ตารางเรียน ({scheduleCount} รายการ):
                   </Text>
                   {relatedSchedules.slice(0, 10).map((schedule, index) => (
                     <div key={schedule.schedule_id || index} className="text-sm py-2">

@@ -77,7 +77,7 @@ const scheduleComp = () => {
                     const data = result.data;
                     const stats: StatApiResponse[] = [
                         { key: "classroom", value: Number(data.classroom) || 0, label: "ห้องเรียน" },
-                        { key: "sectionSchedule", value: Number(data.sectionSchedule) || 0, label: "Section การเรียน" },
+                        { key: "sectionSchedule", value: Number(data.sectionSchedule) || 0, label: "กลุ่มเรียน" },
                     ];
 
                     setStatsFromApi(stats);

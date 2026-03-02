@@ -216,9 +216,9 @@ export default function roomTable() {
             className='text-xs'
         >
             <Table.Td ta="center">{index + 1}</Table.Td>
-            <Table.Td ta="center">{element.floor}</Table.Td>
-            <Table.Td ta="center">{element.floor + String(element.room_number)}</Table.Td>
-            <Table.Td ta="center">{router.query.room_format == 'by_building_no' ? String(element.building_no) + String(element.floor) + String(element.room_number) : String(element.building_name) + " " + String(element.floor) + String(element.room_number)}</Table.Td>
+            {/* <Table.Td ta="center">{element.floor}</Table.Td> */}
+            <Table.Td ta="center">{element.room_number}</Table.Td>
+            {/* <Table.Td ta="center">{router.query.room_format == 'by_building_no' ? String(element.building_no) + String(element.floor) + String(element.room_number) : String(element.building_name) + " " + String(element.floor) + String(element.room_number)}</Table.Td> */}
 
             <Table.Td ta="center">{element.room_remark ? element.room_remark : "-"}</Table.Td>
 
@@ -268,9 +268,9 @@ export default function roomTable() {
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={5} ta="center">ลำดับ</Table.Th>
-                            <Table.Th w={20} ta="center">ชั้น</Table.Th>
-                            <Table.Th w={40} ta="center">เลขห้อง</Table.Th>
-                            <Table.Th w={40} ta="center">ชื่อเต็ม</Table.Th>
+                            {/* <Table.Th w={20} ta="center">ชั้น</Table.Th> */}
+                            <Table.Th w={40} ta="center">ห้อง</Table.Th>
+                            {/* <Table.Th w={40} ta="center">ชื่อเต็ม</Table.Th> */}
                             <Table.Th w={60} ta="center">หมายเหตุ</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
                         </Table.Tr>

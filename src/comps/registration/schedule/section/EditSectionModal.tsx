@@ -358,7 +358,7 @@ export default function SectionEditModal({
                 <div className="max-h-48 overflow-y-auto rounded-lg p-2 px-4 bg-gray-50">
                   {enrollmentCount > 0 && (
                     <div className="mb-3">
-                      <Text size="sm" fw={600} mb="xs">
+                      <Text size="sm" fw={600} mb="xs" c="red">
                         นักเรียน ({enrollmentCount} คน):
                       </Text>
                       {relatedEnrollments.slice(0, 5).map((enrollment, index) => (
@@ -378,7 +378,7 @@ export default function SectionEditModal({
                   )}
                   {educatorCount > 0 && (
                     <div>
-                      <Text size="sm" fw={600} mb="xs">
+                      <Text size="sm" fw={600} mb="xs" c="red">
                         อาจารย์ผู้สอน ({educatorCount} คน):
                       </Text>
                       {relatedEducators.slice(0, 5).map((educator, index) => (

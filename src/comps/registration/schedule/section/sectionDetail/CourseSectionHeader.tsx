@@ -271,9 +271,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
                       <IconMapPin className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
                       <span className="truncate">
                         {item.building_name} ห้อง{" "}
-                        {item.room_format === "by_building_no"
-                          ? `${item.building_no}${item.floor}${item.room_number}`
-                          : `${item.building_name}${item.floor}${item.room_number}`}
+                        {item.room_number}
                       </span>
                     </div>
                   </div>

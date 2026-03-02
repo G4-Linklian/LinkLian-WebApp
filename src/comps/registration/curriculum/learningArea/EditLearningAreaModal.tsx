@@ -219,7 +219,7 @@ export default function LearningAreaEditModal({
                 <div className="max-h-48 overflow-y-auto rounded-lg p-2 px-4 bg-gray-50">
                   {userCount > 0 && (
                     <div className="mb-3">
-                      <Text size="sm" fw={600} mb="xs">
+                      <Text size="sm" fw={600} mb="xs" c="red">
                         ผู้ใช้ ({userCount} คน):
                       </Text>
                       {relatedUsers.slice(0, 5).map((user, index) => (
@@ -236,7 +236,7 @@ export default function LearningAreaEditModal({
                   )}
                   {subjectCount > 0 && (
                     <div>
-                      <Text size="sm" fw={600} mb="xs">
+                      <Text size="sm" fw={600} mb="xs" c="red">
                         รายวิชา ({subjectCount} วิชา):
                       </Text>
                       {relatedSubjects.slice(0, 5).map((subject, index) => (
