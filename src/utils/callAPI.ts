@@ -1,6 +1,7 @@
 // utils/apiClient.ts
 
 import { getRegistrationToken } from "./authToken";
+import { getTeacherToken } from "./authToken";
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -27,7 +28,13 @@ export async function fetchDataApi(
 
   const urls = process.env.NEXT_PUBLIC_BASE_URL;
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
-  const token = getRegistrationToken();
+
+  let token: string | null = null;
+  token = getRegistrationToken();
+
+  if (!token) {
+    token = getTeacherToken();
+  }
 
   if (!urls) {
     throw new Error('BACKEND_PATH environment variable is not set');
