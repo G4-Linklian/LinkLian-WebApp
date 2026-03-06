@@ -116,7 +116,12 @@ export default function subjectTable() {
 
         try {
             const res = await createSubject({
-                ...values
+                ...values,
+                inst_id: Number(values.inst_id),
+                learning_area_id: Number(values.learning_area_id),
+                credit: Number(values.credit),
+                subject_id: Number(values.subject_id),
+                hour_per_week: Number(values.hour_per_week),
             });
 
             setSubjectData([]);
@@ -145,6 +150,7 @@ export default function subjectTable() {
                 learning_area_id: Number(values.learning_area_id),
                 credit: Number(values.credit),
                 subject_id: Number(values.subject_id),
+                hour_per_week: Number(values.hour_per_week),
             };
 
             const res = await updateSubject(payload);

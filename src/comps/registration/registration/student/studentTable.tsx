@@ -173,8 +173,8 @@ export default function StudentTable() {
 
             const res = await updateUserSys(payload);
             await updateProgramUserSys({
-                program_id: values.program_id,
-                user_sys_id: values.user_sys_id,
+                program_id: Number(values.program_id),
+                user_sys_id: Number(values.user_sys_id),
             });
 
             setStudentData([]);
