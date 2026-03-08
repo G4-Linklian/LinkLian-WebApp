@@ -47,7 +47,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
 
       const scheduleData = await getSchedule({
         section_id: Number(sectionId),
-        day_of_week: Number(values.day_of_week),
+        day_of_week: String(values.day_of_week),
         start_time: `${normalizeTime(values.start_time)}`,
         end_time: `${normalizeTime(values.end_time)}`,
         room_location_id: Number(values.room_location_id)
@@ -60,7 +60,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
 
       const payload = {
         ...values,
-        day_of_week: Number(values.day_of_week),
+        day_of_week: String(values.day_of_week),
         start_time: normalizeTime(values.start_time),
         end_time: normalizeTime(values.end_time),
         room_location_id: Number(values.room_location_id)
@@ -87,7 +87,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
 
       const scheduleData = await getSchedule({
         section_id: Number(sectionId),
-        day_of_week: Number(values.day_of_week),
+        day_of_week: String(values.day_of_week),
         start_time: `${normalizeTime(values.start_time)}`,
         end_time: `${normalizeTime(values.end_time)}`,
         room_location_id: Number(values.room_location_id)
@@ -99,7 +99,7 @@ const CourseSectionHeader = ({ sectionData, scheduleData, token, semesterOptions
       }
 
       const payload = {
-        day_of_week: Number(values.day_of_week),
+        day_of_week: String(values.day_of_week),
         start_time: `${normalizeTime(values.start_time)}`,
         end_time: `${normalizeTime(values.end_time)}`,
         section_id: Number(sectionId),

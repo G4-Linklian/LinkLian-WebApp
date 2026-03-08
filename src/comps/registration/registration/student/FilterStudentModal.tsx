@@ -118,8 +118,8 @@ export default function FilterStudentModal({
     const hasValue = (val: any) => val !== "" && val !== undefined && val !== null;
 
     if (hasValue(values.user_status)) filteredValues.user_status = values.user_status;
-    if (hasValue(values.edu_lev_id)) filteredValues.edu_lev_id = values.edu_lev_id;
-    if (hasValue(values.program_id)) filteredValues.program_id = values.program_id;
+    if (hasValue(values.edu_lev_id)) filteredValues.edu_lev_id = Number(values.edu_lev_id);
+    if (hasValue(values.program_id)) filteredValues.program_id = Number(values.program_id);
 
     onSubmit(filteredValues);
     close();

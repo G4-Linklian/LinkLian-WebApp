@@ -38,33 +38,32 @@ export default function AddProgramModalForm({
   });
 
   const handleSubmit = (values: programFields) => {
-
     const instType = token?.institution?.inst_type;
+    const payload = { ...values };
 
     if (!root_id && instType === "school") {
-      values.program_type = "study_plan";
-      values.tree_type = "root";
+      payload.program_type = "study_plan";
+      payload.tree_type = "root";
     } else if (!root_id && instType === "uni") {
-      values.program_type = "faculty";
-      values.tree_type = "root";
+      payload.program_type = "faculty";
+      payload.tree_type = "root";
     } else if (root_id && instType === "school") {
-      values.program_type = "class";
-      values.tree_type = "leaf";
-      values.parent_id = Number(root_id);
+      payload.program_type = "class";
+      payload.tree_type = "leaf";
+      payload.parent_id = Number(root_id);
     } else if (twig_id && instType === "uni") {
-      values.program_type = "major";
-      values.tree_type = "leaf";
-      values.parent_id = Number(twig_id);
+      payload.program_type = "major";
+      payload.tree_type = "leaf";
+      payload.parent_id = Number(twig_id);
     } else if (root_id && instType === "uni") {
-      values.program_type = "department";
-      values.tree_type = "twig";
-      values.parent_id = Number(root_id);
-    }
-    else {
-      values.parent_id = Number(root_id);
+      payload.program_type = "department";
+      payload.tree_type = "twig";
+      payload.parent_id = Number(root_id);
+    } else if (root_id) {
+      payload.parent_id = Number(root_id);
     }
 
-    onSubmit(values);
+    onSubmit(payload);
     form.reset();
     close();
   };

@@ -93,7 +93,12 @@ export default function AddSectionModalForm({
   }, [form.values.building_id]);
 
   const handleSubmit = (values: sectionFields) => {
-    onSubmit(values);
+    const payload = {
+      ...values,
+      subject_id: values.subject_id ? Number(values.subject_id) : undefined,
+      semester_id: values.semester_id ? Number(values.semester_id) : undefined,
+    };
+    onSubmit(payload);
     close();
   };
 

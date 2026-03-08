@@ -135,7 +135,12 @@ export default function EditStudentModal({
   }, [debouncedSearch]);
 
   const handleSubmit = (values: UserSysFields) => {
-    onSubmit?.(values);
+    const payload = {
+      ...values,
+      program_id: values.program_id ? Number(values.program_id) : undefined,
+      edu_lev_id: values.edu_lev_id ? Number(values.edu_lev_id) : undefined,
+    };
+    onSubmit?.(payload);
     close();
   };
 

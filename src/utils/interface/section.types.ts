@@ -6,7 +6,7 @@ export interface sectionFields {
     flag_valid?: boolean;
 
     schedule_id?: number;
-    day_of_week?: number | string;
+    day_of_week?: string;
     start_time?: Date;
     end_time?: Date;
     room_location_id?: number;
@@ -114,7 +114,7 @@ export interface SectionSchedulePayload {
     subject_id?: number;
     semester_id?: number;
     section_name?: string;
-    day_of_week?: number;
+    day_of_week?: number | string;
     start_time?: string; // HH:mm:ss
     end_time?: string;   // HH:mm:ss
     room_location_id?: number;

@@ -145,13 +145,13 @@ export default function StudentTable() {
             fetchData(0);
 
             if (res.success) {
-                showNotification("เพิ่มบุคลากรสำเร็จ!", "", "success");
+                showNotification("เพิ่มผู้เรียนสำเร็จ!", "", "success");
             } else {
-                showNotification("เพิ่มบุคลากรล้มเหลว!", res.message, "error");
+                showNotification("เพิ่มผู้เรียนล้มเหลว!", res.message, "error");
             }
         } catch (error) {
             console.error("Create staff failed:", error);
-            showNotification("เพิ่มบุคลากรล้มเหลว!", "An error occurred while creating the staff.", "error");
+            showNotification("เพิ่มผู้เรียนล้มเหลว!", "An error occurred while creating the student.", "error");
         }
     };
 
