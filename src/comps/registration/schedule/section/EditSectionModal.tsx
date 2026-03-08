@@ -142,7 +142,14 @@ export default function SectionEditModal({
 
 
   const handleSubmit = (values: sectionFields) => {
-    onSubmit?.(values);
+    const payload = {
+      ...values,
+      subject_id: values.subject_id ? Number(values.subject_id) : undefined,
+      semester_id: values.semester_id ? Number(values.semester_id) : undefined,
+      building_id: values.building_id ? Number(values.building_id) : undefined,
+      room_location_id: values.room_location_id ? Number(values.room_location_id) : undefined,
+    };
+    onSubmit?.(payload);
     close();
   };
 

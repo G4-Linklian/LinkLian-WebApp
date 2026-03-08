@@ -38,7 +38,11 @@ export default function AddStaffModalForm({
   });
 
   const handleSubmit = (values: UserSysFields) => {
-    onSubmit(values);
+    const payload = {
+      ...values,
+      learning_area_id: values.learning_area_id ? Number(values.learning_area_id) : undefined,
+    };
+    onSubmit(payload);
     close();
   };
 

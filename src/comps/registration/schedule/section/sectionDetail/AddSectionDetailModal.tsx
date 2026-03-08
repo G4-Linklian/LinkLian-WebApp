@@ -50,7 +50,7 @@ export default function AddSectionDetailModal({
 
   const form = useForm<sectionFields>({
     initialValues: {
-      day_of_week: 0,
+      day_of_week: undefined,
       start_time: undefined,
       end_time: undefined,
       room_location_id: undefined,
@@ -120,7 +120,13 @@ export default function AddSectionDetailModal({
       return;
     }
 
-    onSubmit?.(values);
+    const payload = {
+      ...values,
+      day_of_week: values.day_of_week !== undefined ? String(values.day_of_week) : undefined,
+      building_id: values.building_id ? Number(values.building_id) : undefined,
+      room_location_id: values.room_location_id ? Number(values.room_location_id) : undefined,
+    };
+    onSubmit?.(payload);
     close();
   };
 

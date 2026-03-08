@@ -30,7 +30,13 @@ export default function AddSubjectModalForm({
   });
 
   const handleSubmit = (values: subjectFields) => {
-    onSubmit(values);
+    const payload = {
+      ...values,
+      learning_area_id: values.learning_area_id ? Number(values.learning_area_id) : undefined,
+      credit: values.credit ? Number(values.credit) : undefined,
+      hour_per_week: values.hour_per_week ? Number(values.hour_per_week) : undefined,
+    };
+    onSubmit(payload);
     form.reset();
     close();
   };

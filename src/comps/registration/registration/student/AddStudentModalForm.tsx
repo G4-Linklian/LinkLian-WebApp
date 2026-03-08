@@ -69,7 +69,7 @@ export default function AddStudentModalForm({
 
       const options: ProgramOption[] = programData.data.map((programs: any) => ({
         value: programs.program_id,
-        label: `${programs.program_name} - ${programs.remark}`,
+        label: programs.program_name,
       }));
 
       setProgramOptions(prev => {
@@ -96,7 +96,12 @@ export default function AddStudentModalForm({
   }, [debouncedSearch]);
 
   const handleSubmit = (values: UserSysFields) => {
-    onSubmit(values);
+    const payload = {
+      ...values,
+      program_id: values.program_id ? Number(values.program_id) : undefined,
+      edu_lev_id: values.edu_lev_id ? Number(values.edu_lev_id) : undefined,
+    };
+    onSubmit(payload);
     close();
   };
 
