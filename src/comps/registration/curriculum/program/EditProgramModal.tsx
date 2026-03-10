@@ -97,7 +97,11 @@ export default function EditProgramModal({
   }, [instType, root_id, twig_id]);
 
   const handleSubmit = (values: programFields) => {
-    onSubmit?.(values);
+    const payload = { ...values };
+    if (payload.parent_id !== undefined && payload.parent_id !== null) {
+      payload.parent_id = Number(payload.parent_id);
+    }
+    onSubmit?.(payload);
     close();
   };
 
