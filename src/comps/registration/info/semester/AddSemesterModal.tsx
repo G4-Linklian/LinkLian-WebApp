@@ -64,6 +64,7 @@ export default function AddSemesterModal({
 
   return (
     <Modal
+      id="add-semester-modal"
       opened={opened}
       onClose={close}
       centered
@@ -75,10 +76,12 @@ export default function AddSemesterModal({
       </h1>
 
       <form
+        id="add-semester-form"
         onSubmit={form.onSubmit(handleSubmit)}
         className="flex flex-col gap-2"
       >
         <TextInput
+          id="input-semester"
           label="ปีการศึกษา"
           placeholder="เช่น 1/2568"
           {...form.getInputProps("semester")}
@@ -87,6 +90,7 @@ export default function AddSemesterModal({
         />
 
         <DateInput
+          id="input-start-date"
           label="วันที่เริ่มต้น"
           valueFormat="DD/MM/YYYY"
           placeholder="เช่น 01/01/2567"
@@ -96,6 +100,7 @@ export default function AddSemesterModal({
         />
 
         <DateInput
+          id="input-end-date"
           label="วันที่สิ้นสุด"
           valueFormat="DD/MM/YYYY"
           placeholder="เช่น 30/04/2567"
@@ -105,11 +110,11 @@ export default function AddSemesterModal({
         />
 
         <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close} radius={8}>
+          <Button variant="outline" onClick={close} radius={8} id="cancel-button">
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="submit-button">
             เพิ่มภาคเรียน
           </Button>
         </Group>

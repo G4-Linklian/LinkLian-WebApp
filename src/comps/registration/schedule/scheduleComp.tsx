@@ -6,8 +6,10 @@ import SectionTable from '@/comps/registration/schedule/section/sectionTable';
 import { getSemester } from '@/utils/api/semester';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
-import { Select, Loader } from "@mantine/core";
+import { Select, Loader, Center } from "@mantine/core";
 import TableSection from '@/comps/registration/shared/TableSection';
+import { SummaryType } from "@/enums/registrationSummary";
+import { getRegistrationSummary } from "@/utils/api/registrationSummary";
 
 const scheduleComp = () => {
     const router = useRouter();
@@ -15,6 +17,8 @@ const scheduleComp = () => {
     const [semesterOptions, setSemesterOptions] = useState<{ value: string; label: string; status: string }[]>([]);
     const [loading, setLoading] = useState(false);
     const [trigger, setTrigger] = useState(false);
+    const [statsFromApi, setStatsFromApi] = useState<StatApiResponse[]>([]);
+    const [statsLoading, setStatsLoading] = useState(false);
 
     const token = decodeRegistrationToken();
     const instId = token?.institution?.inst_id || "";
@@ -57,6 +61,37 @@ const scheduleComp = () => {
 
     }, [instId, router.isReady, trigger]);
 
+    useEffect(() => {
+        const fetchSummary = async () => {
+            if (!instId || !router.query.semester_id) return;
+
+            try {
+                setStatsLoading(true);
+                const result = await getRegistrationSummary({
+                    type: SummaryType.SCHEDULE,
+                    inst_id: instId,
+                    semester_id: parseInt(router.query.semester_id as string)
+                });
+
+                if (result.success && result.data) {
+                    const data = result.data;
+                    const stats: StatApiResponse[] = [
+                        { key: "classroom", value: Number(data.classroom) || 0, label: "ห้องเรียน" },
+                        { key: "sectionSchedule", value: Number(data.sectionSchedule) || 0, label: "กลุ่มเรียน" },
+                    ];
+
+                    setStatsFromApi(stats);
+                }
+            } catch (error) {
+                console.error("Failed to fetch schedule summary:", error);
+            } finally {
+                setStatsLoading(false);
+            }
+        };
+
+        fetchSummary();
+    }, [instId, router.query.semester_id]);
+
     const handleSemesterChange = (value: string | null) => {
         if (value) {
             router.push({
@@ -65,14 +100,6 @@ const scheduleComp = () => {
             }, undefined, { shallow: true });
         }
     };
-
-    const statsFromApi: StatApiResponse[] = [
-        { key: "classroom", value: 30, label: "ห้องเรียน" },
-        // { key: "classroomOn", value: 11, label: "ห้องลงเสร็จแล้ว" },
-        { key: "sectionEdit", value: 240, label: "Section การเรียน" },
-        // { key: "clockCheck", value: 127, label: "ลงเวลาแล้ว" },
-        // { key: "clockX", value: 113, label: "ยังไม่ลงเวลา" },
-    ];
 
 
     const getGridCols = (length: number) => {
@@ -123,6 +150,7 @@ const scheduleComp = () => {
 
                         <div className="w-32 flex items-center">
                             <Select
+                                id="select-semester"
                                 placeholder="เลือกปีการศึกษา"
                                 data={semesterOptions}
                                 value={router.query.semester_id as string || null}
@@ -143,11 +171,17 @@ const scheduleComp = () => {
                         </div>
                     </div>
 
-                    <div className={`grid gap-2 ${getGridCols(mappedStats.length)}`}>
-                        {mappedStats.map((stat, index) => (
-                            <StatCard key={index} {...stat} />
-                        ))}
-                    </div>
+                    {statsLoading ? (
+                        <Center style={{ minHeight: '120px' }}>
+                            <Loader size="md" />
+                        </Center>
+                    ) : (
+                        <div className={`grid gap-2 ${getGridCols(mappedStats.length)}`}>
+                            {mappedStats.map((stat, index) => (
+                                <StatCard key={index} {...stat} />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <TableSection>

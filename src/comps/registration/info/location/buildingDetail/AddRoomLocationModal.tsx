@@ -4,18 +4,16 @@ import {
   Group,
   TextInput,
   SegmentedControl,
-  NumberInput,
   Stack,
   Divider,
   Text,
-  Space
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 
 export interface RoomPayload {
   building_id: number;
-  floor: string;
+  // floor: string;
   room_number: string;
   room_remark?: string;
 }
@@ -27,7 +25,7 @@ interface AddRoomLocationModalProps {
   buildingId: number;
 }
 
-type CreateMode = "single" | "floor" | "building";
+type CreateMode = "single" | "floor";
 
 export default function AddRoomLocationModal({
   opened,
@@ -48,20 +46,15 @@ export default function AddRoomLocationModal({
       single_room: "",
 
       // Mode: Floor (สร้างหลายห้อง ใน 1 ชั้น)
-      floor_target: "",
-      room_start: 1,
-      room_end: 10,
+      // floor_target: "",
+      room_start: "",
+      room_end: "",
 
-      // Mode: Building (สร้างหลายชั้น ชั้นละหลายห้อง)
-      floor_start: 1,
-      floor_end: 5,
-      b_room_start: 1,
-      b_room_end: 10,
     },
     validate: {
-        single_floor: (value, values) => mode === 'single' && !value ? 'กรุณาระบุชั้น' : null,
+        // single_floor: (value, values) => mode === 'single' && !value ? 'กรุณาระบุชั้น' : null,
         single_room: (value, values) => mode === 'single' && !value ? 'กรุณาระบุเลขห้อง' : null,
-        floor_target: (value, values) => mode === 'floor' && !value ? 'กรุณาระบุชั้น' : null,
+        // floor_target: (value, values) => mode === 'floor' && !value ? 'กรุณาระบุชั้น' : null,
     }
   });
 
@@ -70,8 +63,36 @@ export default function AddRoomLocationModal({
     if (opened) form.reset();
   }, [opened]);
 
-  // Helper: เติมเลข 0 ข้างหน้า (เช่น 1 -> "01")
-  const padNumber = (num: number) => num.toString().padStart(2, "0");
+  // แยก prefix กับเลขห้อง
+  const parseRoomNumber = (roomStr: string) => {
+    if (!roomStr) {
+      roomStr = String(roomStr || ""); 
+    }
+
+    const match = roomStr.match(/^(.*?)(\d+)$/);
+    if (match) {
+      return {
+        prefix: match[1],
+        num: parseInt(match[2], 10),
+        numLength: match[2].length,
+      };
+    }
+    return null;
+  };
+
+  const formatRoomNumber = (prefix: string, num: number, length: number) => {
+    const result = prefix + num.toString();
+    return result;
+  };
+
+  const getRoomCount = (startRoom: string, endRoom: string) => {
+    const startParsed = parseRoomNumber(startRoom);
+    const endParsed = parseRoomNumber(endRoom);
+    if (startParsed && endParsed && startParsed.prefix === endParsed.prefix) {
+      return Math.max(0, endParsed.num - startParsed.num + 1);
+    }
+    return 0;
+  };
 
   const handleSubmit = (values: typeof form.values) => {
     const payloads: RoomPayload[] = [];
@@ -80,37 +101,20 @@ export default function AddRoomLocationModal({
       // 1. สร้างรายห้อง (Single)
       payloads.push({
         building_id: Number(buildingId),
-        floor: values.single_floor,
         room_number: values.single_room,
         room_remark: values.room_remark,
       });
     } else if (mode === "floor") {
-      // 2. สร้างรายชั้น (Floor) -> ระบุชั้น, รันเลขห้อง
-      const start = Number(values.room_start);
-      const end = Number(values.room_end);
+      // 2. สร้างรายชั้น (Floor) -> ระบุห้องเริ่มต้นและสิ้นสุด
+      const startParsed = parseRoomNumber(values.room_start);
+      const endParsed = parseRoomNumber(values.room_end);
 
-      for (let i = start; i <= end; i++) {
-        payloads.push({
-          building_id: Number(buildingId),
-          floor: values.floor_target,
-          room_number: padNumber(i), // ผลลัพธ์จะเป็น "01", "02", ... "12"
-          room_remark: values.room_remark,
-        });
-      }
-    } else if (mode === "building") {
-      // 3. สร้างรายตึก (Building) -> รันชั้น, รันเลขห้อง
-      const fStart = Number(values.floor_start);
-      const fEnd = Number(values.floor_end);
-      const rStart = Number(values.b_room_start);
-      const rEnd = Number(values.b_room_end);
-
-      for (let f = fStart; f <= fEnd; f++) {
-        for (let r = rStart; r <= rEnd; r++) {
+      if (startParsed && endParsed && startParsed.prefix === endParsed.prefix) {
+        for (let i = startParsed.num; i <= endParsed.num; i++) {
           payloads.push({
             building_id: Number(buildingId),
-            floor: f.toString(),
-            room_number: padNumber(r),
-            room_remark: values.room_remark, 
+            room_number: formatRoomNumber(startParsed.prefix, i, startParsed.numLength),
+            room_remark: values.room_remark,
           });
         }
       }
@@ -122,6 +126,7 @@ export default function AddRoomLocationModal({
 
   return (
     <Modal
+      id="add-room-location-modal"
       opened={opened}
       onClose={close}
       centered
@@ -141,7 +146,6 @@ export default function AddRoomLocationModal({
           data={[
             { label: "รายห้อง", value: "single" },
             { label: "รายชั้น", value: "floor" },
-            { label: "รายตึก", value: "building" },
           ]}
         />
 
@@ -154,15 +158,9 @@ export default function AddRoomLocationModal({
             <>
               <Group grow>
                 <TextInput
-                  label="ชั้น"
-                  placeholder="เช่น 6"
-                  {...form.getInputProps("single_floor")}
-                  required
-                  radius={8}
-                />
-                <TextInput
+                  id="input-single-room"
                   label="หมายเลขห้อง"
-                  placeholder="เช่น 07"
+                  placeholder="เช่น SCL607"
                   {...form.getInputProps("single_room")}
                   required
                   radius={8}
@@ -174,76 +172,34 @@ export default function AddRoomLocationModal({
           {/* --- MODE 2: FLOOR --- */}
           {mode === "floor" && (
             <>
-              <TextInput
-                label="ชั้นที่ต้องการสร้าง"
-                placeholder="เช่น 6"
-                description="ระบุชั้นที่ต้องการเพิ่มห้อง"
-                {...form.getInputProps("floor_target")}
-                required
-                radius={8}
-              />
               <Group grow>
-                <NumberInput
+                <TextInput
+                  id="input-room-start"
                   label="เริ่มห้องเลขที่"
-                  min={1}
+                  placeholder="เช่น SCL601"
                   {...form.getInputProps("room_start")}
                   radius={8}
+                  required
                 />
-                <NumberInput
+                <TextInput
+                  id="input-room-end"
                   label="ถึงห้องเลขที่"
-                  min={1}
+                  placeholder="เช่น SCL607"
                   {...form.getInputProps("room_end")}
                   radius={8}
+                  required
                 />
               </Group>
               <Text size="xs" c="dimmed">
-                ระบบจะสร้างห้องตั้งแต่ {padNumber(form.values.room_start)} ถึง {padNumber(form.values.room_end)} ในชั้น {form.values.floor_target || "?"}
+                {form.values.room_start && form.values.room_end 
+                  ? `ระบบจะสร้างห้องตั้งแต่ ${form.values.room_start} ถึง ${form.values.room_end} (${getRoomCount(form.values.room_start, form.values.room_end)} ห้อง)`
+                  : "กรุณาระบุห้องเริ่มต้นและสิ้นสุด"}
               </Text>
             </>
           )}
-
-          {/* --- MODE 3: BUILDING --- */}
-          {mode === "building" && (
-            <>
-              <Text fw={500} size="sm">ช่วงของชั้น (Floor Range)</Text>
-              <Group grow>
-                <NumberInput
-                  label="เริ่มชั้นที่"
-                  min={1}
-                  {...form.getInputProps("floor_start")}
-                  radius={8}
-                />
-                <NumberInput
-                  label="ถึงชั้นที่"
-                  min={1}
-                  {...form.getInputProps("floor_end")}
-                  radius={8}
-                />
-              </Group>
-              
-              <Text fw={500} size="sm" mt="xs">ช่วงของห้องในแต่ละชั้น (Room Range per Floor)</Text>
-              <Group grow>
-                <NumberInput
-                  label="เริ่มห้องเลขที่"
-                  min={1}
-                  {...form.getInputProps("b_room_start")}
-                  radius={8}
-                />
-                <NumberInput
-                  label="ถึงห้องเลขที่"
-                  min={1}
-                  {...form.getInputProps("b_room_end")}
-                  radius={8}
-                />
-              </Group>
-               <Text size="xs" c="dimmed">
-                ระบบจะสร้างห้อง {padNumber(form.values.b_room_start)}-{padNumber(form.values.b_room_end)} ให้กับทุกชั้นตั้งแต่ชั้น {form.values.floor_start} ถึง {form.values.floor_end}
-              </Text>
-            </>
-          )}
-
 
           <TextInput
+            id="input-room-remark"
             label="หมายเหตุ (ใช้ร่วมกัน)"
             placeholder="เช่น ห้องเล็คเชอร์, ห้องแล็บ"
             {...form.getInputProps("room_remark")}
@@ -251,11 +207,11 @@ export default function AddRoomLocationModal({
           />
 
           <Group justify="flex-end" mt="2xl">
-            <Button variant="default" onClick={close} radius={8}>
+            <Button variant="default" onClick={close} radius={8} id="cancel-button">
               ยกเลิก
             </Button>
-            <Button type="submit" radius={8}>
-              สร้างข้อมูล ({mode === 'single' ? 1 : 'Multiple'})
+            <Button type="submit" radius={8} id="submit-button">
+              สร้างข้อมูล ({mode === 'single' ? 1 : getRoomCount(form.values.room_start, form.values.room_end)} ห้อง)
             </Button>
           </Group>
         </form>

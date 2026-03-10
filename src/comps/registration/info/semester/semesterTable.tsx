@@ -9,6 +9,7 @@ import {
 
 import {
     IconEdit,
+    IconFilter
 } from "@tabler/icons-react";
 import { getSemester } from '@/utils/api/semester';
 import { semesterFields } from '@/utils/interface/semester.types';
@@ -18,6 +19,7 @@ import { formatDate, formatDateOnly, normalizeDate } from "@/config/formatters";
 import { Modal, Button, Group } from "@mantine/core";
 import SemesterEditModal from '@/comps/registration/info/semester/EditSemesterModal';
 import AddSemesterModal from '@/comps/registration/info/semester/AddSemesterModal';
+import FilterSemesterModal from '@/comps/registration/info/semester/FilterSemesterModal';
 import { useDisclosure } from "@mantine/hooks";
 import { createSemester, updateSemester } from '@/utils/api/semester';
 import { useNotification } from '@/comps/noti/notiComp';
@@ -36,8 +38,10 @@ export default function SemesterTable() {
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddSemester, { open: openAddSemester, close: closeAddSemester }] = useDisclosure(false);
+    const [openedFilterModal, { open: openFilterModal, close: closeFilterModal }] = useDisclosure(false);
     const [selectedSemester, setSelectedSemester] =
         useState<semesterFields | null>(null);
+    const [filterParams, setFilterParams] = useState<semesterFields>({});
 
     const openEditModals = (semester: semesterFields) => {
         setSelectedSemester(semester);
@@ -69,10 +73,15 @@ export default function SemesterTable() {
                 offset: offset,
                 sort_by: "start_date",
                 sort_order: "desc",
-                limit: BATCH_SIZE
+                limit: BATCH_SIZE,
+                ...filterParams
             })
 
-            setSemesterData((prev) => [...prev, ...semesterData.data]);
+            if (offset === 0) {
+                setSemesterData(semesterData.data);
+            } else {
+                setSemesterData((prev) => [...prev, ...semesterData.data]);
+            }
 
             if (semesterData.data.length < BATCH_SIZE) {
                 setHasMore(false);
@@ -161,10 +170,19 @@ export default function SemesterTable() {
         }
     };
 
+    const deleteSemesterData = async (semester_id: number) => {
+        // Refresh data after delete (actual deletion is handled in EditSemesterModal)
+        setSemesterData([]);
+        setHasMore(true);
+        fetchData(0);
+    };
+
 
     useEffect(() => {
-        fetchData(0);
-    }, [instId]);
+        if (instId) {
+            fetchData(0);
+        }
+    }, [instId, filterParams]);
 
     const onScroll = () => {
         if (viewportRef.current) {
@@ -235,21 +253,39 @@ export default function SemesterTable() {
 
     return (
         <div
+            id="semester-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
                 <Text size="xl" fw={500} className='flex items-center gap-2'>
-                    ปีการศึกษาและภาคเรียน
+                    ภาคการศึกษา
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddSemesterModal();
-                    }}
-                >
-                    เพิ่มภาคเรียน
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        id="filter-button"
+                        variant="default"
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconFilter size={14} />}
+                        onClick={() => {
+                            openFilterModal();
+                        }}
+                    >
+                        ตัวกรอง
+                    </Button>
+
+                    <Button
+                        id="add-semester-button"
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddSemesterModal();
+                        }}
+                    >
+                        เพิ่มภาคเรียน
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -260,7 +296,7 @@ export default function SemesterTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" id="semester-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={40} ta="center">ปีการศึกษา</Table.Th>
@@ -299,6 +335,10 @@ export default function SemesterTable() {
                     await updateSemesterData(values);
                     closeEditModal();
                 }}
+                onDelete={async (semester_id) => {
+                    await deleteSemesterData(semester_id);
+                    closeEditModal();
+                }}
             />
 
             <AddSemesterModal
@@ -308,6 +348,18 @@ export default function SemesterTable() {
                     await addSemesterData(values);
                     closeAddSemester();
                 }}
+            />
+
+            <FilterSemesterModal
+                opened={openedFilterModal}
+                close={closeFilterModal}
+                onSubmit={(values) => {
+                    setFilterParams(values);
+                }}
+                onClear={() => {
+                    setFilterParams({});
+                }}
+                initialValues={filterParams}
             />
 
         </div>

@@ -18,6 +18,7 @@ import { UserSysFields, UserSysFieldsForm } from "@/utils/interface/user.types";
 import { useEffect, useState } from "react";
 import { useDebouncedValue } from '@mantine/hooks';
 import { getUserSys } from "@/utils/api/userData";
+import { teacherPositionOptions } from "@/enums/teacher";
 
 interface AddTeacherSectionModalProps {
   opened: boolean;
@@ -175,6 +176,7 @@ export default function AddTeacherSectionModal({
 
   return (
     <Modal
+      id="add-teacher-modal"
       opened={opened}
       onClose={close}
       centered
@@ -185,6 +187,7 @@ export default function AddTeacherSectionModal({
       <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
 
         <Select
+          id="select-teacher"
           label="เลือกผู้สอน"
           placeholder="ค้นหาชื่อ หรือ รหัสผู้สอน"
           data={userOptions}
@@ -205,12 +208,15 @@ export default function AddTeacherSectionModal({
 
         {renderUserInfoCard()}
 
-        <TextInput
+        <Select
+          id="teacher-position-select"
           label="ตำแหน่งใน Section"
-          placeholder="เช่น หัวหน้าผู้สอน, ผู้ช่วยสอน"
+          placeholder="เลือกตำแหน่ง"
+          data={teacherPositionOptions}
           {...form.getInputProps("position")}
           radius={8}
           required
+          clearable
         />
 
         <Divider label="ตรวจสอบข้อมูล (Auto-filled)" labelPosition="center" mb="sm" />
@@ -218,6 +224,7 @@ export default function AddTeacherSectionModal({
         <Grid gutter="sm">
           <Grid.Col span={12}>
             <TextInput
+              id="teacher-email-input"
               label="อีเมล"
               leftSection={<IconMail size={16} />}
               {...form.getInputProps("email")}
@@ -229,6 +236,7 @@ export default function AddTeacherSectionModal({
 
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-first-name-input"
               label="ชื่อ"
               {...form.getInputProps("first_name")}
               radius={8}
@@ -238,6 +246,7 @@ export default function AddTeacherSectionModal({
           </Grid.Col>
           <Grid.Col span={6}>
             <TextInput
+              id="teacher-last-name-input"
               label="นามสกุล"
               {...form.getInputProps("last_name")}
               radius={8}
@@ -245,18 +254,9 @@ export default function AddTeacherSectionModal({
               variant={selectedUserObj ? "filled" : "default"}
             />
           </Grid.Col>
-
           <Grid.Col span={6}>
             <TextInput
-              label="ชื่อกลาง"
-              {...form.getInputProps("middle_name")}
-              radius={8}
-              readOnly={!!selectedUserObj}
-              variant={selectedUserObj ? "filled" : "default"}
-            />
-          </Grid.Col>
-          <Grid.Col span={6}>
-            <TextInput
+              id="teacher-middle-name-input"
               label="เบอร์โทร"
               leftSection={<IconPhone size={16} />}
               {...form.getInputProps("phone")}
@@ -266,8 +266,9 @@ export default function AddTeacherSectionModal({
             />
           </Grid.Col>
 
-          <Grid.Col span={12}>
+          <Grid.Col span={6}>
             <TextInput
+              id="teacher-code-input"
               label="รหัสบุคลากร"
               leftSection={<IconId size={16} />}
               {...form.getInputProps("code")}
@@ -279,6 +280,7 @@ export default function AddTeacherSectionModal({
 
           <Grid.Col span={12}>
             <TextInput
+              id="teacher-learning-area-input"
               label="กลุ่มสาระการเรียนรู้"
               leftSection={<IconLibrary size={16} />}
               {...form.getInputProps("learning_area_name")}
@@ -290,11 +292,11 @@ export default function AddTeacherSectionModal({
         </Grid>
 
         <Group justify="flex-end" className="mt-6">
-          <Button color="gray" variant="outline" onClick={close} radius={8}>
+          <Button id="cancel-button" color="gray" variant="outline" onClick={close} radius={8}>
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="submit-button">
             เพิ่มผู้สอน
           </Button>
         </Group>

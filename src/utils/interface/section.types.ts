@@ -6,7 +6,7 @@ export interface sectionFields {
     flag_valid?: boolean;
 
     schedule_id?: number;
-    day_of_week?: number | string;
+    day_of_week?: string;
     start_time?: Date;
     end_time?: Date;
     room_location_id?: number;
@@ -16,7 +16,7 @@ export interface sectionFields {
     building_id?: number | string;
     building_name?: string;
     building_no?: string;
-    room_format?: string;
+    // room_format?: string;
 
     learning_area_name?: string;
     subject_code?: string;
@@ -37,6 +37,10 @@ export interface sectionFields {
     position?: string;
 
     total_count?: number;
+    keyword?: string;
+    program_id?: number;
+
+    learning_area_id?: number;
 
     offset?: number;
     limit?: number;
@@ -44,6 +48,16 @@ export interface sectionFields {
     sort_order?: 'asc' | 'desc';
 
     count_student?: boolean;
+
+    email?: string;
+    password?: string;
+    first_name?: string;
+    middle_name?: string | null;
+    last_name?: string;
+    user_status?: string;
+    code?: string;
+    level_name?: string;
+    edu_lev_id?: number;
 }
 
 export interface sectionFieldsForm {
@@ -64,7 +78,7 @@ export interface sectionFieldsForm {
     building_id?: number | string;
     building_name?: string;
     building_no?: string;
-    room_format?: string;
+    // room_format?: string;
 
     learning_area_name?: string;
     subject_code?: string;
@@ -96,14 +110,14 @@ export interface sectionFieldsForm {
 
 
 export interface SectionSchedulePayload {
-  section_id?: number;
-  subject_id?: number;
-  semester_id?: number;
-  section_name?: string;
-  day_of_week?: number;
-  start_time?: string; // HH:mm:ss
-  end_time?: string;   // HH:mm:ss
-  room_location_id?: number;
-  schedule_id?: number;
-  flag_valid?: boolean;
+    section_id?: number;
+    subject_id?: number;
+    semester_id?: number;
+    section_name?: string;
+    day_of_week?: number | string;
+    start_time?: string; // HH:mm:ss
+    end_time?: string;   // HH:mm:ss
+    room_location_id?: number;
+    schedule_id?: number;
+    flag_valid?: boolean;
 }

@@ -10,6 +10,6 @@ export interface learningAreaFields {
     sort_order?: 'asc' | 'desc';
     subject_count?: boolean;
     total_count?: number;
-
+    keyword?: string;
     user_sys_id?: number;
 }

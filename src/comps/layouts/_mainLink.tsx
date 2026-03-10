@@ -98,11 +98,11 @@ export function MainLinks() {
     //   route: "community",
     //   icon: <IconUsers size={18} stroke={1.8} />,
     // },
-    {
-      label: "ข้อความ",
-      route: "messages",
-      icon: <IconMessageDots size={18} stroke={1.8} />,
-    },
+    // {
+    //   label: "ข้อความ",
+    //   route: "messages",
+    //   icon: <IconMessageDots size={18} stroke={1.8} />,
+    // },
     {
       label: "โปรไฟล์",
       route: "profile",

@@ -4,24 +4,26 @@ import {
     ScrollArea,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from '@mantine/core';
 import {
     IconEdit,
     IconEye,
+    IconSearch,
 } from '@tabler/icons-react';
 import { programFields } from '@/utils/interface/program.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
 import { getProgram, createProgram, updateProgram } from '@/utils/api/program';
 import EditProgramModal from '@/comps/registration/curriculum/program/EditProgramModal';
 import AddProgramModal from '@/comps/registration/curriculum/program/AddProgramModal';
 import { useNotification } from '@/comps/noti/notiComp';
 
-const BATCH_SIZE = 4;
+const BATCH_SIZE = 6;
 
 export default function programTable() {
     const [programData, setProgramData] = useState<programFields[]>([]);
@@ -32,6 +34,10 @@ export default function programTable() {
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
     const [programName, setProgramName] = useState<string>("");
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddProgram, { open: openAddProgram, close: closeAddProgram }] = useDisclosure(false);
@@ -77,11 +83,18 @@ export default function programTable() {
                 children_count: true,
                 limit: BATCH_SIZE,
                 offset: offset,
+                keyword: debouncedSearchTerm
             })
 
-            setProgramData((prev) => [...prev, ...programDatas.data]);
+            const newData = programDatas?.data || [];
 
-            if (programDatas.data.length < BATCH_SIZE) {
+            if (offset === 0) {
+                setProgramData(newData);
+            } else {
+                setProgramData((prev) => [...prev, ...newData]);
+            }
+
+            if (newData.length < BATCH_SIZE) {
                 setHasMore(false);
             }
         }
@@ -90,7 +103,7 @@ export default function programTable() {
 
     useEffect(() => {
         fetchData(0);
-    }, [instId]);
+    }, [instId, debouncedSearchTerm]);
 
     const addProgramData = async (values: programFields) => {
         if (!instId) return;
@@ -218,21 +231,36 @@ export default function programTable() {
 
     return (
         <div
+            id="program-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
-                <Text size="xl" fw={500}>
+                <Text size="xl" fw={500} id="program-table-title">
                     {programName}
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddProgramModal();
-                    }}
-                >
-                    เพิ่ม{programName}
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        id="search-program-input"
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+
+                    <Button
+                        id="add-program-button"
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddProgramModal();
+                        }}
+                    >
+                        เพิ่ม{programName}
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -243,7 +271,7 @@ export default function programTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="program-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={10} ta="center">ลำดับ</Table.Th>
@@ -295,6 +323,11 @@ export default function programTable() {
                     onSubmit={async (values) => {
                         await updateProgramData(values);
                         closeEditModal();
+                    }}
+                    onDelete={(program_id) => {
+                        setProgramData([]);
+                        setHasMore(true);
+                        fetchData(0);
                     }}
                 />
             )}

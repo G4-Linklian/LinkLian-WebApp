@@ -186,6 +186,14 @@ export default function roomTable() {
         }
     };
 
+    const deleteRoomLocationData = async (room_location_id: number) => {
+        // Refresh data after delete (actual deletion is handled in EditRoomLocationModal)
+        setRoomData([]);
+        setHasMore(true);
+        fetchData(0);
+        setOffset(0);
+    };
+
     const onScroll = () => {
         if (viewportRef.current) {
             const { scrollHeight, scrollTop, clientHeight } = viewportRef.current;
@@ -208,9 +216,9 @@ export default function roomTable() {
             className='text-xs'
         >
             <Table.Td ta="center">{index + 1}</Table.Td>
-            <Table.Td ta="center">{element.floor}</Table.Td>
-            <Table.Td ta="center">{element.floor + String(element.room_number)}</Table.Td>
-            <Table.Td ta="center">{router.query.room_format == 'by_building_no' ? String(element.building_no) + String(element.floor) + String(element.room_number) : String(element.building_name) + " " + String(element.floor) + String(element.room_number)}</Table.Td>
+            {/* <Table.Td ta="center">{element.floor}</Table.Td> */}
+            <Table.Td ta="center">{element.room_number}</Table.Td>
+            {/* <Table.Td ta="center">{router.query.room_format == 'by_building_no' ? String(element.building_no) + String(element.floor) + String(element.room_number) : String(element.building_name) + " " + String(element.floor) + String(element.room_number)}</Table.Td> */}
 
             <Table.Td ta="center">{element.room_remark ? element.room_remark : "-"}</Table.Td>
 
@@ -229,6 +237,7 @@ export default function roomTable() {
 
     return (
         <div
+            id="room-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -236,6 +245,7 @@ export default function roomTable() {
                     ห้องเรียนของ : {buildingName}
                 </Text>
                 <Button
+                    id="add-room-button"
                     size="xs"
                     radius="md"
                     onClick={() => {
@@ -254,13 +264,13 @@ export default function roomTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="room-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={5} ta="center">ลำดับ</Table.Th>
-                            <Table.Th w={20} ta="center">ชั้น</Table.Th>
-                            <Table.Th w={40} ta="center">เลขห้อง</Table.Th>
-                            <Table.Th w={40} ta="center">ชื่อเต็ม</Table.Th>
+                            {/* <Table.Th w={20} ta="center">ชั้น</Table.Th> */}
+                            <Table.Th w={40} ta="center">ห้อง</Table.Th>
+                            {/* <Table.Th w={40} ta="center">ชื่อเต็ม</Table.Th> */}
                             <Table.Th w={60} ta="center">หมายเหตุ</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
                         </Table.Tr>
@@ -291,6 +301,10 @@ export default function roomTable() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateRoomLocationData(values);
+                    closeEditModal();
+                }}
+                onDelete={async (room_location_id) => {
+                    await deleteRoomLocationData(room_location_id);
                     closeEditModal();
                 }}
             />

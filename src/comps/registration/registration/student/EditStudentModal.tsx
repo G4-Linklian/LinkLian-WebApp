@@ -12,6 +12,7 @@ import { UserSysFields } from "@/utils/interface/user.types";
 import { useEffect, useState } from "react";
 import { useDebouncedValue } from '@mantine/hooks';
 import { getProgram } from "@/utils/api/program";
+import { studentStatusOptions } from "@/enums/userStatus";
 
 interface EditStudentModalProps {
   student: UserSysFields | null;
@@ -134,12 +135,18 @@ export default function EditStudentModal({
   }, [debouncedSearch]);
 
   const handleSubmit = (values: UserSysFields) => {
-    onSubmit?.(values);
+    const payload = {
+      ...values,
+      program_id: values.program_id ? Number(values.program_id) : undefined,
+      edu_lev_id: values.edu_lev_id ? Number(values.edu_lev_id) : undefined,
+    };
+    onSubmit?.(payload);
     close();
   };
 
   return (
     <Modal
+      id="edit-student-modal"
       opened={opened}
       onClose={close}
       centered
@@ -147,8 +154,9 @@ export default function EditStudentModal({
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการนักเรียน</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-student-form">
         <TextInput
+          id="input-student-code"
           label="รหัสนักเรียน"
           placeholder="กรอกรหัสนักเรียน"
           {...form.getInputProps("code")}
@@ -156,6 +164,7 @@ export default function EditStudentModal({
           required
         />
         <TextInput
+          id="input-student-first-name"
           label="ชื่อ"
           placeholder="กรอกชื่อ"
           {...form.getInputProps("first_name")}
@@ -169,6 +178,7 @@ export default function EditStudentModal({
           radius={8}
         /> */}
         <TextInput
+          id="input-student-last-name"
           label="นามสกุล"
           placeholder="กรอกนามสกุล"
           {...form.getInputProps("last_name")}
@@ -176,6 +186,7 @@ export default function EditStudentModal({
           required
         />
         <TextInput
+          id="input-student-email"
           label="อีเมล"
           placeholder="กรอกอีเมล"
           {...form.getInputProps("email")}
@@ -183,6 +194,7 @@ export default function EditStudentModal({
           required
         />
         <TextInput
+          id="input-student-phone"
           label="เบอร์โทร"
           placeholder="กรอกเบอร์โทร"
           {...form.getInputProps("phone")}
@@ -191,6 +203,7 @@ export default function EditStudentModal({
         <div className="flex gap-2 justify-between mt-3">
 
           <Select
+            id="select-edu-level"
             className="w-[40%]"
             label="ชั้น"
             placeholder="เช่น ม.1"
@@ -201,6 +214,7 @@ export default function EditStudentModal({
           />
 
           <Select
+            id="select-classroom"
             className="w-[60%]"
             label="ห้องเรียน"
             placeholder="พิมพ์ชื่อห้องเรียน"
@@ -221,24 +235,22 @@ export default function EditStudentModal({
         </div>
 
         <Select
+          id="select-student-status"
           className="w-[100%] mt-3"
           label="สถานะผู้ใช้"
           placeholder="เลือกสถานะ"
-          data={[
-            { value: "Active", label: "Active (ใช้งาน)" },
-            { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-          ]}
+          data={studentStatusOptions}
           {...form.getInputProps("user_status")}
           radius={8}
           required
         />
 
         <Group justify="flex-end" className="mt-8">
-          <Button color="blue" variant="outline" onClick={close} radius={8}>
+          <Button color="blue" variant="outline" onClick={close} radius={8} id="cancel-button">
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="save-button">
             บันทึก
           </Button>
         </Group>

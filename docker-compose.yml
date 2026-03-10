@@ -9,6 +9,7 @@ services:
       - "4100:4100"
     environment:
       - NODE_ENV=production
+    mem_limit: 400m
     # volumes:
     #   - .:/app
     #   - /app/node_modules

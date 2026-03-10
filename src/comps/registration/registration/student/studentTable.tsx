@@ -10,19 +10,22 @@ import {
 import { IconSearch, IconFilter, IconPlus } from '@tabler/icons-react';
 import {
     IconEdit,
+    IconEye,
 } from "@tabler/icons-react";
 import { getUserSys, updateUserSys, createUserSys } from '@/utils/api/userData';
 import { UserSysFields } from '@/utils/interface/user.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
 import { useNotification } from '@/comps/noti/notiComp';
 import { useEduLevelOptions } from "@/hooks/eduLevel";
 import { updateProgramUserSys } from '@/utils/api/program';
 import EditStudentModal from '@/comps/registration/registration/student/EditStudentModal';
 import AddStudentModal from '@/comps/registration/registration/student/AddStudentModal';
+import FilterStudentModal from '@/comps/registration/registration/student/FilterStudentModal';
+import ViewStudentDetailModal from '@/comps/registration/registration/student/ViewStudentDetailModal';
 
 const BATCH_SIZE = 20;
 
@@ -40,8 +43,23 @@ export default function StudentTable() {
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddStudent, { open: openAddStudent, close: closeAddStudent }] = useDisclosure(false);
+    const [openedFilterModal, { open: openFilterModal, close: closeFilterModal }] = useDisclosure(false);
+    const [openedViewDetail, { open: openViewDetail, close: closeViewDetail }] = useDisclosure(false);
     const [selectedStudent, setSelectedStudent] =
         useState<UserSysFields | null>(null);
+    const [filterParams, setFilterParams] = useState<UserSysFields>({});
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
+
+    // Sync debounced search term with filterParams
+    useEffect(() => {
+        setFilterParams((prev) => ({
+            ...prev,
+            keyword: debouncedSearchTerm
+        }));
+    }, [debouncedSearchTerm]);
 
     const openEditModals = (student: UserSysFields) => {
         setSelectedStudent(student);
@@ -50,6 +68,11 @@ export default function StudentTable() {
 
     const openAddStudentModal = () => {
         openAddStudent();
+    };
+
+    const openViewDetailModal = (student: UserSysFields) => {
+        setSelectedStudent(student);
+        openViewDetail();
     };
 
 
@@ -66,7 +89,6 @@ export default function StudentTable() {
 
             const role_id = token.institution.inst_type === "school" ? 2 : 3;
             setRoleID(role_id);
-
         }
     }, [router.isReady]);
 
@@ -80,10 +102,16 @@ export default function StudentTable() {
                 offset: offset,
                 sort_by: "user_sys_id",
                 sort_order: "asc",
-                limit: BATCH_SIZE
-            })
+                limit: BATCH_SIZE,
+                user_status: "Active",
+                ...filterParams
+            });
 
-            setStudentData((prev) => [...prev, ...userData.data]);
+            if (offset === 0) {
+                setStudentData(userData.data);
+            } else {
+                setStudentData((prev) => [...prev, ...userData.data]);
+            }
 
             if (userData.data.length < BATCH_SIZE) {
                 setHasMore(false);
@@ -93,8 +121,10 @@ export default function StudentTable() {
     };
 
     useEffect(() => {
-        fetchData(0);
-    }, [instId]);
+        if (instId) {
+            fetchData(0);
+        }
+    }, [instId, filterParams]);
 
     const addStudentData = async (values: UserSysFields) => {
         if (!instId) {
@@ -115,13 +145,13 @@ export default function StudentTable() {
             fetchData(0);
 
             if (res.success) {
-                showNotification("เพิ่มบุคลากรสำเร็จ!", "", "success");
+                showNotification("เพิ่มผู้เรียนสำเร็จ!", "", "success");
             } else {
-                showNotification("เพิ่มบุคลากรล้มเหลว!", res.message, "error");
+                showNotification("เพิ่มผู้เรียนล้มเหลว!", res.message, "error");
             }
         } catch (error) {
             console.error("Create staff failed:", error);
-            showNotification("เพิ่มบุคลากรล้มเหลว!", "An error occurred while creating the staff.", "error");
+            showNotification("เพิ่มผู้เรียนล้มเหลว!", "An error occurred while creating the student.", "error");
         }
     };
 
@@ -143,8 +173,8 @@ export default function StudentTable() {
 
             const res = await updateUserSys(payload);
             await updateProgramUserSys({
-                program_id: values.program_id,
-                user_sys_id: values.user_sys_id,
+                program_id: Number(values.program_id),
+                user_sys_id: Number(values.user_sys_id),
             });
 
             setStudentData([]);
@@ -224,6 +254,13 @@ export default function StudentTable() {
             </Table.Td>
 
             <Table.Td ta="center" className='flex justify-center gap-2'>
+                <IconEye size={20} stroke={2} color='gray'
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        openViewDetailModal(element);
+                    }}
+                    style={{ cursor: "pointer" }}
+                />
                 <IconEdit size={20} stroke={2} color='#5e5e5eff'
                     onClick={(e) => {
                         e.stopPropagation();
@@ -249,21 +286,23 @@ export default function StudentTable() {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-student-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
                         leftSection={<IconSearch size={14} />}
-                    // onChange={(event) => handleSearch(event.currentTarget.value)} 
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
                     />
 
-
                     <Button
+                        id="filter-student-button"
                         variant="default"
                         size="xs"
                         radius="md"
                         leftSection={<IconFilter size={14} />}
                         onClick={() => {
-                            // logic เปิด Modal หรือ Dropdown filter
+                            openFilterModal();
                         }}
                     >
                         ตัวกรอง
@@ -272,10 +311,10 @@ export default function StudentTable() {
                     <Button
                         size="xs"
                         radius="md"
-                        // leftSection={<IconPlus size={14} />}
                         onClick={() => {
                             openAddStudentModal();
                         }}
+                        id="add-student-button"
                     >
                         เพิ่มนักเรียน
                     </Button>
@@ -290,7 +329,7 @@ export default function StudentTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" id="student-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             {/* <Table.Th w={5} ta="center">ลำดับ</Table.Th> */}
@@ -344,6 +383,25 @@ export default function StudentTable() {
                 }}
                 eduLevelOptions={eduLevelOptions}
                 token={token}
+            />
+
+            <FilterStudentModal
+                opened={openedFilterModal}
+                close={closeFilterModal}
+                onSubmit={(values) => {
+                    setFilterParams(values);
+                }}
+                onClear={() => {
+                    setFilterParams({});
+                }}
+                eduLevelOptions={eduLevelOptions}
+                initialValues={filterParams}
+            />
+
+            <ViewStudentDetailModal
+                opened={openedViewDetail}
+                close={closeViewDetail}
+                student={selectedStudent}
             />
 
         </div>

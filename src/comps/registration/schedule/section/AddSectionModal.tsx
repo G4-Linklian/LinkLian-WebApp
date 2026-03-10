@@ -1,28 +1,11 @@
-import { useRef, RefObject, useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Modal,
-  Button,
-  Group,
-  TextInput,
-  Checkbox,
-  Select,
-  Loader,
-  Divider,
-  Text,
-  ActionIcon
+  SegmentedControl,
 } from "@mantine/core";
-import {
-  IconSelector,
-  IconClock
-} from '@tabler/icons-react';
-import { DateInput } from "@mantine/dates";
-import { useForm } from "@mantine/form";
 import { sectionFields } from "@/utils/interface/section.types";
-import { useRouter } from "next/router";
-import { getSubject } from "@/utils/api/subject";
-import { getBuilding, getRoomLocation } from "@/utils/api/building";
-import { decodeRegistrationToken } from '@/utils/authToken';
-import { useDebouncedValue } from '@mantine/hooks';
+import AddSectionModalForm from "./AddSectionModalForm";
+import AddSectionModalImport from "./AddSectionModalImport";
 
 interface SectionEditModalProps {
   opened: boolean;
@@ -32,11 +15,6 @@ interface SectionEditModalProps {
   token?: any;
 }
 
-type SubjectOption = {
-  value: string;
-  label: string;
-};
-
 export default function AddSectionModal({
   opened,
   close,
@@ -44,173 +22,52 @@ export default function AddSectionModal({
   semesterData,
   token
 }: SectionEditModalProps) {
-  const router = useRouter();
-
-  const [searchValue, setSearchValue] = useState('');
-  const [debouncedSearch] = useDebouncedValue(searchValue, 300);
-  const [subjectOptions, setSubjectOptions] = useState<SubjectOption[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const [buildingOptions, setBuildingOptions] = useState<any[]>([]);
-  const [roomOptions, setRoomOptions] = useState<any[]>([]);
-  const [loadingBuilding, setLoadingBuilding] = useState(false);
-  const [loadingRoom, setLoadingRoom] = useState(false);
-
-
-  const form = useForm<sectionFields>({
-    initialValues: {
-      semester_id: undefined,
-      subject_id: undefined,
-      section_name: "",
-    },
-  });
-
-  useEffect(() => {
-    if (!opened) return;
-
-    setLoadingBuilding(true);
-    getBuilding({ inst_id: token.institution.inst_id })
-      .then((res) => {
-        const options = res.data.map((b: any) => ({
-          value: String(b.building_id),
-          label: b.building_name,
-        }));
-        setBuildingOptions(options);
-      })
-      .finally(() => setLoadingBuilding(false));
-  }, [opened]);
-
-  useEffect(() => {
-    const buildingId = form.values.building_id;
-    if (!buildingId || buildingId === "" || buildingId === null || buildingId === undefined || buildingId === "null") {
-      setRoomOptions([]);
-      return;
-    }
-
-    setLoadingRoom(true);
-    getRoomLocation({ building_id: Number(buildingId) })
-      .then((res) => {
-        const options = res.data.map((r: any) => ({
-          value: String(r.room_location_id),
-          label: `${r.floor ?? ""}${r.room_number ?? ""}`.trim(),
-        }));
-        setRoomOptions(options);
-      })
-      .finally(() => setLoadingRoom(false));
-  }, [form.values.building_id]);
-
-
+  const [tab, setTab] = useState<"manual" | "csv">("manual");
 
   const handleSubmit = (values: sectionFields) => {
     onSubmit?.(values);
     close();
   };
 
-
-  const fetchSubjects = async (keyword: string) => {
-    const token = decodeRegistrationToken();
-    const instId = token?.institution?.inst_id;
-
-    if (!instId) return;
-
-    try {
-      setLoading(true);
-
-      const subjectData = await getSubject({
-        inst_id: instId,
-        keyword,
-        sort_order: "desc",
-      });
-
-      const options: SubjectOption[] = subjectData.data.map((subjects: any) => ({
-        value: subjects.subject_id,
-        label: `${subjects.subject_code} ${subjects.name_th}`,
-      }));
-
-      setSubjectOptions(prev => {
-        const map = new Map<string, SubjectOption>();
-
-        [...prev, ...options].forEach(item => {
-          map.set(item.value, item);
-        });
-
-        return Array.from(map.values());
-      });
-    } catch (error) {
-      console.error("Failed to fetch subjects:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (debouncedSearch.length >= 2) {
-      fetchSubjects(debouncedSearch);
-    } else if (debouncedSearch.length === 0) {
-
-      setSubjectOptions([]);
-    }
-  }, [debouncedSearch]);
-
   return (
     <Modal
+      id="add-section-modal"
       opened={opened}
       onClose={close}
       centered
-      size="md"
+      size={tab === "manual" ? "md" : "1200px"}
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">เพิ่มกลุ่มเรียน</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-4 flex flex-col">
 
-        <Select
-          label="เลือกรายวิชา"
-          placeholder="พิมพ์รหัสหรือชื่อวิชา (อย่างน้อย 2 ตัวอักษร)"
-          data={subjectOptions}
-          searchable
-          nothingFoundMessage={loading ? "กำลังค้นหา..." : "ไม่พบรายวิชา"}
-          onSearchChange={setSearchValue}
-          searchValue={searchValue}
-          clearable
-          {...form.getInputProps("subject_id")}
-          filter={({ options }) => options}
-          radius={8}
-          required
-          rightSection={loading ? <Loader size={16} /> : <IconSelector size={16} />}
+      <SegmentedControl
+        id="add-section-tab"
+        value={tab}
+        onChange={(value) => setTab(value as "manual" | "csv")}
+        data={[
+          { label: "กรอกข้อมูล", value: "manual" },
+          { label: "นำเข้าไฟล์", value: "csv" },
+        ]}
+        fullWidth
+        radius="md"
+        mb="md"
+      />
+
+      {/* ================= MANUAL ================= */}
+      {tab === "manual" && (
+        <AddSectionModalForm
+          onSubmit={handleSubmit}
+          close={close}
+          semesterData={semesterData}
+          token={token}
+          opened={opened}
         />
+      )}
 
-        <Select
-          label="ปีการศึกษา"
-          placeholder="เลือกปีการศึกษา"
-          data={semesterData}
-          value={router.query.semester_id as string || null}
-          disabled={true}
-          clearable={false}
-          radius={8}
-          required
-        />
-
-        <TextInput
-          label="ชื่อกลุ่มเรียน"
-          placeholder="เช่น S1"
-          {...form.getInputProps("section_name")}
-          required
-          radius={8}
-        />
-
-        <Group justify="flex-end" className="mt-4">
-
-          <Button color="blue" variant="outline" radius={8}
-            onClick={() => close()}
-          >
-            ยกเลิก
-          </Button>
- 
-          <Button type="submit" radius={8}>
-            บันทึก
-          </Button>
-        </Group>
-      </form>
+      {/* ================= CSV UPLOAD ================= */}
+      {tab === "csv" && (
+        <AddSectionModalImport />
+      )}
     </Modal>
   );
 }

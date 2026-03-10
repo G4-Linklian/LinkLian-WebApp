@@ -32,6 +32,7 @@ export default function twigTable() {
     const [instId, setInstId] = useState<number | null>(null);
     const [offset, setOffset] = useState<number>(0);
     const [programName, setProgramName] = useState<string>("");
+    const [rootProgramName, setRootProgramName] = useState<string>("");
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddProgram, { open: openAddProgram, close: closeAddProgram }] = useDisclosure(false);
@@ -83,9 +84,23 @@ export default function twigTable() {
         setLoading(false);
     };
 
+    const fetchRootProgramName = async () => {
+        if (instId && root_id) {
+            const rootData = await getProgram({
+                inst_id: instId,
+                program_id: Number(root_id),
+                tree_type: "root",
+            });
+            if (rootData.data && rootData.data.length > 0) {
+                setRootProgramName(rootData.data[0].program_name || "");
+            }
+        }
+    };
+
     useEffect(() => {
         fetchData(0);
-    }, [instId]);
+        fetchRootProgramName();
+    }, [instId, root_id]);
 
     const addProgramData = async (values: programFields) => {
         if (!instId) return;
@@ -210,11 +225,12 @@ export default function twigTable() {
 
     return (
         <div
+            id="twig-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
                 <Text size="xl" fw={500}>
-                    ภาควิชา
+                    ภาควิชาของ: {rootProgramName || "-"}
                 </Text>
                 <Button
                     size="xs"
@@ -235,7 +251,7 @@ export default function twigTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="twig-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={10} ta="center">ลำดับ</Table.Th>
@@ -287,6 +303,11 @@ export default function twigTable() {
                     onSubmit={async (values) => {
                         await updateProgramData(values);
                         closeEditModal();
+                    }}
+                    onDelete={(program_id) => {
+                        setProgramData([]);
+                        setHasMore(true);
+                        fetchData(0);
                     }}
                 />
             )}

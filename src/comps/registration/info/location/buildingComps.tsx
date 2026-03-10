@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Badge, ThemeIcon, ActionIcon, Menu, rem } from '@mantine/core';
-import { IconBuildingBank, IconEdit, IconArrowRight } from '@tabler/icons-react';
+import { IconBuildingBank, IconEdit, IconArrowRight, IconSearch } from '@tabler/icons-react';
 import { buildingFields } from '@/utils/interface/building.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
@@ -11,9 +11,10 @@ import {
     Card,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
 import { getBuilding, createBuilding, updateBuilding } from '@/utils/api/building';
 import AddBuildingModal from '@/comps/registration/info/location/AddBuildingModal';
@@ -32,6 +33,10 @@ export default function BuildingComps() {
     const [openedAddBuilding, { open: openAddBuilding, close: closeAddBuilding }] = useDisclosure(false);
     const [selectedBuilding, setSelectedBuilding] =
         useState<buildingFields | null>(null);
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
 
     const openEditBuildingModal = (building: buildingFields) => {
         setSelectedBuilding(building);
@@ -61,6 +66,7 @@ export default function BuildingComps() {
                 inst_id: instId,
                 sort_by: "building_no",
                 sort_order: "asc",
+                keyword: debouncedSearchTerm
             })
 
             setBuildingData(buildingDatas.data);
@@ -70,7 +76,7 @@ export default function BuildingComps() {
 
     useEffect(() => {
         fetchData();
-    }, [instId]);
+    }, [instId, debouncedSearchTerm]);
 
 
     const addBuildingData = async (values: buildingFields) => {
@@ -114,7 +120,7 @@ export default function BuildingComps() {
 
             const payload = {
                 ...values,
-                inst_id: Number(values.inst_id),
+                inst_id: instId,
             };
 
             const res = await updateBuilding(payload);
@@ -133,25 +139,46 @@ export default function BuildingComps() {
         }
     };
 
+    const deleteBuildingData = async (building_id: number) => {
+        // Refresh data after delete (actual deletion is handled in EditBuildingModal)
+        setBuildingData([]);
+        fetchData();
+    };
+
 
 
     return (
         <div
+            id="building-info-section"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
                 <Text size="xl" fw={500}>
                     อาคารเรียน
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddBuildingModal();
-                    }}
-                >
-                    เพิ่มอาคารเรียน
-                </Button>
+                
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        id="search-building-input"
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+
+                    <Button
+                        id="add-building-button"
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddBuildingModal();
+                        }}
+                    >
+                        เพิ่มอาคารเรียน
+                    </Button>
+                </div>
             </div>
 
             {loading ? (
@@ -170,7 +197,7 @@ export default function BuildingComps() {
                             radius={16}
                             withBorder
                             className="transition-all duration-200 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-                            onClick={() => router.push(`/registration/info/building?building_id=${building.building_id}&room_format=${router.query.room_format || "by_building_no"}`)}
+                            onClick={() => router.push(`/registration/info/building?building_id=${building.building_id}`)}
                         >
                             <Group justify="space-between" mb="xs">
                                 <ThemeIcon size="xl" radius={8} variant="light" color="orange">
@@ -182,10 +209,10 @@ export default function BuildingComps() {
                             </Group>
 
                             <div className="min-h-[80px]">
-                                <Text fw={700} size="lg" mt="md" lineClamp={1}>
+                                <Text fw={700} size="lg" mt="md" lineClamp={1} id="building-name">
                                     {building.building_name}
                                 </Text>
-                                <Text size="sm" c="dimmed" mt={5} lineClamp={2}>
+                                <Text size="sm" c="dimmed" mt={5} lineClamp={2} id="building-remark">
                                     {building.remark || "-"}
                                 </Text>
                             </div>
@@ -193,6 +220,7 @@ export default function BuildingComps() {
                             <Group mt="md" grow>
 
                                 <Button
+                                    id="edit-building-button"
                                     variant="default"
                                     radius="md"
                                     onClick={(e) => {
@@ -204,6 +232,7 @@ export default function BuildingComps() {
                                 </Button>
 
                                 <Button
+                                    id="view-building-button"
                                     radius="md"
                                     variant="light"
                                     rightSection={<IconArrowRight size={16} />}
@@ -223,6 +252,10 @@ export default function BuildingComps() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateBuildingData(values);
+                    closeEditModal();
+                }}
+                onDelete={async (building_id) => {
+                    await deleteBuildingData(building_id);
                     closeEditModal();
                 }}
             />

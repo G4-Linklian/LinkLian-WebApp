@@ -4,10 +4,12 @@ import {
     ScrollArea,
     Text,
     Loader,
-    Center
+    Center,
+    TextInput
 } from '@mantine/core';
 import {
     IconEdit,
+    IconSearch,
 } from '@tabler/icons-react';
 import { learningAreaFields } from '@/utils/interface/learningArea.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
@@ -15,7 +17,7 @@ import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
 import LearningAreaEditModal from '@/comps/registration/curriculum/learningArea/EditLearningAreaModal';
 import LearningAreaModal from '@/comps/registration/curriculum/learningArea/AddLearningAreaModal';
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { PushRouter } from '@/utils/function/navigation';
 import { getLearningArea, createLearningArea, updateLearningArea } from '@/utils/api/learningArea';
 import { useNotification } from '@/comps/noti/notiComp';
@@ -35,6 +37,10 @@ export default function learningAreaTable() {
     const [openedAddLearningArea, { open: openAddLearningArea, close: closeAddLearningArea }] = useDisclosure(false);
     const [selectedLearningArea, setSelectedLearningArea] =
         useState<learningAreaFields | null>(null);
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
 
     const { showNotification } = useNotification();
 
@@ -70,9 +76,14 @@ export default function learningAreaTable() {
                 limit: BATCH_SIZE,
                 offset: offset,
                 subject_count: true,
+                keyword: debouncedSearchTerm
             })
 
-            setLearningAreaData((prev) => [...prev, ...learningAreaData.data]);
+            if (offset === 0) {
+                setLearningAreaData(learningAreaData.data);
+            } else {
+                setLearningAreaData((prev) => [...prev, ...learningAreaData.data]);
+            }
 
             if (learningAreaData.data.length < BATCH_SIZE) {
                 setHasMore(false);
@@ -132,10 +143,17 @@ export default function learningAreaTable() {
         }
     };
 
+    const deleteLearningAreaData = async (learning_area_id: number) => {
+        // Refresh data after delete (actual deletion is handled in EditLearningAreaModal)
+        setLearningAreaData([]);
+        setHasMore(true);
+        fetchData(0);
+    };
+
 
     useEffect(() => {
         fetchData(0);
-    }, [instId]);
+    }, [instId, debouncedSearchTerm]);
 
     const onScroll = () => {
         if (viewportRef.current) {
@@ -184,15 +202,29 @@ export default function learningAreaTable() {
                 <Text size="xl" fw={500}>
                     กลุ่มการเรียนรู้
                 </Text>
-                <Button
-                    size="xs"
-                    radius="md"
-                    onClick={() => {
-                        openAddLearningAreaModal();
-                    }}
-                >
-                    เพิ่มกลุ่มการเรียนรู้
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <TextInput
+                        id="search-learning-area"
+                        placeholder="ค้นหา..."
+                        size="xs"
+                        radius="md"
+                        leftSection={<IconSearch size={14} />}
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+                    />
+
+                    <Button
+                        id="add-learning-area-button"
+                        size="xs"
+                        radius="md"
+                        onClick={() => {
+                            openAddLearningAreaModal();
+                        }}
+                    >
+                        เพิ่มกลุ่มการเรียนรู้
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea
@@ -203,7 +235,7 @@ export default function learningAreaTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="sm" layout="fixed" id="learning-area-table" >
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             <Table.Th w={10} ta="center">ลำดับ</Table.Th>
@@ -239,6 +271,10 @@ export default function learningAreaTable() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateLearningAreaData(values);
+                    closeEditModal();
+                }}
+                onDelete={async (learning_area_id) => {
+                    await deleteLearningAreaData(learning_area_id);
                     closeEditModal();
                 }}
             />

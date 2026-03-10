@@ -16,9 +16,10 @@ import { UserSysFields } from '@/utils/interface/user.types';
 import { decodeRegistrationToken } from '@/utils/authToken';
 import { useRouter } from "next/router";
 import { Modal, Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import EditStaffModal from '@/comps/registration/info/staff/EditStaffModal';
 import AddStaffModal from '@/comps/registration/info/staff/AddStaffModal';
+import FilterStaffModal from '@/comps/registration/info/staff/FilterStaffModal';
 import { getLearningArea, updateLearningAreaUserSys } from '@/utils/api/learningArea';
 import { useNotification } from '@/comps/noti/notiComp';
 
@@ -37,9 +38,24 @@ export default function StaffTable() {
 
     const [openedEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [openedAddStaff, { open: openAddStaff, close: closeAddStaff }] = useDisclosure(false);
+    const [openedFilterModal, { open: openFilterModal, close: closeFilterModal }] = useDisclosure(false);
     const [selectedStaff, setSelectedStaff] =
         useState<UserSysFields | null>(null);
     const [learningAreaOptions, setLearningAreaOptions] = useState<{ value: string; label: string }[]>([]);
+    const [filterParams, setFilterParams] = useState<UserSysFields>({});
+
+    // Debounce Search
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
+
+    // Sync debounced search term with filterParams
+    useEffect(() => {
+        setFilterParams((prev) => ({
+            ...prev,
+            keyword: debouncedSearchTerm
+        }));
+    }, [debouncedSearchTerm]);
+
 
     const openEditModals = (staff: UserSysFields) => {
         setSelectedStaff(staff);
@@ -69,7 +85,7 @@ export default function StaffTable() {
     }, [router.isReady]);
 
     const fetchData = async (offset: number) => {
-        setLoading(true);
+        setLoading(true); 
 
         if (instId && roleID) {
             const userData = await getUserSys({
@@ -78,10 +94,15 @@ export default function StaffTable() {
                 offset: offset,
                 sort_by: "code",
                 sort_order: "asc",
-                limit: BATCH_SIZE
+                limit: BATCH_SIZE,
+                ...filterParams
             })
 
-            setStaffData((prev) => [...prev, ...userData.data]);
+            if (offset === 0) {
+                setStaffData(userData.data);
+            } else {
+                setStaffData((prev) => [...prev, ...userData.data]);
+            }
 
             if (userData.data.length < BATCH_SIZE) {
                 setHasMore(false);
@@ -91,8 +112,10 @@ export default function StaffTable() {
     };
 
     useEffect(() => {
-        fetchData(0);
-    }, [instId]);
+        if (instId) {
+            fetchData(0);
+        }
+    }, [instId, filterParams]);
 
     const addStaffData = async (values: UserSysFields) => {
         if (!instId) {
@@ -136,13 +159,10 @@ export default function StaffTable() {
                 ...values,
                 inst_id: Number(instId),
                 user_sys_id: Number(values.user_sys_id),
+                learning_area_id: Number(values.learning_area_id),
             };
 
             const res = await updateUserSys(payload);
-            await updateLearningAreaUserSys({
-                learning_area_id: values.learning_area_id,
-                user_sys_id: values.user_sys_id,
-            });
 
             setStaffData([]);
             setHasMore(true);
@@ -178,7 +198,7 @@ export default function StaffTable() {
                 }
             } catch (error) {
                 console.error("Failed to fetch learning areas:", error);
-                showNotification("โหลดกลุ่มการสอนล้มเหลว!", "เกิดข้อผิดพลาดขณะโหลดกลุ่มการสอน", "error");
+                showNotification("โหลดกลุ่มการเรียนรู้ล้มเหลว!", "เกิดข้อผิดพลาดขณะโหลดกลุ่มการเรียนรู้", "error");
             }
         };
 
@@ -259,6 +279,7 @@ export default function StaffTable() {
 
     return (
         <div
+            id="staff-table-container"
             className='bg-white'
             style={{ padding: '1px' }}>
             <div className="flex justify-between items-center mb-3 mt-1">
@@ -269,27 +290,31 @@ export default function StaffTable() {
 
                 <div className="flex items-center gap-2">
                     <TextInput
+                        id="search-input"
                         placeholder="ค้นหา..."
                         size="xs"
                         radius="md"
                         leftSection={<IconSearch size={14} />}
-                    // onChange={(event) => handleSearch(event.currentTarget.value)} 
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.currentTarget.value)}
                     />
 
-
                     <Button
+                        id="filter-button"
                         variant="default"
                         size="xs"
                         radius="md"
                         leftSection={<IconFilter size={14} />}
                         onClick={() => {
                             // logic เปิด Modal หรือ Dropdown filter
+                            openFilterModal();
                         }}
                     >
                         ตัวกรอง
                     </Button>
 
                     <Button
+                        id="add-staff-button"
                         size="xs"
                         radius="md"
                         // leftSection={<IconPlus size={14} />}
@@ -310,13 +335,13 @@ export default function StaffTable() {
                 bd="1px solid gray.3"
                 style={{ borderRadius: 8 }}
             >
-                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" >
+                <Table stickyHeader horizontalSpacing="md" verticalSpacing="md" layout="fixed" id="staff-table">
                     <Table.Thead style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)' }}>
                         <Table.Tr>
                             {/* <Table.Th w={5} ta="center">ลำดับ</Table.Th> */}
                             <Table.Th w={40} ta="center">รหัสบุคลากร</Table.Th>
                             <Table.Th w={60} ta="center">ชื่อ-นามสกุล</Table.Th>
-                            <Table.Th w={40} ta="center">กลุ่มการสอน</Table.Th>
+                            <Table.Th w={40} ta="center">กลุ่มการเรียนรู้</Table.Th>
                             <Table.Th w={70} ta="center">อีเมล</Table.Th>
                             <Table.Th w={30} ta="center">สถานะ</Table.Th>
                             <Table.Th w={5} ta="center">จัดการ</Table.Th>
@@ -361,6 +386,19 @@ export default function StaffTable() {
                     closeAddStaff();
                 }}
                 learningAreaOptions={learningAreaOptions}
+            />
+
+            <FilterStaffModal
+                opened={openedFilterModal}
+                close={closeFilterModal}
+                onSubmit={(values) => {
+                    setFilterParams(values);
+                }}
+                onClear={() => {
+                   setFilterParams({});
+                }}
+                learningAreaOptions={learningAreaOptions}
+                initialValues={filterParams}
             />
 
         </div>

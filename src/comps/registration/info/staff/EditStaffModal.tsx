@@ -8,6 +8,7 @@ import {
 import { useForm } from "@mantine/form";
 import { UserSysFields } from "@/utils/interface/user.types";
 import { useEffect } from "react";
+import { teacherStatusOptions } from "@/enums/userStatus";
 
 interface EditStaffModalProps {
   staff: UserSysFields | null;
@@ -67,12 +68,17 @@ export default function EditStaffModal({
   }, [staff]);
 
   const handleSubmit = (values: UserSysFields) => {
-    onSubmit?.(values);
+    const payload = {
+      ...values,
+      learning_area_id: values.learning_area_id ? Number(values.learning_area_id) : undefined,
+    };
+    onSubmit?.(payload);
     close();
   };
 
   return (
     <Modal
+      id="edit-staff-modal"
       opened={opened}
       onClose={close}
       centered
@@ -80,8 +86,9 @@ export default function EditStaffModal({
       radius={16}
     >
       <h1 className="color-black font-bold text-2xl mb-4 text-center">จัดการบุคลากร</h1>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col">
+      <form onSubmit={form.onSubmit(handleSubmit)} className="gap-2 flex flex-col" id="edit-staff-form">
         <TextInput
+          id="input-email"
           label="อีเมล"
           placeholder="กรอกอีเมล"
           {...form.getInputProps("email")}
@@ -89,6 +96,7 @@ export default function EditStaffModal({
           required
         />
         <TextInput
+          id="input-first-name"
           label="ชื่อ"
           placeholder="กรอกชื่อ"
           {...form.getInputProps("first_name")}
@@ -96,6 +104,7 @@ export default function EditStaffModal({
           required
         />
         <TextInput
+          id="input-last-name"
           label="นามสกุล"
           placeholder="กรอกนามสกุล"
           {...form.getInputProps("last_name")}
@@ -104,6 +113,7 @@ export default function EditStaffModal({
         />
         <div className="flex gap-2 justify-between mt-2">
           <TextInput
+            id="input-phone"
             className="w-[50%]"
             label="เบอร์โทร"
             placeholder="กรอกเบอร์โทร"
@@ -112,6 +122,7 @@ export default function EditStaffModal({
             pattern="[0-9]*"
           />
           <TextInput
+            id="input-code"
             className="w-[50%]"
             label="รหัสบุคลากร"
             placeholder="กรอกรหัสบุคลากร"
@@ -122,21 +133,20 @@ export default function EditStaffModal({
         </div>
         <div className="flex gap-2 justify-between mt-3">
           <Select
+            id="select-user-status"
             className="w-[40%]"
             label="สถานะผู้ใช้"
             placeholder="เลือกสถานะ"
-            data={[
-              { value: "Active", label: "Active (ใช้งาน)" },
-              { value: "Inactive", label: "Inactive (ไม่ใช้งาน)" },
-            ]}
+            data={teacherStatusOptions}
             {...form.getInputProps("user_status")}
             radius={8}
             required
           />
 
           <Select
+            id="select-learning-area"
             className="w-[60%]"
-            label="กลุ่มการสอน"
+            label="กลุ่มการเรียนรู้"
             placeholder="เช่น คณิตศาสตร์"
             data={learningAreaOptions}
             {...form.getInputProps("learning_area_id")}
@@ -145,12 +155,12 @@ export default function EditStaffModal({
           />
         </div>
 
-        <Group justify="flex-end" className="mt-8">
+        <Group justify="flex-end" className="mt-8" id="delete-button">
           <Button color="blue" variant="outline" onClick={close} radius={8}>
             ยกเลิก
           </Button>
 
-          <Button type="submit" radius={8}>
+          <Button type="submit" radius={8} id="save-button">
             บันทึก
           </Button>
         </Group>

@@ -19,7 +19,22 @@ export interface StatData {
 }
 
 export interface StatApiResponse {
-    key: "academicYear" | "subject" | "classroom" | "staff" | "learningArea" | "curriculum" | "building" | "classroomOff" | "classroomOn" | "clockCheck" | "clockX" | "sectionEdit";
+    key: "academicYear" | 
+        "subject" | 
+        "classroom" | 
+        "staff" | 
+        "learningArea" | 
+        "curriculum" | 
+        "building" | 
+        "classroomOff" | 
+        "classroomOn" | 
+        "clockCheck" | 
+        "clockX" | 
+        "sectionSchedule" |
+        "allStudent" |
+        "activeStudent" |
+        "graduatedStudent" 
+        ;
     value: number;
     label: string;
 }

@@ -15,7 +15,7 @@ export const getBuilding = async (input: buildingFields) => {
         building_no,
         building_name,
         flag_valid,
-        room_format,
+        keyword,
         offset,
         limit,
         sort_by,
@@ -28,7 +28,7 @@ export const getBuilding = async (input: buildingFields) => {
         building_no,
         building_name,
         flag_valid,
-        room_format,
+        keyword,
         offset,
         limit,
         sort_by,
@@ -46,7 +46,6 @@ export const createBuilding = async (input: buildingFields) => {
         building_name,
         remark,
         flag_valid,
-        room_format,
     } = input;
 
     const data = await fetchDataApi(`POST`, "building", {
@@ -55,7 +54,7 @@ export const createBuilding = async (input: buildingFields) => {
         building_name,
         flag_valid,
         remark,
-        room_format,
+        // room_format,
     });
 
     return data;
@@ -70,7 +69,7 @@ export const updateBuilding = async (input: buildingFields) => {
         building_name,
         remark,
         flag_valid,
-        room_format,
+        // room_format,
     } = input;
 
     const data = await fetchDataApi(`PUT`, `building/${building_id}`, {
@@ -79,7 +78,7 @@ export const updateBuilding = async (input: buildingFields) => {
         building_name,
         remark,
         flag_valid,
-        room_format,
+        // room_format,
     });
 
     return data;

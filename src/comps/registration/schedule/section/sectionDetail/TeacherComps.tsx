@@ -68,7 +68,7 @@ export default function TeacherComps() {
             const sectionData = await getSectionEducator({
                 section_id: Number(sectionId),
                 sort_by: "position",
-                sort_order: "asc",
+                sort_order: "desc",
             })
 
             setSectionData(sectionData.data);
@@ -80,6 +80,8 @@ export default function TeacherComps() {
         fetchData();
     }, [instId]);
 
+    // ตรวจสอบว่ามีผู้สอนหลัก (MAIN_TEACHER) หรือไม่
+    const hasMainTeacher = sectionData.some(teacher => teacher.position === "main_teacher");
 
     const addSectionData = async (values: sectionFieldsForm) => {
 
@@ -143,6 +145,7 @@ export default function TeacherComps() {
                     ผู้สอน
                 </Text>
                 <Button
+                    id="add-teacher-button"
                     size="xs"
                     radius="md"
                     onClick={() => {
@@ -157,17 +160,33 @@ export default function TeacherComps() {
                 <Center p="md">
                     <Loader size="sm" />
                 </Center>
-            ) : sectionData.length === 0 ? (
-                <Text>ไม่มีข้อมูลผู้สอน</Text>
-            ) : sectionData.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-4">
-                    {sectionData.map((instructor) => (
-                        <InstructorCard
-                            key={instructor.user_sys_id}
-                            instructor={instructor}
-                        />
-                    ))}
-                </div>
+            ) : (
+                <>
+                    {!hasMainTeacher && (
+                        <Card withBorder radius="md" p="md" mb="md" className="bg-yellow-50 border-yellow-300">
+                            <Text size="sm" c="orange" fw={500} ta="center">
+                                ⚠️ ต้องมีผู้สอนหลักอย่างน้อย 1 คน
+                            </Text>
+                        </Card>
+                    )}
+                    
+                    {sectionData.length === 0 ? (
+                        <Text c="dimmed" ta="center">ยังไม่มีผู้สอน กรุณาเพิ่มผู้สอน</Text>
+                    ) : (
+                        <div className="grid grid-cols-4 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-4">
+                            {sectionData.map((instructor) => (
+                                <InstructorCard
+                                    key={instructor.user_sys_id}
+                                    instructor={instructor}
+                                    sectionId={sectionId}
+                                    onDelete={(user_sys_id: number) => {
+                                        fetchData();
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
 
             {/* <EditSectionModal

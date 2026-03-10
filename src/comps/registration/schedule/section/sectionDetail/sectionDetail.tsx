@@ -119,12 +119,12 @@ const SectionDetail = () => {
                         items={[
                             { label: "งานจัดตาราง", href: "/registration/scheduling" },
                             //   { label: "ปีการศึกษา" },
-                            { label: `จัดการ Section` },
+                            { label: `จัดการกลุ่มเรียน` },
                         ]}
                     />
                     <div className="w-full h-[95%] mt-4 text-black">
                         <div className="header-section">
-                            <h2 className="text-2xl font-bold text-gray-800 mb-1">จัดการ Section การเรียน</h2>
+                            <h2 className="text-2xl font-bold text-gray-800 mb-1">จัดการกลุ่มการเรียน</h2>
 
                             <CourseSectionHeader 
                                 sectionData={sectionData} 
