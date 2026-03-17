@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Head from 'next/head';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from "next/router";
 import ProfilePage from "@/comps/profile/profileComp";
 import LayoutShell from "@/comps/layouts/LayoutShell";
+import { decodeTeacherToken } from "@/utils/authToken";
 
 function PageContent() {
   const router = useRouter();
@@ -20,6 +21,16 @@ function PageContent() {
 }
 
 export default function TeacherProfile() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = decodeTeacherToken();
+
+    if (!token) {
+      router.push("/teacherLogin");
+    }
+  }, [router]);
+  
   return (
     <>
       <Head>
