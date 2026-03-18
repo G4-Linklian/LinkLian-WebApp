@@ -59,7 +59,7 @@ function ClassHeader({
         id="cd-header-bg"
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url('${process.env.NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE}')`,
+          backgroundImage: `url('${process.env.NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE || "https://uat-core.linklian.org/v1/assets/active/url"}')`,
           transform: `scale(${1 + scrollRatio * 0.05})`,
         }}
       />
