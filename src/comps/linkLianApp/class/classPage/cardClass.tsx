@@ -23,7 +23,7 @@ const CARD_GRADIENTS = [
   'from-[#FFE3BB] to-[#DB763F]',   // orange deep
 ];
 
-const bgImage = process.env.NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE;
+const bgImage = process.env.NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE || "https://uat-core.linklian.org/v1/assets/active/url";
 
 function getGradient(sectionId: number): string {
   const safeIndex = Math.abs(sectionId) % CARD_GRADIENTS.length;
