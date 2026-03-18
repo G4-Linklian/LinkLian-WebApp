@@ -9,6 +9,7 @@ services:
         - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://wp-core.linklian.org}
         - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH:-/v1}
         - NEXT_PUBLIC_GOOGLE_ANALYTICS=${NEXT_PUBLIC_GOOGLE_ANALYTICS:-}
+        - NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE=${NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE:-https://uat-core.linklian.org/v1/assets/active/url}
     ports:
       - "4100:4100"
     environment:
@@ -16,6 +17,7 @@ services:
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://wp-core.linklian.org}
       - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH:-/v1}
       - NEXT_PUBLIC_GOOGLE_ANALYTICS=${NEXT_PUBLIC_GOOGLE_ANALYTICS:-}
+      - NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE=${NEXT_PUBLIC_CLASS_DETAIL_BG_IMAGE:-https://uat-core.linklian.org/v1/assets/active/url}
     mem_limit: 400m
     # volumes:
     #   - .:/app
