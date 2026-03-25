@@ -59,7 +59,7 @@ const LayoutShell = ({ children }: any) => {
                     top: 0,
                     left: 0,
                     height: "60px",
-                    zIndex: 9999,
+                    zIndex: 50,
                     paddingTop: "10px"
                 }}>
                     <div className="flex flex-col items-center">
@@ -77,7 +77,7 @@ const LayoutShell = ({ children }: any) => {
                     top: 0,
                     left: 0,
                     height: "60px",
-                    zIndex: 9999,
+                    zIndex: 50,
                     paddingTop: "10px"
                 }}>
                     <div className="flex flex-col items-center">
@@ -146,4 +146,3 @@ const LayoutShell = ({ children }: any) => {
 };
 
 export default LayoutShell;
-

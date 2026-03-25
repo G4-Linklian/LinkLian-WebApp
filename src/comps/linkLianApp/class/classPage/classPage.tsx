@@ -5,22 +5,22 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
+import { Alert, Button, Loader, ScrollArea, Text } from '@mantine/core';
 import { useRouter } from 'next/router';
 import CardClass from '@/comps/linkLianApp/class/classPage/cardClass';
 import FilterSemester from '@/comps/linkLianApp/class/classPage/filterSemester';
 import ComposerBar from '@/comps/linkLianApp/class/classPage/composeBar';
-import CreatePost from '@/comps/linkLianApp/class/shared/createPost';
-import CreatePostModal from '@/comps/linkLianApp/class/shared/createPostModal';
+import CreatePostModal from '@/comps/linkLianApp/shared/createPostModal';
 import { useClassFeed } from '@/hooks/social-feed/useClassfeed';
 import { ClassFeedItem, PostType } from '@/utils/interface/class.types';
 
-type PostTarget = number | 'all' | null;
+type PostTarget = number[];
 
 const ClassPage = () => {
     const router = useRouter();
     const listRef = useRef<HTMLDivElement>(null);
 
-    const [postTarget, setPostTarget] = useState<PostTarget>('all');
+    const [postTarget, setPostTarget] = useState<PostTarget>([]);
     const [showCreatePopup, setShowCreatePopup] = useState(false);
     const selectedPostType: PostType = 'announcement';
 
@@ -41,16 +41,19 @@ const ClassPage = () => {
 
     useEffect(() => {
         if (classList.length === 0) {
-            setPostTarget('all');
+            setPostTarget([]);
             return;
         }
-        if (postTarget === 'all') return;
-        const exists = classList.some((item) => item.section_id === postTarget);
-        if (!exists) setPostTarget(classList[0].section_id);
-    }, [classList, postTarget]);
 
-    const selectedClass = useMemo(
-        () => classList.find((item) => item.section_id === postTarget) ?? null,
+        const validIds = new Set(classList.map((item) => item.section_id));
+        setPostTarget((prev) => {
+            const next = prev.filter((id) => validIds.has(id));
+            return next.length > 0 ? next : classList.map((item) => item.section_id);
+        });
+    }, [classList]);
+
+    const selectedClasses = useMemo(
+        () => classList.filter((item) => postTarget.includes(item.section_id)),
         [classList, postTarget],
     );
 
@@ -79,7 +82,7 @@ const ClassPage = () => {
 
     return (
         <div id="classes-page" className="relative h-full w-full bg-[#fafafa] px-4 pb-6 pt-4 text-black md:px-6">
-        <div id="classes-content" className="mx-auto flex h-full w-full flex-col">
+        <div id="classes-content" className="mx-auto flex h-full w-full max-w-[1500px] flex-col">
 
                 {/* Composer */}
                 <ComposerBar
@@ -87,7 +90,7 @@ const ClassPage = () => {
                     postTarget={postTarget}
                     onTargetChange={setPostTarget}
                     onOpenCreate={() => {
-                        if (postTarget !== null) setShowCreatePopup(true);
+                        if (postTarget.length > 0) setShowCreatePopup(true);
                     }}
                 />
 
@@ -106,26 +109,25 @@ const ClassPage = () => {
 
                 {(isLoading && classList.length === 0) && (
                     <div id="classes-loading" className="flex flex-1 flex-col items-center justify-center gap-3">
-                        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-amber-200 border-t-amber-500" />
-                        <p className="text-sm text-amber-400">กำลังโหลดห้องเรียน...</p>
+                        <Loader color="orange" size="lg" />
+                        <Text size="sm" c="orange.6">กำลังโหลดห้องเรียน...</Text>
                     </div>
                 )}
 
                 {!isSemesterLoading && !isLoading && (semesterError || error) && (
                     <div id="classes-error" className="flex flex-1 flex-col items-center justify-center gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-                            <svg className="h-8 w-8 text-red-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                            </svg>
-                        </div>
-                        <p id="classes-error-msg" className="text-center text-sm text-gray-500">{semesterError ?? error}</p>
-                        <button
+                        <Alert id="classes-error-msg" color="red" radius="lg" variant="light" className="max-w-md">
+                            {semesterError ?? error}
+                        </Alert>
+                        <Button
                             id="classes-retry-btn"
                             onClick={refresh}
-                            className="rounded-full bg-amber-100 px-5 py-2 text-sm font-medium text-amber-800 hover:bg-amber-200"
+                            color="orange"
+                            variant="light"
+                            radius="xl"
                         >
                             ลองใหม่
-                        </button>
+                        </Button>
                     </div>
                 )}
 
@@ -143,13 +145,20 @@ const ClassPage = () => {
                 )}
 
                 {!isSemesterLoading && !isLoading && !semesterError && !error && classList.length > 0 && (
-                    <div
+                    <ScrollArea
                         id="classes-list"
-                        ref={listRef}
-                        onScroll={handleScroll}
-                        className="flex-1 overflow-y-auto pb-6"
+                        viewportRef={listRef}
+                        onScrollPositionChange={handleScroll}
+                        type="hover"
+                        scrollbars="y"
+                        className="min-h-0 flex-1"
+                        classNames={{ viewport: 'pb-6' }}
+                        styles={{
+                            scrollbar: { background: 'transparent', width: '10px', padding: '2px' },
+                            thumb: { backgroundColor: '#DB763F', borderRadius: '999px', border: '2px solid transparent', backgroundClip: 'padding-box' },
+                        }}
                     >
-                        <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                        <div className="mx-auto grid w-full gap-x-6 gap-y-4 md:w-[75%] md:grid-cols-2">
                             {classList.map((item) => (
                                 <CardClass key={item.section_id} data={item} onTap={() => openClassDetail(item)} />
                             ))}
@@ -157,7 +166,7 @@ const ClassPage = () => {
 
                         {isLoadingMore && (
                             <div id="classes-load-more-spinner" className="flex justify-center py-4">
-                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-200 border-t-amber-500" />
+                                <Loader color="orange" size="sm" />
                             </div>
                         )}
 
@@ -166,22 +175,27 @@ const ClassPage = () => {
                                 แสดงทั้งหมด {classList.length} ห้องเรียน
                             </p>
                         )}
-                    </div>
+                    </ScrollArea>
                 )}
             </div>
 
-            {showCreatePopup && postTarget && (
-                <CreatePostModal>
-                    <CreatePost
-                        sectionId={postTarget === 'all' ? classList[0]?.section_id ?? 0 : postTarget}
-                        sectionIds={postTarget === 'all' ? classList.map((item) => item.section_id) : undefined}
-                        subjectName={postTarget === 'all' ? 'โพสต์ทุกคลาส' : selectedClass?.subject_name_th}
-                        initialPostType={selectedPostType}
-                        allowAnonymous={false}
-                        onClose={() => setShowCreatePopup(false)}
-                        onSubmitted={() => setShowCreatePopup(false)}
-                    />
-                </CreatePostModal>
+            {showCreatePopup && postTarget.length > 0 && (
+                <CreatePostModal
+                    opened={showCreatePopup}
+                    onClose={() => setShowCreatePopup(false)}
+                    sectionId={postTarget[0] ?? 0}
+                    sectionIds={postTarget}
+                    subjectName={
+                        selectedClasses.length === classList.length
+                            ? 'โพสต์ทุกคลาส'
+                            : selectedClasses.length === 1
+                                ? selectedClasses[0]?.subject_name_th
+                                : `${selectedClasses.length} ห้องเรียน`
+                    }
+                    initialPostType={selectedPostType}
+                    allowAnonymous={false}
+                    onSubmitted={() => setShowCreatePopup(false)}
+                />
             )}
         </div>
     );

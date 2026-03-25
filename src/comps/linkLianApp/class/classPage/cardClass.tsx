@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────
 
 import React from 'react';
+import { Paper, Text } from '@mantine/core';
 import { ClassFeedItem, ClassSchedule } from '@/utils/interface/class.types';
 import { dayOfWeekToText, formatTime } from '@/utils/function/classHelper';
 
@@ -33,9 +34,9 @@ function getGradient(sectionId: number): string {
 function ScheduleText({ schedules, sectionId }: { schedules: ClassSchedule[]; sectionId: number }) {
   if (schedules.length === 0) {
     return (
-      <span id={`cc-schedule-empty-${sectionId}`} className="text-[10px] text-gray-600/70">
+      <Text id={`cc-schedule-empty-${sectionId}`} size="10px" c="dimmed">
         ยังไม่พบตารางเรียน
-      </span>
+      </Text>
     );
   }
 
@@ -59,12 +60,12 @@ function ScheduleText({ schedules, sectionId }: { schedules: ClassSchedule[]; se
   });
 
   return (
-    <span id={`cc-schedule-${sectionId}`} className="line-clamp-1 text-[10px] text-gray-700/80">
+    <Text id={`cc-schedule-${sectionId}`} size="10px" c="dark.5" className="line-clamp-1">
       {sortedSchedules
         .slice(0, 3)
         .map((s) => `${dayOfWeekToText(s.day_of_week)} : [ ${formatTime(s.start_time)} - ${formatTime(s.end_time)} ]`)
         .join(' , ')}
-    </span>
+    </Text>
   );
 }
 
@@ -73,10 +74,14 @@ export default function CardClass({ data, onTap }: CardClassProps) {
   const gradient = getGradient(sid);
 
   return (
-    <div
+    <Paper
+      component="button"
       id={`cc-card-${sid}`}
       data-testid={`cc-card-${sid}`}
       onClick={onTap}
+      radius="md"
+      shadow="sm"
+      p="md"
       style={
         bgImage
           ? {
@@ -89,25 +94,25 @@ export default function CardClass({ data, onTap }: CardClassProps) {
       className={`group relative h-full cursor-pointer overflow-hidden rounded-2xl ${!bgImage ? `bg-gradient-to-br ${gradient}` : ''
         } p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]`}
     >
-      <div id={`cc-header-${sid}`} className="mb-2.5 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 id={`cc-title-${sid}`} className="line-clamp-1 text-4xl font-semibold tracking-tight text-[#1d1d1d]">
+      <div id={`cc-header-${sid}`} className="mb-2.5 flex items-end justify-between gap-3 text-left">
+        <div className="min-w-0 text-left">
+          <Text id={`cc-title-${sid}`} className="line-clamp-1 text-left text-4xl tracking-tight" size="xl" fw={700} c="#1d1d1d">
             {data.display_class_name || data.section_name || data.subject_code}
-          </h3>
-          <p id={`cc-subtitle-${sid}`} className="mt-1 line-clamp-1 text-xs text-[#1f1f1f]">
+          </Text>
+          <Text id={`cc-subtitle-${sid}`} mt={4} className="line-clamp-1 text-left" size="sm" c="#1f1f1f">
             {data.subject_name_th || data.subject_code}
-          </p>
+          </Text>
         </div>
       </div>
 
       <div className="border-t border-black/10 pt-2">
         <div
           id={`cc-schedule-row-${sid}`}
-          className="flex items-center justify-between gap-2"
+          className="flex items-center justify-between gap-2 text-left"
         >
           <ScheduleText schedules={data.schedules} sectionId={sid} />
         </div>
       </div>
-    </div>
+    </Paper>
   );
 }

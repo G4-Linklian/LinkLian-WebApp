@@ -1,11 +1,6 @@
-// ─────────────────────────────────────────────
-// hooks/useClassInfo.ts
-// Hook สำหรับดึง class info (room, schedules, members, educators)
-// ─────────────────────────────────────────────
-
-import { useState, useEffect } from 'react';
-import { getClassInfo } from '@/utils/api/social-feed/class-info';
-import { ClassInfoData } from '@/utils/interface/class.types';
+import { useState, useEffect } from "react";
+import { getClassInfo } from "@/utils/api/social-feed/class-info";
+import { ClassInfoData } from "@/utils/interface/class.types";
 
 interface UseClassInfoReturn {
   classInfo: ClassInfoData | null;
@@ -16,38 +11,44 @@ interface UseClassInfoReturn {
 
 export const useClassInfo = (sectionId: number | null): UseClassInfoReturn => {
   const [classInfo, setClassInfo] = useState<ClassInfoData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchClassInfo = async () => {
-    if (!sectionId) return;
+  const fetchData = async () => {
+    if (!sectionId) {
+      setClassInfo(null);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const res = await getClassInfo(sectionId);
-      if (res.success) {
-        setClassInfo(res.data);
+      const classInfoData = await getClassInfo(sectionId);
+
+      if (classInfoData.success) {
+        setClassInfo(classInfoData.data);
       } else {
-        setError('ไม่สามารถโหลดข้อมูลห้องเรียนได้');
+        setClassInfo(null);
+        setError("ไม่สามารถโหลดข้อมูลห้องเรียนได้");
       }
     } catch (err) {
-      console.error('[useClassInfo] fetch error:', err);
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      console.error("Failed to fetch class info:", err);
+      setClassInfo(null);
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchClassInfo();
+    fetchData();
   }, [sectionId]);
 
   return {
     classInfo,
     isLoading,
     error,
-    refetch: fetchClassInfo,
+    refetch: fetchData,
   };
 };

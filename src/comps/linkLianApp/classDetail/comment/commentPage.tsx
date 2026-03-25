@@ -5,8 +5,10 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useRef, useState } from 'react';
+import { ActionIcon, Alert, Badge, Button, Loader, Paper, ScrollArea, Text, Textarea, ThemeIcon } from '@mantine/core';
+import { IconSend2 } from '@tabler/icons-react';
 import { useRouter } from 'next/router';
-import CardPost from '@/comps/linkLianApp/class/classDetail/cardPost';
+import CardPost from '../post/cardPost';
 import { useComments } from '@/hooks/social-feed/useComment';
 import { getPostById } from '@/utils/api/social-feed/post';
 import { CommentNode, PostItem } from '@/utils/interface/class.types';
@@ -42,26 +44,27 @@ function CommentItem({
           </div>
           <div className="min-w-0 flex-1">
             <div id={`cmt-meta-${cid}`} className="mb-1 flex items-baseline gap-2">
-              <span id={`cmt-name-${cid}`} className="text-xs font-semibold text-gray-800">
+              <Text id={`cmt-name-${cid}`} size="xs" fw={600} c="dark.7">
                 {node.is_anonymous ? 'ไม่ระบุชื่อ' : node.display_name}
-              </span>
-              <span id={`cmt-time-${cid}`} className="text-xs text-gray-400">
+              </Text>
+              <Text id={`cmt-time-${cid}`} size="xs" c="gray.5">
                 {formatDateTime(node.created_at)}
-              </span>
+              </Text>
             </div>
             <div className="flex items-end gap-2">
               <div id={`cmt-content-${cid}`} className="inline-block rounded-2xl rounded-tl-sm bg-gray-100 px-3 py-2 text-sm text-gray-800">
                 {node.comment_text}
               </div>
-              <button
+              <Button
                 id={`cmt-reply-btn-${cid}`}
                 aria-label={`ตอบกลับ ${node.display_name}`}
                 onClick={() => onReply(node)}
-                style={{ fontSize: '12px', lineHeight: 1 }}
-                className="mb-1 shrink-0 font-semibold text-gray-400 hover:text-amber-500 transition-colors"
+                variant="subtle"
+                color="orange"
+                size="compact-xs"
               >
                 ตอบกลับ
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -70,17 +73,20 @@ function CommentItem({
       {hasReplies && (
         <div id={`cmt-children-${cid}`}>
           {node.children!.length > 2 && (
-            <button
+            <Button
               id={`cmt-collapse-btn-${cid}`}
               aria-expanded={!collapsed}
               onClick={() => setCollapsed((v) => !v)}
-              className="mb-1.5 ml-11 flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700"
+              variant="subtle"
+              color="orange"
+              size="compact-xs"
+              className="mb-1.5 ml-11"
             >
               <svg className={`h-3.5 w-3.5 transition-transform ${collapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
               {collapsed ? `ดูการตอบกลับ ${node.children!.length} รายการ` : 'ซ่อนการตอบกลับ'}
-            </button>
+            </Button>
           )}
           {!collapsed && node.children!.map((child) => (
             <CommentItem key={child.comment_id} node={child} depth={depth + 1} onReply={onReply} />
@@ -97,81 +103,66 @@ function CommentInput({
 }: {
   replyingTo: CommentNode | null;
   onCancelReply: () => void;
-  onSubmit: (text: string, isAnonymous: boolean) => Promise<boolean>;
+  onSubmit: (text: string) => Promise<boolean>;
   isSubmitting: boolean;
 }) {
   const [text, setText] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => { if (replyingTo) inputRef.current?.focus(); }, [replyingTo]);
 
   const handleSubmit = () => {
     if (!text.trim() || isSubmitting) return;
-    onSubmit(text.trim(), isAnonymous);
+    onSubmit(text.trim());
     setText('');
   };
 
   return (
     <div id="cmt-input-container" className="shrink-0 border-t border-gray-100 bg-white px-4 pt-2 pb-4">
       {replyingTo && (
-        <div id="cmt-replying-to-banner" className="mb-2 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-1.5">
-          <span id="cmt-replying-to-label" className="text-xs text-amber-700">
+        <Paper id="cmt-replying-to-banner" className="mb-2 flex items-center justify-between" radius="lg" p="xs" bg="orange.0">
+          <Text id="cmt-replying-to-label" size="xs" c="orange.8">
             ตอบกลับ <span className="font-semibold">{replyingTo.display_name ?? 'ไม่ระบุชื่อ'}</span>
-          </span>
-          <button id="cmt-cancel-reply-btn" aria-label="ยกเลิกการตอบกลับ" onClick={onCancelReply} className="text-amber-500 hover:text-amber-700">
+          </Text>
+          <ActionIcon id="cmt-cancel-reply-btn" aria-label="ยกเลิกการตอบกลับ" onClick={onCancelReply} variant="subtle" color="orange" radius="xl">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
-        </div>
+          </ActionIcon>
+        </Paper>
       )}
       <div id="cmt-input-row" className="flex items-end gap-2">
-        <button
-          id="cmt-anon-toggle"
-          aria-label={isAnonymous ? 'ปิดการระบุตัวตน' : 'เปิดการระบุตัวตน'}
-          aria-pressed={isAnonymous}
-          onClick={() => setIsAnonymous((v) => !v)}
-          className={`mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${isAnonymous ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-        >
-          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
-          </svg>
-        </button>
-        <div className="flex-1 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 transition-all focus-within:border-amber-300 focus-within:bg-white">
-          <textarea
+        <div className="flex-1">
+          <Textarea
             id="cmt-input"
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
             placeholder={replyingTo ? `ตอบกลับ ${replyingTo.display_name ?? 'ไม่ระบุชื่อ'}...` : 'เขียนความคิดเห็น...'}
-            rows={1}
-            className="w-full resize-none bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
-            style={{ maxHeight: 80 }}
+            autosize
+            minRows={1}
+            maxRows={4}
+            radius="xl"
           />
         </div>
-        <button
+        <ActionIcon
           id="cmt-send-btn"
           aria-label="ส่งความคิดเห็น"
           onClick={handleSubmit}
           disabled={!text.trim() || isSubmitting}
-          className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white shadow hover:bg-amber-600 disabled:opacity-40"
+          className="mb-1"
+          color="orange"
+          radius="xl"
+          variant="filled"
         >
           {isSubmitting ? (
-            <span id="cmt-send-spinner" className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            <Loader id="cmt-send-spinner" size="sm" color="white" />
           ) : (
-            <svg className="h-4 w-4 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-            </svg>
+            <IconSend2 size={16} stroke={2} className="translate-x-0.5" />
           )}
-        </button>
+        </ActionIcon>
       </div>
-      {isAnonymous && (
-        <p id="cmt-anon-note" className="mt-1.5 pl-10 text-xs text-amber-500">
-          ความคิดเห็นนี้จะแสดงแบบไม่ระบุตัวตน
-        </p>
-      )}
     </div>
   );
 }
@@ -182,12 +173,11 @@ interface CommentPageProps {
   postId: number;
   subjectName: string;
   className: string;
-  isPopup?: boolean;
+  showHeader?: boolean;
   post?: PostItem | null
-  onClose?: () => void;
 }
 
-const CommentPage = ({ sectionId, postId, subjectName, className, isPopup = false, onClose }: CommentPageProps) => {
+const CommentPage = ({ sectionId, postId, subjectName, className, showHeader = true }: CommentPageProps) => {
   const router = useRouter();
 
   const [post, setPost] = useState<PostItem | null>(null);
@@ -220,7 +210,7 @@ const CommentPage = ({ sectionId, postId, subjectName, className, isPopup = fals
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
-  const handleScroll = () => {
+  const handleScroll = (_position?: { x: number; y: number }) => {
     if (!scrollRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
     if (scrollHeight - scrollTop - clientHeight < 200 && hasMore && !isLoadingMore) {
@@ -229,59 +219,65 @@ const CommentPage = ({ sectionId, postId, subjectName, className, isPopup = fals
   };
 
   return (
-    <div id="cmt-page" className="flex h-full min-h-0 w-full flex-col bg-[#FAFAFA] text-black">
+    <div id="cmt-page" className="flex h-full min-h-0 w-full flex-col bg-white text-black">
 
       {/* Header */}
-      <div id="cmt-header" className="flex shrink-0 items-center justify-between gap-3 bg-white px-4 py-3 shadow-sm">
-
-        {/* ปุ่มย้อนกลับ — เฉพาะ non-popup */}
-        {!isPopup && (
-          <button
+      {showHeader && (
+        <div id="cmt-header" className="flex shrink-0 items-center justify-between gap-3 bg-white px-4 py-3 shadow-sm">
+          <ActionIcon
             id="cmt-back-btn"
             aria-label="ย้อนกลับ"
             onClick={() => router.back()}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-amber-800 hover:bg-amber-50"
+            variant="subtle"
+            color="orange"
+            radius="xl"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-          </button>
-        )}
+          </ActionIcon>
 
-        {/* Title */}
-        <div className="min-w-0 flex-1">
-          <h1 id="cmt-header-title" className="truncate text-base font-semibold text-gray-900">
-            {subjectName || 'ความคิดเห็น'}
-          </h1>
-          {className && (
-            <p id="cmt-header-subtitle" className="truncate text-xs text-gray-400">{className}</p>
-          )}
+          <div className="min-w-0 flex-1">
+            <h1 id="cmt-header-title" className="truncate text-base font-semibold text-gray-900">
+              {subjectName || 'ความคิดเห็น'}
+            </h1>
+            {className && (
+              <p id="cmt-header-subtitle" className="truncate text-xs text-gray-400">{className}</p>
+            )}
+          </div>
         </div>
-
-        {/* ปุ่มปิด — เฉพาะ popup มุมขวา สี danger */}
-        {isPopup && (
-          <button
-            id="cmt-close-btn"
-            aria-label="ปิดหน้าต่างความคิดเห็น"
-            onClick={() => onClose?.()}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Scrollable */}
-      <div id="cmt-scroll-area" ref={scrollRef} onScroll={handleScroll} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+      <ScrollArea
+        id="cmt-scroll-area"
+        viewportRef={scrollRef}
+        onScrollPositionChange={handleScroll}
+        type="hover"
+        scrollbars="y"
+        className="min-h-0 flex-1 bg-white"
+        classNames={{ viewport: 'bg-white px-4 py-4' }}
+        styles={{
+          scrollbar: {
+            background: 'transparent',
+            width: '10px',
+            padding: '2px',
+          },
+          thumb: {
+            backgroundColor: '#DB763F',
+            borderRadius: '999px',
+            border: '2px solid transparent',
+            backgroundClip: 'padding-box',
+          },
+        }}
+      >
         {postLoading && (
           <div id="cmt-post-loading" className="mb-4 flex justify-center py-8">
-            <div className="h-7 w-7 animate-spin rounded-full border-[3px] border-amber-200 border-t-amber-500" />
+            <Loader color="orange" />
           </div>
         )}
         {postError && (
-          <p id="cmt-post-error" className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-500">{postError}</p>
+          <Alert id="cmt-post-error" mb="md" color="red" radius="xl" variant="light">{postError}</Alert>
         )}
         {!postLoading && post && (
           <div id="cmt-post-section">
@@ -292,28 +288,30 @@ const CommentPage = ({ sectionId, postId, subjectName, className, isPopup = fals
         {!postLoading && post && (
           <div id="cmt-divider" className="mb-4 flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">
+            <Text size="xs" c="gray.5">
               {total > 0 ? `${total} ความคิดเห็น` : 'ยังไม่มีความคิดเห็น'}
-            </span>
+            </Text>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
         )}
 
         {commentLoading && (
           <div id="cmt-loading" className="flex flex-col items-center gap-3 py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-200 border-t-amber-500" />
-            <p className="text-xs text-amber-400">กำลังโหลดความคิดเห็น...</p>
+            <Loader color="orange" size="sm" />
+            <Text size="xs" c="orange.5">กำลังโหลดความคิดเห็น...</Text>
           </div>
         )}
         {!commentLoading && commentError && (
-          <p id="cmt-error" className="py-4 text-center text-sm text-red-400">{commentError}</p>
+          <Text id="cmt-error" py="md" ta="center" size="sm" c="red.5">{commentError}</Text>
         )}
         {!commentLoading && !commentError && comments.length === 0 && (
           <div id="cmt-empty" className="flex flex-col items-center gap-2 py-10">
-            <svg className="h-10 w-10 text-gray-200" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <p id="cmt-empty-msg" className="text-sm text-gray-400">เป็นคนแรกที่แสดงความคิดเห็น</p>
+            <ThemeIcon size={40} radius="xl" variant="light" color="gray">
+              <svg className="h-5 w-5 text-gray-200" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </ThemeIcon>
+            <Text id="cmt-empty-msg" size="sm" c="gray.5">เป็นคนแรกที่แสดงความคิดเห็น</Text>
           </div>
         )}
         {!commentLoading && comments.length > 0 && (
@@ -327,18 +325,17 @@ const CommentPage = ({ sectionId, postId, subjectName, className, isPopup = fals
             ))}
             {isLoadingMore && (
               <div id="cmt-load-more-spinner" className="flex justify-center py-4">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber-200 border-t-amber-500" />
+                <Loader color="orange" size="xs" />
               </div>
             )}
             {hasMore && !isLoadingMore && (
-              <button id="cmt-load-more-btn" onClick={() => loadComments()}
-                className="w-full py-2 text-center text-sm font-medium text-amber-600 hover:text-amber-700">
+              <Button id="cmt-load-more-btn" onClick={() => loadComments()} variant="subtle" color="orange" fullWidth>
                 โหลดเพิ่มเติม
-              </button>
+              </Button>
             )}
           </div>
         )}
-      </div>
+      </ScrollArea>
 
       {/* Input */}
       <CommentInput

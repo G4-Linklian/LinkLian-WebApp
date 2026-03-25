@@ -10,7 +10,7 @@ import {
   deletePostComment,
 } from '@/utils/api/social-feed/post-comment';
 import { CommentNode } from '@/utils/interface/class.types';
-import { getSocialFeedUserId } from '@/hooks/useAuthIdentity';
+import { decodeRegistrationToken, decodeTeacherToken, decodeToken } from '@/utils/authToken';
 
 interface UseCommentsReturn {
   comments: CommentNode[];
@@ -28,6 +28,33 @@ interface UseCommentsReturn {
 }
 
 const LIMIT = 10;
+
+const parseTokenNumber = (value: unknown): number | null => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
+const getSocialFeedUserId = (): number | null => {
+  try {
+    const tokens = [
+      decodeTeacherToken(),
+      decodeRegistrationToken(),
+      decodeToken(),
+    ].filter(Boolean);
+
+    for (const token of tokens) {
+      const userId = parseTokenNumber((token as any)?.user_sys_id);
+      if (userId) return userId;
+
+      const fallbackId = parseTokenNumber((token as any)?.user_id);
+      if (fallbackId) return fallbackId;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 export const useComments = (postId: number): UseCommentsReturn => {
   const [comments, setComments] = useState<CommentNode[]>([]);
@@ -79,44 +106,37 @@ export const useComments = (postId: number): UseCommentsReturn => {
     [postId, offset],
   );
 
-  /**
-   * ส่ง comment ใหม่ / reply
-   * returns true ถ้าสำเร็จ
-   */
-const submitComment = useCallback(async (
-  text: string,
-  isAnonymous = false,
-): Promise<boolean> => {
-  const userId = getSocialFeedUserId();
-  if (!userId || !text.trim()) return false;
+  const submitComment = useCallback(
+    async (text: string, isAnonymous = false): Promise<boolean> => {
+      const userId = getSocialFeedUserId();
+      if (!userId || !text.trim()) return false;
 
-  setIsSubmitting(true);
-  try {
-    const res = await createPostComment(userId, {
-      post_id: postId,
-      comment_text: text.trim(),
-      is_anonymous: isAnonymous,
-      parent_id: replyingTo?.comment_id,
-    });
+      setIsSubmitting(true);
+      try {
+        const res = await createPostComment(userId, {
+          post_id: postId,
+          comment_text: text.trim(),
+          is_anonymous: isAnonymous,
+          parent_id: replyingTo?.comment_id,
+        });
 
-    if (res.success) {
-      setReplyingTo(null);
-      await loadComments({ reset: true });
-      return true;
-    }
-    return false;
-  } catch (err) {
-    console.error('[useComments] submit error:', err);
-    return false;
-  } finally {
-    setIsSubmitting(false);
-  }
-}, [postId, replyingTo, loadComments]);
+        if (res.success) {
+          setReplyingTo(null);
+          await loadComments({ reset: true });
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error('[useComments] submit error:', err);
+        return false;
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [postId, replyingTo, loadComments],
+  );
 
-  /**
-   * ลบ comment (soft delete)
-   * returns true ถ้าสำเร็จ
-   */
+  // ลบ comment (soft delete) — returns true ถ้าสำเร็จ
   const removeComment = async (commentId: number): Promise<boolean> => {
     const userId = getSocialFeedUserId();
     if (!userId) return false;

@@ -1,28 +1,18 @@
-// ─────────────────────────────────────────────
-// utils/api/feed.ts
-// API calls สำหรับ class feed (teacher)
-// ─────────────────────────────────────────────
+import { fetchDataApi } from "@/utils/callAPI"
+import { GetClassFeedParams } from "@/utils/interface/class.types"
 
-import { fetchDataApi } from '@/utils/callAPI';
-import {
-  ClassFeedResponse,
-  GetClassFeedParams,
-} from '@/utils/interface/class.types';
+// ========== Get Endpoints ==========
 
-/**
- * ดึง class feed สำหรับ Teacher / Instructor
- */
-export const getTeacherClassFeed = async (
-  params: GetClassFeedParams,
-): Promise<ClassFeedResponse> => {
-  const { user_id, semester_id, limit = 10, offset = 0 } = params;
+// GET /social-feed/feed/teacher - ดึง class feed สำหรับ Teacher / Instructor
+export const getTeacherClassFeed = async (params: GetClassFeedParams) => {
+    const { user_id, semester_id, limit = 10, offset = 0 } = params;
 
-  const data = await fetchDataApi('GET', 'social-feed/feed/teacher', {
-    user_id,
-    semester_id,
-    limit,
-    offset,
-  });
+    const data = await fetchDataApi(`GET`, "social-feed/feed/teacher", {
+        user_id,
+        semester_id,
+        limit,
+        offset,
+    });
 
-  return data;
+    return data;
 };

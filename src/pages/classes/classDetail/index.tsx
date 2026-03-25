@@ -2,7 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import LayoutShell from '@/comps/layouts/LayoutShell';
-import ClassDetailComp from '@/comps/linkLianApp/class/classDetailComp';
+import ClassDetailComp from '@/comps/linkLianApp/classDetail/classDetailComp';
 
 export default function ClassDetailHome() {
     const router      = useRouter();

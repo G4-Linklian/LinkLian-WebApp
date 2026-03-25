@@ -3,7 +3,8 @@
 // Hook สำหรับ search posts ด้วย debounce
 // ─────────────────────────────────────────────
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useDebouncedValue } from '@mantine/hooks';
 import { searchPosts } from '@/utils/api/social-feed/post';
 import { PostItem } from '@/utils/interface/class.types';
 
@@ -22,8 +23,8 @@ export const useSearchPosts = (sectionId?: number): UseSearchPostsReturn => {
   const [results, setResults] = useState<PostItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [keyword, setKeywordState] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [keyword, setKeyword] = useState('');
+  const [debouncedKeyword] = useDebouncedValue(keyword, DEBOUNCE_MS);
 
   const search = useCallback(
     async (kw: string) => {
@@ -59,44 +60,28 @@ export const useSearchPosts = (sectionId?: number): UseSearchPostsReturn => {
     [sectionId],
   );
 
-  const setKeyword = (kw: string) => {
-    setKeywordState(kw);
-
-    // debounce
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    if (!kw.trim()) {
+  useEffect(() => {
+    if (debouncedKeyword.trim()) {
+      search(debouncedKeyword);
+    } else {
       setResults([]);
       setIsLoading(false);
-      return;
     }
+  }, [debouncedKeyword, search]);
 
-    setIsLoading(true);
-    debounceRef.current = setTimeout(() => {
-      search(kw);
-    }, DEBOUNCE_MS);
-  };
+  // แสดง loading ทันทีที่พิมพ์ก่อน debounce จะ fire
+  useEffect(() => {
+    if (keyword.trim()) {
+      setIsLoading(true);
+    }
+  }, [keyword]);
 
   const clear = () => {
-    setKeywordState('');
+    setKeyword('');
     setResults([]);
     setError(null);
     setIsLoading(false);
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
   };
-
-  // cleanup
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
 
   return {
     results,

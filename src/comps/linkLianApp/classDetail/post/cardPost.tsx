@@ -5,6 +5,8 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react';
+import { ActionIcon, Box, Button, Group, Loader, Paper, Text } from '@mantine/core';
+import { IconArrowsMaximize, IconDownload, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled } from '@tabler/icons-react';
 import { PostItem, PostAttachment } from '@/utils/interface/class.types';
 import {
     POST_TYPE_LABEL,
@@ -20,7 +22,7 @@ import {
 import { deletePost } from '@/utils/api/social-feed/post';
 import { fetchPostAttachmentBlob, triggerPostAttachmentDownload } from '@/utils/api/social-feed/download';
 import { AppColors } from '@/constants/colors';
-import { getSocialFeedUserId } from '@/hooks/useAuthIdentity';
+import { decodeRegistrationToken, decodeTeacherToken, decodeToken } from '@/utils/authToken';
 
 
 interface CardPostProps {
@@ -32,8 +34,31 @@ interface CardPostProps {
     highlighted?: boolean;
 }
 
+const parseTokenNumber = (value: unknown): number | null => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function getCurrentUserId(): number | null {
-    return getSocialFeedUserId();
+    try {
+        const tokens = [
+            decodeTeacherToken(),
+            decodeRegistrationToken(),
+            decodeToken(),
+        ].filter(Boolean);
+
+        for (const token of tokens) {
+            const userId = parseTokenNumber((token as any)?.user_sys_id);
+            if (userId) return userId;
+
+            const fallbackId = parseTokenNumber((token as any)?.user_id);
+            if (fallbackId) return fallbackId;
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
 }
 
 // ── PostTypeTag ───────────────────────────────
@@ -384,11 +409,13 @@ function AttachmentSidePreview({
             : `${pdfPreviewUrl}#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0`;
 
     return (
-        <div
+        <Paper
             id={`cp-attachment-side-${postId}`}
-            className="block overflow-hidden rounded-xl border border-gray-200 bg-gray-50"
+            radius="md"
+            withBorder
+            className="block overflow-hidden border-gray-200 bg-gray-50"
         >
-            <div id={`cp-attachment-side-cover-${postId}`} className="relative aspect-[16/10] w-full overflow-hidden bg-white">
+            <Box id={`cp-attachment-side-cover-${postId}`} className="relative aspect-[16/10] w-full overflow-hidden bg-white">
                 {attachmentKind === 'image' ? (
                     previewUrl ? (
                         <img
@@ -401,15 +428,13 @@ function AttachmentSidePreview({
                             }}
                         />
                     ) : (
-                        <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-gray-600">
-                            <svg className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span className="text-xs font-semibold">{previewError ? 'โหลดภาพตัวอย่างไม่สำเร็จ' : 'กำลังโหลดภาพ...'}</span>
-                        </div>
+                        <Box className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-gray-600">
+                            {previewError ? <IconPhoto size={40} stroke={1.8} /> : <Loader size="md" color="gray" />}
+                            <Text size="xs" fw={600}>{previewError ? 'โหลดภาพตัวอย่างไม่สำเร็จ' : 'กำลังโหลดภาพ...'}</Text>
+                        </Box>
                     )
                 ) : attachmentKind === 'pdf' ? (
-                    <div className="relative h-full w-full bg-gray-100">
+                    <Box className="relative h-full w-full bg-gray-100">
                         {pdfPreviewUrl ? (
                             <>
                                 <iframe
@@ -418,21 +443,19 @@ function AttachmentSidePreview({
                                     className="absolute inset-0 h-full w-full bg-white"
                                     onLoad={() => setPdfFrameLoaded(true)}
                                 />
-                                <div className="absolute inset-0 z-10" />
-                                <div className="absolute bottom-0 right-0 top-0 z-20 w-3 bg-white" />
+                                <Box className="absolute inset-0 z-10" />
+                                <Box className="absolute bottom-0 right-0 top-0 z-20 w-3 bg-white" />
                             </>
                         ) : null}
                         {!pdfPreviewUrl && (
-                            <div className="absolute inset-0 flex h-full w-full flex-col items-center justify-center gap-2 text-gray-700">
-                                <svg className="h-10 w-10 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M4 3a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V17a2 2 0 01-2 2H6a2 2 0 01-2-2V3zm5 1a1 1 0 00-1 1v1a1 1 0 102 0V5a1 1 0 00-1-1zm-1 6a1 1 0 000 2h4a1 1 0 100-2H8zm0 3a1 1 0 000 2h4a1 1 0 100-2H8z" clipRule="evenodd" />
-                                </svg>
-                                <span className="text-xs font-semibold">{previewError ? 'ไม่สามารถแสดงตัวอย่าง PDF' : 'กำลังโหลด PDF...'}</span>
-                            </div>
+                            <Box className="absolute inset-0 flex h-full w-full flex-col items-center justify-center gap-2 text-gray-700">
+                                {previewError ? <IconFileTypePdf size={40} className="text-red-500" stroke={1.8} /> : <Loader size="md" color="gray" />}
+                                <Text size="xs" fw={600}>{previewError ? 'ไม่สามารถแสดงตัวอย่าง PDF' : 'กำลังโหลด PDF...'}</Text>
+                            </Box>
                         )}
-                    </div>
+                    </Box>
                 ) : attachmentKind === 'link' ? (
-                    <div className="relative h-full w-full">
+                    <Box className="relative h-full w-full">
                         {youtubeThumbnail ? (
                             <img
                                 src={youtubeThumbnail}
@@ -443,69 +466,69 @@ function AttachmentSidePreview({
                                 }}
                             />
                         ) : null}
-                    </div>
+                    </Box>
                 ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-gray-600">
-                        <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a3 3 0 016 0v4a1 1 0 11-2 0V7a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-xs font-semibold uppercase">{file.file_type || 'FILE'}</span>
-                    </div>
+                    <Box className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-gray-600">
+                        <IconPaperclip size={40} stroke={1.8} />
+                        <Text size="xs" fw={600} tt="uppercase">{file.file_type || 'FILE'}</Text>
+                    </Box>
                 )}
 
-                {/* dots indicator */}
                 {attachments.length > 1 && (
-                    <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/35 px-2 py-1">
+                    <Group className="absolute bottom-2 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/35 px-2 py-1" gap={6}>
                         {attachments.map((_, index) => (
-                            <span
+                            <IconPointFilled
                                 key={`${postId}-${index}`}
-                                className={`h-1.5 w-1.5 rounded-full ${index === currentIndex ? 'bg-white' : 'bg-white/45'}`}
+                                size={8}
+                                className={index === currentIndex ? 'text-white' : 'text-white/45'}
                             />
                         ))}
-                    </div>
+                    </Group>
                 )}
-            </div>
+            </Box>
 
-            <div
-                className="space-y-1 px-3 py-3 text-white"
+            <Box
+                className="space-y-1 px-3 py-3"
                 style={{ backgroundColor: AppColors.primaryPalette[300] }}
             >
-                <p id={`cp-attachment-side-name-${postId}`} className="truncate text-sm font-semibold text-black">
+                <Text id={`cp-attachment-side-name-${postId}`} className="truncate" size="sm" fw={600} c="black">
                     {getFileName(file)}
-                </p>
-                <div className="flex items-center justify-between pt-1">
-                    <button
-                        className="rounded-full bg-white/95 p-3 shadow transition-transform duration-150 hover:scale-110 hover:bg-white active:scale-95"
+                </Text>
+                <Group justify="space-between" className="pt-1" wrap="nowrap">
+                    <ActionIcon
                         onClick={(e) => {
                             void handleDownload(e);
                         }}
                         aria-label="Download attachment"
+                        radius="xl"
+                        variant="filled"
+                        color="white"
+                        className="shadow transition-transform duration-150 hover:scale-110 active:scale-95"
                     >
-                        <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" strokeWidth={2.3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2h16v-2" />
-                        </svg>
-                    </button>
+                        <IconDownload size={18} className="text-gray-800" stroke={2.2} />
+                    </ActionIcon>
 
-                    <button
-                        className="rounded-full bg-white/95 p-3 shadow transition-transform duration-150 hover:scale-110 hover:bg-white active:scale-95"
+                    <ActionIcon
                         onClick={handleOpenPreview}
                         aria-label="Expand preview"
+                        radius="xl"
+                        variant="filled"
+                        color="white"
+                        className="shadow transition-transform duration-150 hover:scale-110 active:scale-95"
                     >
-                        <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" strokeWidth={2.3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                        </svg>
-                    </button>
-                </div>
-                <p id={`cp-attachment-side-size-${postId}`} className="text-xs text-white/90">
+                        <IconArrowsMaximize size={18} className="text-gray-800" stroke={2.2} />
+                    </ActionIcon>
+                </Group>
+                <Text id={`cp-attachment-side-size-${postId}`} size="xs" c="white">
                     {formatFileSize(fileSize)}
-                </p>
+                </Text>
                 {attachments.length > 1 && (
-                    <p id={`cp-attachment-side-more-${postId}`} className="text-[11px] font-medium text-white/95">
+                    <Text id={`cp-attachment-side-more-${postId}`} size="11px" fw={500} c="white">
                         ไฟล์ {currentIndex + 1}/{attachments.length}
-                    </p>
+                    </Text>
                 )}
-            </div>
-        </div>
+            </Box>
+        </Paper>
     );
 }
 
@@ -742,17 +765,18 @@ export default function CardPost({
 
             {/* Bottom bar */}
             <div id={`cp-bottom-bar-${pid}`} className="mt-3 flex items-center justify-end gap-2 border-t border-gray-50 px-6 py-2.5">
-                <button
+                <Button
                     id={`cp-comment-btn-${pid}`}
                     aria-label="เปิดความคิดเห็น"
                     onClick={(e) => { e.stopPropagation(); onTap?.(); }}
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-amber-700 transition-colors hover:bg-amber-50"
+                    variant="subtle"
+                    color="orange"
+                    radius="xl"
+                    size="compact-sm"
+                    leftSection={<IconMessageCircle size={16} stroke={1.8} />}
                 >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
                     ความคิดเห็น
-                </button>
+                </Button>
             </div>
         </div>
     );

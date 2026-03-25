@@ -3,12 +3,39 @@
 // Hook สำหรับ create / edit post
 // ─────────────────────────────────────────────
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Dispatch, SetStateAction } from 'react';
 import { createPost, updatePost } from '@/utils/api/social-feed/post';
 import { CreatePostAttachment, PostItem, PostType } from '@/utils/interface/class.types';
-import { getSocialFeedUserId } from '@/hooks/useAuthIdentity';
+import { decodeRegistrationToken, decodeTeacherToken, decodeToken } from '@/utils/authToken';
 
 export type CreatePostMode = 'create' | 'edit';
+
+const parseTokenNumber = (value: unknown): number | null => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
+const getSocialFeedUserId = (): number | null => {
+  try {
+    const tokens = [
+      decodeTeacherToken(),
+      decodeRegistrationToken(),
+      decodeToken(),
+    ].filter(Boolean);
+
+    for (const token of tokens) {
+      const userId = parseTokenNumber((token as any)?.user_sys_id);
+      if (userId) return userId;
+
+      const fallbackId = parseTokenNumber((token as any)?.user_id);
+      if (fallbackId) return fallbackId;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 interface UseCreatePostOptions {
   mode: CreatePostMode;
@@ -28,7 +55,7 @@ interface UseCreatePostReturn {
   postType: PostType;
   setPostType: (v: PostType) => void;
   attachments: CreatePostAttachment[];
-  setAttachments: (v: CreatePostAttachment[]) => void;
+  setAttachments: Dispatch<SetStateAction<CreatePostAttachment[]>>;
   addAttachment: (a: CreatePostAttachment) => void;
   removeAttachment: (index: number) => void;
   // assignment

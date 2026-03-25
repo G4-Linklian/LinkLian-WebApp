@@ -5,24 +5,43 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { ActionIcon, Alert, Avatar, Badge, Button, Loader, Modal, Paper, ScrollArea, Text, TextInput } from '@mantine/core'
 import { useRouter } from 'next/router'
-import CardPost from '@/comps/linkLianApp/class/classDetail/cardPost'
-import FilterPost from '@/comps/linkLianApp/class/classDetail/filterPost'
-import CreatePost from '@/comps/linkLianApp/class/shared/createPost'
-import CreatePostModal from '@/comps/linkLianApp/class/shared/createPostModal'
-import CommentPage from '@/comps/linkLianApp/class/classDetail/commentPage'
-import SearchPost from '@/comps/linkLianApp/class/classDetail/searchPost'
-import ClassInfoPopup from '@/comps/linkLianApp/class/classDetail/classInfoPopup'
+import CardPost from '../post/cardPost'
+import FilterPost from '../post/filterPost'
+import CreatePostModal from '@/comps/linkLianApp/shared/createPostModal'
+import CommentPage from '../comment/commentPage'
+import SearchPost from '../post/searchPost'
+import ClassInfoPopup from './classInfoPopup'
 import { usePosts } from '@/hooks/social-feed/usePost'
 import { useClassInfo } from '@/hooks/social-feed/useClassinfo'
 import { useSearchPosts } from '@/hooks/social-feed/useSearchpost'
 import { ClassSchedule, PostItem } from '@/utils/interface/class.types'
 import { dayOfWeekToText, formatDateTime, formatTime } from '@/utils/function/classHelper'
-import { useAuthIdentity } from '@/hooks/useAuthIdentity'
+import { decodeRegistrationToken, decodeTeacherToken, decodeToken } from '@/utils/authToken'
 import { getSection } from '@/utils/api/section'
 
 const HEADER_FULL = 210
 const HEADER_MIN = 0
+const CLASS_DETAIL_MODAL_Z_INDEX = 11000
+
+const getSocialFeedRoleName = (): string => {
+  try {
+    const tokens = [
+      decodeTeacherToken(),
+      decodeRegistrationToken(),
+      decodeToken(),
+    ].filter(Boolean)
+
+    const roleName = tokens
+      .map((token) => String((token as any)?.role_name ?? '').toLowerCase())
+      .find((name) => name.length > 0)
+
+    return roleName ?? ''
+  } catch {
+    return ''
+  }
+}
 
 interface ClassHeaderProps {
   subjectName: string
@@ -35,6 +54,66 @@ interface ClassHeaderProps {
   onSearch: () => void
   onShowClassInfo: () => void
   onCreatePost: () => void
+}
+
+interface CommentModalProps {
+  opened: boolean
+  onClose: () => void
+  sectionId: number
+  postId: number
+  subjectName: string
+  className: string
+}
+
+function CommentModal({
+  opened,
+  onClose,
+  sectionId,
+  postId,
+  subjectName,
+  className,
+}: CommentModalProps) {
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      zIndex={CLASS_DETAIL_MODAL_Z_INDEX}
+      scrollAreaComponent={ScrollArea.Autosize}
+      title={(
+        <div className="min-w-0">
+          <Text size="base" fw={600} c="dark.9" truncate>
+            {subjectName || 'ความคิดเห็น'}
+          </Text>
+          {className && (
+            <Text size="xs" c="gray.5" truncate>
+              {className}
+            </Text>
+          )}
+        </div>
+      )}
+      centered
+      size="min(980px, calc(100vw - 3rem))"
+      padding={0}
+      radius="lg"
+      overlayProps={{ backgroundOpacity: 0.35, blur: 1 }}
+      styles={{
+        header: { padding: '16px 20px', alignItems: 'flex-start', backgroundColor: '#fff' },
+        title: { flex: 1, minWidth: 0 },
+        body: { padding: 0, backgroundColor: '#fff' },
+        content: { overflow: 'hidden', backgroundColor: '#fff' },
+      }}
+    >
+      <div id="cd-comment-modal" className="mx-auto flex h-[min(78vh,780px)] w-full max-w-4xl overflow-hidden bg-white">
+        <CommentPage
+          sectionId={sectionId}
+          postId={postId}
+          subjectName={subjectName}
+          className={className}
+          showHeader={false}
+        />
+      </div>
+    </Modal>
+  )
 }
 
 function ClassHeader({
@@ -67,16 +146,18 @@ function ClassHeader({
 
       <div id="cd-header-top-row" className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-3" style={{ opacity: Math.max(0, titleOpacity) }}>
         <div id="cd-header-nav-breadcrumb-row" className="flex min-w-0 items-center gap-2 text-xs text-white/90">
-          <button
+          <ActionIcon
             id="cd-back-btn"
             aria-label="ย้อนกลับ"
             onClick={onBack}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50"
+            variant="filled"
+            radius="xl"
+            style={{ backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', backdropFilter: 'blur(4px)' }}
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-          </button>
+          </ActionIcon>
           <span id="cd-header-breadcrumb-home">ห้องเรียน</span>
           <span>/</span>
           <span id="cd-header-breadcrumb-subject" className="truncate">{subjectName}</span>
@@ -84,57 +165,67 @@ function ClassHeader({
         </div>
 
         <div id="cd-header-actions" className="flex shrink-0 items-center gap-2">
-          <button
-            id="cd-class-info-btn"
-            aria-label="ข้อมูลห้องเรียน"
-            onClick={onShowClassInfo}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 xl:hidden"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </button>
-          <button
-            id="cd-search-btn"
-            aria-label="ค้นหาโพสต์"
-            onClick={onSearch}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 xl:hidden"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-          <button
+          <div className="flex items-center gap-2 xl:hidden">
+            <ActionIcon
+              id="cd-class-info-btn"
+              aria-label="ข้อมูลห้องเรียน"
+              onClick={onShowClassInfo}
+              variant="filled"
+              radius="xl"
+              style={{ backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', backdropFilter: 'blur(4px)' }}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </ActionIcon>
+            <ActionIcon
+              id="cd-search-btn"
+              aria-label="ค้นหาโพสต์"
+              onClick={onSearch}
+              variant="filled"
+              radius="xl"
+              style={{ backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', backdropFilter: 'blur(4px)' }}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </ActionIcon>
+          </div>
+          <ActionIcon
             id="cd-create-post-btn"
             aria-label="สร้างโพสต์"
             onClick={onCreatePost}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500 text-white shadow-lg hover:bg-amber-600"
+            variant="filled"
+            color="orange"
+            radius="xl"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-          </button>
+          </ActionIcon>
         </div>
       </div>
 
       <div id="cd-header-collapsed-title" className="absolute bottom-3 left-0 right-0 px-4" style={{ opacity: collapsedOpacity }}>
-        <p className="truncate text-center text-sm font-semibold text-white drop-shadow">{mainTitle}</p>
+        <Text className="truncate text-center drop-shadow" size="sm" fw={600} c="white">{mainTitle}</Text>
       </div>
 
       <div id="cd-header-expanded-info" className="absolute bottom-0 left-0 right-0 px-4 pb-4" style={{ opacity: Math.max(0, titleOpacity) }}>
-        <p id="cd-header-main-title" className="text-3xl font-bold leading-tight text-white drop-shadow-md">{mainTitle}</p>
-        <p id="cd-header-sub-title" className="mt-0.5 text-sm text-white/80">{subTitle}</p>
+        <Text id="cd-header-main-title" className="drop-shadow-md" size="2rem" fw={700} lh={1.2} c="white">{mainTitle}</Text>
+        <Text id="cd-header-sub-title" mt={2} size="sm" c="rgba(255,255,255,0.8)">{subTitle}</Text>
         {schedules.length > 0 && (
           <div id="cd-header-schedules" className="mt-2 flex flex-wrap gap-1.5">
             {schedules.map((s, i) => (
-              <span
+              <Badge
                 key={i}
                 id={`cd-header-schedule-chip-${i}`}
-                className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm"
+                variant="filled"
+                radius="xl"
+                style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff', backdropFilter: 'blur(4px)' }}
               >
                 {dayOfWeekToText(s.day_of_week, true)} {formatTime(s.start_time)}–{formatTime(s.end_time)}
                 {s.room?.room_number ? ` • ${s.room.room_number}` : ''}
-              </span>
+              </Badge>
             ))}
           </div>
         )}
@@ -165,11 +256,15 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
   const [editingPost, setEditingPost] = useState<PostItem | null>(null)
   const [resolvedSubjectName, setResolvedSubjectName] = useState(subjectName)
   const [highlightedPostId, setHighlightedPostId] = useState<number | null>(null)
+
+  const navigateBack = () => {
+    router.push('/classes')
+  }
   const [pendingFocusPostId, setPendingFocusPostId] = useState<number | null>(null)
   const [focusSignal, setFocusSignal] = useState(0)
 
   const { classInfo, isLoading: isClassInfoLoading, error: classInfoError } = useClassInfo(sectionId)
-  const { roleName } = useAuthIdentity()
+  const roleName = getSocialFeedRoleName()
   const isTeacherRole = roleName === 'teacher' || roleName === 'instructor'
 
   const safeSubjectName = (resolvedSubjectName || subjectName || '').trim()
@@ -349,37 +444,41 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
 
         {/* ── Left aside: Class Info ── */}
         <aside id="cd-class-info-column" className="hidden min-h-0 xl:block">
-          <div
+          <Paper
             id="cd-class-info-panel"
             ref={classInfoRef}
-            className="h-full overflow-y-auto rounded-2xl border border-gray-100 bg-white p-4 shadow-sm [scrollbar-width:thin] [scrollbar-color:#DB763F_#F8E7DA] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#F8E7DA] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#DB763F] [&::-webkit-scrollbar-thumb]:shadow-[0_0_0_2px_#fff]"
+            className="h-full"
+            radius="lg"
+            withBorder
+            p="md"
+            shadow="sm"
           >
-            <h3 id="cd-class-info-title" className="mb-2 text-sm font-semibold text-gray-900">ข้อมูลห้องเรียน</h3>
-            {isClassInfoLoading && <p id="cd-class-info-loading" className="text-xs text-gray-500">กำลังโหลดข้อมูล...</p>}
-            {!isClassInfoLoading && classInfoError && <p id="cd-class-info-error" className="text-xs text-red-500">{classInfoError}</p>}
+            <Text id="cd-class-info-title" mb="lg" size="lg" fw={900} c="dark.8">ข้อมูลห้องเรียน</Text>
+            {isClassInfoLoading && <Text id="cd-class-info-loading" size="xs" c="dimmed">กำลังโหลดข้อมูล...</Text>}
+            {!isClassInfoLoading && classInfoError && <Text id="cd-class-info-error" size="xs" c="red.6">{classInfoError}</Text>}
             {!isClassInfoLoading && !classInfoError && (
-              <div id="cd-class-info-content" className="space-y-5">
+              <ScrollArea id="cd-class-info-content" h="calc(100% - 28px)" offsetScrollbars>
+                <div className="space-y-8 py-1">
 
                 <section id="cd-class-info-subject-section">
-                  <p className="mb-1 text-xs font-semibold text-gray-500">วิชา</p>
-                  <p className="text-sm text-gray-700">{safeSubjectName || 'ไม่ระบุ'}</p>
+                  <Text size="xl" fw={700} c="dark.6">{safeSubjectName || 'ไม่ระบุ'}</Text>
                 </section>
 
                 <section id="cd-class-info-schedules-section">
                   <p className="mb-2 text-xs font-semibold text-gray-500">ห้องเรียนตามวัน</p>
                   <div className="space-y-2">
                     {schedulesByDay.map(([day, rows]) => (
-                      <div key={day} className="rounded-xl bg-gray-50 p-2">
-                        <p className="text-xs font-semibold text-gray-700">{day}</p>
+                      <Paper key={day} radius="lg" bg="gray.0" p="sm">
+                        <Text size="xs" fw={600} c="dark.6">{day}</Text>
                         <div className="mt-1 space-y-1">
                           {rows.map((row) => (
-                            <p key={`${day}-${row}`} className="text-[11px] text-gray-500">{row}</p>
+                            <Text key={`${day}-${row}`} size="11px" c="dimmed">{row}</Text>
                           ))}
                         </div>
-                      </div>
+                      </Paper>
                     ))}
                     {schedulesByDay.length === 0 && (
-                      <p className="text-xs text-gray-400">ไม่มีข้อมูลตารางเรียน</p>
+                      <Text size="xs" c="gray.5">ไม่มีข้อมูลตารางเรียน</Text>
                     )}
                   </div>
                 </section>
@@ -390,25 +489,34 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
                   </p>
                   <div className="space-y-2">
                     {(classInfo?.educators ?? []).map((educator) => (
-                      <div key={educator.user_sys_id} className="flex items-center gap-2 rounded-xl bg-gray-50 p-2">
+                      <Paper
+                        key={educator.user_sys_id}
+                        radius="lg"
+                        bg="gray.0"
+                        p="sm"
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '36px minmax(0, 1fr)',
+                          columnGap: '12px',
+                          alignItems: 'start',
+                        }}
+                      >
                         {educator.profile_pic ? (
-                          <img src={educator.profile_pic} alt={educator.display_name} className="h-9 w-9 rounded-full object-cover" />
+                          <Avatar src={educator.profile_pic} alt={educator.display_name} radius="xl" size={36} />
                         ) : (
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
-                            {(educator.display_name || '?').charAt(0)}
-                          </div>
+                          <Avatar color="blue" radius="xl" size={36}>{(educator.display_name || '?').charAt(0)}</Avatar>
                         )}
                         <div className="min-w-0">
-                          <p className="truncate text-xs font-semibold text-gray-800">
+                          <Text truncate size="xs" fw={600} c="dark.7">
                             {educator.display_name || 'ไม่ระบุชื่อ'}
                             {educator.is_main_teacher ? ' (ผู้สอนหลัก)' : ''}
-                          </p>
-                          <p className="truncate text-[11px] text-gray-500">รหัส: {educator.user_sys_id}</p>
+                          </Text>
+                          <Text truncate size="11px" c="dimmed">รหัส: {educator.user_sys_id}</Text>
                         </div>
-                      </div>
+                      </Paper>
                     ))}
                     {(classInfo?.educators?.length ?? 0) === 0 && (
-                      <p className="text-xs text-gray-400">ไม่มีข้อมูลผู้สอน</p>
+                      <Text size="xs" c="gray.5">ไม่มีข้อมูลผู้สอน</Text>
                     )}
                   </div>
                 </section>
@@ -417,31 +525,53 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
                   <p className="mb-2 text-xs font-semibold text-gray-500">
                     สมาชิก ({classInfo?.members?.length ?? 0})
                   </p>
-                  <div className="max-h-64 space-y-2 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#DB763F_#F8E7DA] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#F8E7DA] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#DB763F]">
-                    {(classInfo?.members ?? []).map((member) => (
-                      <div key={member.user_sys_id} className="flex items-center gap-2 rounded-xl bg-gray-50 p-2">
-                        {member.profile_pic ? (
-                          <img src={member.profile_pic} alt={member.display_name} className="h-9 w-9 rounded-full object-cover" />
-                        ) : (
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-700">
-                            {(member.display_name || '?').charAt(0)}
+                  <ScrollArea.Autosize
+                    mah={256}
+                    type="hover"
+                    scrollbars="y"
+                    offsetScrollbars={false}
+                    classNames={{ viewport: 'pr-2' }}
+                    styles={{
+                      scrollbar: { background: 'transparent', width: '8px' },
+                      thumb: { backgroundColor: '#DB763F', borderRadius: '999px' },
+                    }}
+                  >
+                    <div className="space-y-3 py-1">
+                      {(classInfo?.members ?? []).map((member) => (
+                        <Paper
+                          key={member.user_sys_id}
+                          radius="lg"
+                          bg="gray.0"
+                          p="sm"
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '36px minmax(0, 1fr)',
+                            columnGap: '12px',
+                            alignItems: 'start',
+                          }}
+                        >
+                          {member.profile_pic ? (
+                            <Avatar src={member.profile_pic} alt={member.display_name} radius="xl" size={36} />
+                          ) : (
+                            <Avatar color="orange" radius="xl" size={36}>{(member.display_name || '?').charAt(0)}</Avatar>
+                          )}
+                          <div className="min-w-0">
+                            <Text truncate size="xs" fw={600} c="dark.7">{member.display_name || 'ไม่ระบุชื่อ'}</Text>
+                            <Text truncate size="11px" c="dimmed">รหัส: {member.student_code || member.user_sys_id}</Text>
                           </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="truncate text-xs font-semibold text-gray-800">{member.display_name || 'ไม่ระบุชื่อ'}</p>
-                          <p className="truncate text-[11px] text-gray-500">รหัส: {member.student_code || member.user_sys_id}</p>
-                        </div>
-                      </div>
-                    ))}
-                    {(classInfo?.members?.length ?? 0) === 0 && (
-                      <p className="text-xs text-gray-400">ไม่มีสมาชิก</p>
-                    )}
-                  </div>
+                        </Paper>
+                      ))}
+                      {(classInfo?.members?.length ?? 0) === 0 && (
+                        <Text size="xs" c="gray.5">ไม่มีสมาชิก</Text>
+                      )}
+                    </div>
+                  </ScrollArea.Autosize>
                 </section>
 
-              </div>
+                </div>
+              </ScrollArea>
             )}
-          </div>
+          </Paper>
         </aside>
 
         {/* ── Main shell ── */}
@@ -453,81 +583,97 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
             subTitle={subTitle}
             schedules={classInfo?.schedules ?? []}
             scrollRatio={scrollRatio}
-            onBack={() => router.back()}
+            onBack={navigateBack}
             onSearch={() => setShowSearch(true)}
             onShowClassInfo={() => setShowClassInfo(true)}
             onCreatePost={openCreatePost}
           />
 
           {/* Search bar — desktop only */}
-          <div
+          <Paper
             id="cd-search-bar"
-            className="mt-3 hidden shrink-0 items-center gap-2 rounded-2xl border border-gray-100 bg-white px-4 py-2.5 shadow-sm xl:flex"
+            className="mt-3 hidden shrink-0 xl:flex"
+            radius="lg"
+            withBorder
+            p="sm"
           >
-            <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
+            <TextInput
               id="cd-search-input"
               ref={searchInputRef}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="ค้นหาโพสต์ในห้องเรียนนี้..."
-              className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
-            />
-            {keyword && (
-              <button
-                onClick={clearSearch}
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-gray-300"
-              >
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              className="w-full"
+              variant="unstyled"
+              leftSection={
+                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-              </button>
-            )}
-          </div>
+              }
+              rightSection={
+                keyword ? (
+                  <ActionIcon onClick={clearSearch} variant="light" color="gray" radius="xl" size="sm">
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </ActionIcon>
+                ) : undefined
+              }
+            />
+          </Paper>
 
           {/* Filter bar — ซ่อนตอน search mode */}
           {!isSearchMode && (
-            <div id="cd-filter-bar" className="mt-3 flex shrink-0 items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-2.5 shadow-sm">
-              <p id="cd-filter-label" className="truncate text-sm font-medium text-gray-500">โพสต์ทั้งหมด</p>
+            <div id="cd-filter-bar" className="mt-3 flex shrink-0 justify-end">
               <FilterPost value={filterType} onChange={setFilterType} />
             </div>
           )}
 
           {/* ── Search mode: แสดง results แทน feed ── */}
           {isSearchMode ? (
-            <div
+            <ScrollArea
               id="cd-search-results-area"
-              className="flex-1 overflow-y-auto pt-3 pb-24 [scrollbar-width:thin] [scrollbar-color:#DB763F_#F8E7DA] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#F8E7DA] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#DB763F] [&::-webkit-scrollbar-thumb]:shadow-[0_0_0_2px_#fff]"
+              type="hover"
+              scrollbars="y"
+              className="min-h-0 flex-1"
+              classNames={{ viewport: 'pt-3 pb-24' }}
+              styles={{
+                scrollbar: { background: 'transparent', width: '16px', padding: '2px' },
+                thumb: { backgroundColor: '#DB763F', borderRadius: '999px', border: '2px solid transparent', backgroundClip: 'padding-box' },
+              }}
             >
               {/* header แถบ results */}
               <div className="mb-3 flex items-center justify-between px-1">
-                <p className="text-sm font-medium text-gray-500">
+                <Text size="sm" fw={500} c="dimmed">
                   {isSearchLoading
                     ? 'กำลังค้นหา...'
                     : `พบ ${searchResults.length} ผลลัพธ์สำหรับ "${keyword}"`}
-                </p>
-                <button
+                </Text>
+                <Button
                   onClick={clearSearch}
-                  className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500 hover:bg-gray-200"
+                  variant="light"
+                  color="gray"
+                  radius="xl"
+                  size="xs"
+                  leftSection={
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  }
                 >
-                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
                   ล้างการค้นหา
-                </button>
+                </Button>
               </div>
 
               {isSearchLoading && (
                 <div className="flex flex-col items-center gap-3 py-16">
-                  <div className="h-7 w-7 animate-spin rounded-full border-[3px] border-amber-200 border-t-amber-500" />
-                  <p className="text-sm text-amber-400">กำลังค้นหา...</p>
+                  <Loader color="orange" />
+                  <Text size="sm" c="orange.5">กำลังค้นหา...</Text>
                 </div>
               )}
 
               {!isSearchLoading && searchError && (
-                <p className="py-4 text-center text-sm text-red-400">{searchError}</p>
+                <Alert color="red" variant="light">{searchError}</Alert>
               )}
 
               {!isSearchLoading && !searchError && searchResults.length === 0 && (
@@ -537,18 +683,22 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-400">ไม่พบโพสต์สำหรับ "{keyword}"</p>
+                  <Text size="sm" c="gray.5">ไม่พบโพสต์สำหรับ "{keyword}"</Text>
                 </div>
               )}
 
               {!isSearchLoading && searchResults.length > 0 && (
                 <div id="cd-search-result-list" className="space-y-2">
                   {searchResults.map((post, index) => (
-                    <button
+                    <Paper
+                      component="button"
                       id={`cd-search-item-${index}`}
                       key={post.post_id}
                       onClick={() => { void focusPostInFeed(post.post_id) }}
-                      className="flex w-full items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-colors hover:border-amber-200 hover:bg-amber-50"
+                      className="flex w-full items-start gap-3 text-left transition-colors hover:border-amber-200 hover:bg-amber-50"
+                      radius="xl"
+                      withBorder
+                      p="md"
                     >
                       <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100">
                         <svg className="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -556,39 +706,46 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
                         </svg>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-gray-800">{post.title || 'ไม่มีหัวข้อ'}</p>
-                        <p className="mt-1 line-clamp-2 text-xs text-gray-500">{post.content}</p>
-                        <p className="mt-1.5 text-[11px] text-gray-400">{formatDateTime(post.created_at)}</p>
+                        <Text className="truncate" size="sm" fw={600} c="dark.7">{post.title || 'ไม่มีหัวข้อ'}</Text>
+                        <Text mt={4} className="line-clamp-2" size="xs" c="dimmed">{post.content}</Text>
+                        <Text mt={6} size="11px" c="gray.5">{formatDateTime(post.created_at)}</Text>
                       </div>
                       <svg className="mt-1 h-4 w-4 shrink-0 text-gray-300" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                       </svg>
-                    </button>
+                    </Paper>
                   ))}
                 </div>
               )}
-            </div>
+            </ScrollArea>
           ) : (
             /* ── Normal feed ── */
-            <div
+            <ScrollArea
               id="cd-scroll-area"
-              ref={feedScrollRef}
-              onScroll={handleFeedScroll}
-              className="flex-1 overflow-y-auto pt-4 pb-24 [scrollbar-width:thin] [scrollbar-color:#DB763F_#F8E7DA] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#F8E7DA] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#DB763F] [&::-webkit-scrollbar-thumb]:shadow-[0_0_0_2px_#fff]"
+              viewportRef={feedScrollRef}
+              onScrollPositionChange={handleFeedScroll}
+              type="hover"
+              scrollbars="y"
+              className="min-h-0 flex-1"
+              classNames={{ viewport: 'pt-3 pb-24' }}
+              styles={{
+                scrollbar: { background: 'transparent', width: '16px', padding: '2px' },
+                thumb: { backgroundColor: '#DB763F', borderRadius: '999px', border: '2px solid transparent', backgroundClip: 'padding-box' },
+              }}
             >
               {isLoading && (
                 <div id="cd-loading" className="flex flex-col items-center gap-3 py-16">
-                  <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-amber-200 border-t-amber-500" />
-                  <p className="text-sm text-amber-400">กำลังโหลดโพสต์...</p>
+                  <Loader color="orange" />
+                  <Text size="sm" c="orange.5">กำลังโหลดโพสต์...</Text>
                 </div>
               )}
 
               {!isLoading && error && (
                 <div id="cd-error" className="flex flex-col items-center gap-4 py-16">
-                  <p id="cd-error-msg" className="text-center text-sm text-gray-500">{error}</p>
-                  <button id="cd-retry-btn" onClick={refresh} className="rounded-full bg-amber-100 px-5 py-2 text-sm font-medium text-amber-800 hover:bg-amber-200">
+                  <Alert id="cd-error-msg" color="red" variant="light" className="max-w-md">{error}</Alert>
+                  <Button id="cd-retry-btn" onClick={refresh} variant="light" color="orange" radius="xl">
                     ลองใหม่
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -599,10 +756,10 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
                   </div>
-                  <p id="cd-empty-msg" className="text-sm text-gray-400">ยังไม่มีโพสต์ในห้องเรียนนี้</p>
-                  <button id="cd-empty-create-btn" onClick={openCreatePost} className="rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-white shadow hover:bg-amber-600">
+                  <Text id="cd-empty-msg" size="sm" c="gray.5">ยังไม่มีโพสต์ในห้องเรียนนี้</Text>
+                  <Button id="cd-empty-create-btn" onClick={openCreatePost} color="orange" radius="xl">
                     สร้างโพสต์แรก
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -620,15 +777,15 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
                   ))}
                   {isLoadingMore && (
                     <div id="cd-load-more-spinner" className="flex justify-center py-4">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-200 border-t-amber-500" />
+                      <Loader color="orange" size="sm" />
                     </div>
                   )}
                   {!hasMore && posts.length > 0 && (
-                    <p id="cd-end-msg" className="py-4 text-center text-xs text-gray-300">แสดงทั้งหมด {posts.length} โพสต์</p>
+                    <Text id="cd-end-msg" py="md" ta="center" size="xs" c="gray.4">แสดงทั้งหมด {posts.length} โพสต์</Text>
                   )}
                 </div>
               )}
-            </div>
+            </ScrollArea>
           )}
 
           {/* Search overlay — mobile */}
@@ -662,40 +819,33 @@ const ClassDetail = ({ sectionId, subjectName, className }: ClassDetailProps) =>
 
       {/* ─── CreatePostModal ─── */}
       {showCreatePost && (
-        <CreatePostModal>
-          <div id="cd-create-overlay" className="h-full">
-            <CreatePost
-              sectionId={sectionId}
-              subjectName={safeSubjectName}
-              editPostId={editingPost?.post_id}
-              editPostContentId={editingPost?.post_content_id}
-              allowAnonymous={false}
-              onClose={() => {
-                setShowCreatePost(false)
-                setEditingPost(null)
-              }}
-              onSubmitted={() => {
-                refresh()
-              }}
-            />
-          </div>
-        </CreatePostModal>
+        <CreatePostModal
+          opened={showCreatePost}
+          onClose={() => {
+            setShowCreatePost(false)
+            setEditingPost(null)
+          }}
+          sectionId={sectionId}
+          subjectName={safeSubjectName}
+          editPostId={editingPost?.post_id}
+          editPostContentId={editingPost?.post_content_id}
+          allowAnonymous={false}
+          onSubmitted={() => {
+            refresh()
+          }}
+        />
       )}
 
       {/* ─── Comment modal ─── */}
       {showCommentPostId && (
-        <div id="cd-comment-overlay" className="fixed inset-x-0 bottom-0 top-[60px] z-[9000] bg-black/35 p-3 backdrop-blur-[1px] md:p-6">
-          <div id="cd-comment-modal" className="mx-auto flex h-full w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <CommentPage
-              sectionId={sectionId}
-              postId={showCommentPostId}
-              subjectName={safeSubjectName}
-              className={className}
-              isPopup
-              onClose={() => setShowCommentPostId(null)}
-            />
-          </div>
-        </div>
+        <CommentModal
+          opened={!!showCommentPostId}
+          onClose={() => setShowCommentPostId(null)}
+          sectionId={sectionId}
+          postId={showCommentPostId}
+          subjectName={safeSubjectName}
+          className={className}
+        />
       )}
     </div>
   )
