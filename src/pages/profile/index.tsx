@@ -7,12 +7,6 @@ import LayoutShell from "@/comps/layouts/LayoutShell";
 import { decodeTeacherToken } from "@/utils/authToken";
 
 function PageContent() {
-  const router = useRouter();
-
-  const handleLogout = () => {
-    router.push("/teacherLogin");
-  };
-
   return (
     <div className="flex justify-center items-center w-full h-full">
       <ProfilePage />
