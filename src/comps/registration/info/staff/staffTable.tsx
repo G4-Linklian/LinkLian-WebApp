@@ -179,6 +179,11 @@ export default function StaffTable() {
         }
     };
 
+    const deleteStaffData = async (_user_sys_id: number) => {
+        setStaffData([]);
+        setHasMore(true);
+        fetchData(0);
+    };
 
     useEffect(() => {
         const fetchLearningAreas = async () => {
@@ -204,7 +209,6 @@ export default function StaffTable() {
 
         fetchLearningAreas();
     }, [instId]);
-
 
     const onScroll = () => {
         if (viewportRef.current) {
@@ -373,6 +377,10 @@ export default function StaffTable() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateStaffData(values);
+                    closeEditModal();
+                }}
+                onDelete={async (user_sys_id) => {
+                    await deleteStaffData(user_sys_id);
                     closeEditModal();
                 }}
                 learningAreaOptions={learningAreaOptions}

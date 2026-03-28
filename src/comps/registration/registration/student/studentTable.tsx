@@ -192,6 +192,11 @@ export default function StudentTable() {
         }
     };
 
+    const deleteStudentData = async (_user_sys_id: number) => {
+        setStudentData([]);
+        setHasMore(true);
+        fetchData(0);
+    };
 
     const onScroll = () => {
         if (viewportRef.current) {
@@ -368,6 +373,10 @@ export default function StudentTable() {
                 close={closeEditModal}
                 onSubmit={async (values) => {
                     await updateStudentData(values);
+                    closeEditModal();
+                }}
+                onDelete={async (user_sys_id) => {
+                    await deleteStudentData(user_sys_id);
                     closeEditModal();
                 }}
                 eduLevelOptions={eduLevelOptions}
