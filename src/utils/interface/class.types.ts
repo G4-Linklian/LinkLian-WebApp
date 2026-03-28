@@ -68,7 +68,7 @@ export interface PostAttachment {
 // ==================== USER (ใน Post) ====================
 
 export interface PostUser {
-  user_sys_id: number;
+  user_sys_id: number | null;
   email: string | null;
   profile_pic: string | null;
   display_name: string;
@@ -86,6 +86,7 @@ export interface PostItem {
   content: string;
   post_type: PostType;
   is_anonymous: boolean;
+  is_user_deleted?: boolean;
   created_at: string; // ISO string
   due_date: string | null;
   max_score: number | null;

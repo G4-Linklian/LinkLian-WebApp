@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Alert, Badge, Button, Loader, Paper, ScrollArea, Text, Textarea, ThemeIcon } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Box, Button, Group, Loader, Paper, ScrollArea, Stack, Text, Textarea, ThemeIcon } from '@mantine/core';
 import { IconSend2 } from '@tabler/icons-react';
 import { useRouter } from 'next/router';
 import CardPost from '../post/cardPost';
@@ -16,11 +16,12 @@ import { formatDateTime, getInitial } from '@/utils/function/classHelper';
 
 // ── CommentItem ───────────────────────────────
 function CommentItem({
-  node, depth = 0, onReply,
+  node, depth = 0, onReply, disableReply = false,
 }: {
   node: CommentNode;
   depth?: number;
   onReply: (node: CommentNode) => void;
+  disableReply?: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const hasReplies = node.children && node.children.length > 0;
@@ -58,9 +59,10 @@ function CommentItem({
               <Button
                 id={`cmt-reply-btn-${cid}`}
                 aria-label={`ตอบกลับ ${node.display_name}`}
-                onClick={() => onReply(node)}
+                onClick={() => !disableReply && onReply(node)}
+                disabled={disableReply}
                 variant="subtle"
-                color="orange"
+                color={disableReply ? 'gray' : 'orange'}
                 size="compact-xs"
               >
                 ตอบกลับ
@@ -89,7 +91,7 @@ function CommentItem({
             </Button>
           )}
           {!collapsed && node.children!.map((child) => (
-            <CommentItem key={child.comment_id} node={child} depth={depth + 1} onReply={onReply} />
+            <CommentItem key={child.comment_id} node={child} depth={depth + 1} onReply={onReply} disableReply={disableReply} />
           ))}
         </div>
       )}
@@ -99,12 +101,13 @@ function CommentItem({
 
 // ── CommentInput ──────────────────────────────
 function CommentInput({
-  replyingTo, onCancelReply, onSubmit, isSubmitting,
+  replyingTo, onCancelReply, onSubmit, isSubmitting, isUserDeleted = false,
 }: {
   replyingTo: CommentNode | null;
   onCancelReply: () => void;
   onSubmit: (text: string) => Promise<boolean>;
   isSubmitting: boolean;
+  isUserDeleted?: boolean;
 }) {
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -112,58 +115,77 @@ function CommentInput({
   useEffect(() => { if (replyingTo) inputRef.current?.focus(); }, [replyingTo]);
 
   const handleSubmit = () => {
-    if (!text.trim() || isSubmitting) return;
+    if (!text.trim() || isSubmitting || isUserDeleted) return;
     onSubmit(text.trim());
     setText('');
   };
 
-  return (
-    <div id="cmt-input-container" className="shrink-0 border-t border-gray-100 bg-white px-4 pt-2 pb-4">
-      {replyingTo && (
-        <Paper id="cmt-replying-to-banner" className="mb-2 flex items-center justify-between" radius="lg" p="xs" bg="orange.0">
-          <Text id="cmt-replying-to-label" size="xs" c="orange.8">
-            ตอบกลับ <span className="font-semibold">{replyingTo.display_name ?? 'ไม่ระบุชื่อ'}</span>
-          </Text>
-          <ActionIcon id="cmt-cancel-reply-btn" aria-label="ยกเลิกการตอบกลับ" onClick={onCancelReply} variant="subtle" color="orange" radius="xl">
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  if (isUserDeleted) {
+    return (
+      <Box id="cmt-input-container" className="shrink-0" style={{ borderTop: '1px solid #f3f4f6', background: '#fff' }} px="md" pt="xs" pb="md">
+        <Paper id="cmt-disabled-notice" radius="xl" p="sm" bg="gray.1" style={{ border: '1px solid #e5e7eb' }}>
+          <Group gap="xs" wrap="nowrap" justify="center">
+            <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
-          </ActionIcon>
+            <Text size="sm" c="gray.5">ไม่สามารถแสดงความคิดเห็นบนโพสต์นี้ได้</Text>
+          </Group>
         </Paper>
-      )}
-      <div id="cmt-input-row" className="flex items-end gap-2">
-        <div className="flex-1">
-          <Textarea
-            id="cmt-input"
-            ref={inputRef}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-            placeholder={replyingTo ? `ตอบกลับ ${replyingTo.display_name ?? 'ไม่ระบุชื่อ'}...` : 'เขียนความคิดเห็น...'}
-            autosize
-            minRows={1}
-            maxRows={4}
+      </Box>
+    );
+  }
+
+  return (
+    <Box id="cmt-input-container" className="shrink-0" style={{ borderTop: '1px solid #f3f4f6', background: '#fff' }} px="md" pt="xs" pb="md">
+      <Stack gap="xs">
+        {replyingTo && (
+          <Paper id="cmt-replying-to-banner" radius="lg" p="xs" bg="orange.0">
+            <Group id="cmt-replying-to-row" justify="space-between" wrap="nowrap">
+              <Text id="cmt-replying-to-label" size="xs" c="orange.8">
+                ตอบกลับ <span className="font-semibold">{replyingTo.display_name ?? 'ไม่ระบุชื่อ'}</span>
+              </Text>
+              <ActionIcon id="cmt-cancel-reply-btn" aria-label="ยกเลิกการตอบกลับ" onClick={onCancelReply} variant="subtle" color="orange" radius="xl">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </ActionIcon>
+            </Group>
+          </Paper>
+        )}
+        <Group id="cmt-input-row" align="flex-end" gap="xs" wrap="nowrap">
+          <Box style={{ flex: 1 }}>
+            <Textarea
+              id="cmt-input"
+              ref={inputRef}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+              placeholder={replyingTo ? `ตอบกลับ ${replyingTo.display_name ?? 'ไม่ระบุชื่อ'}...` : 'เขียนความคิดเห็น...'}
+              autosize
+              minRows={1}
+              maxRows={4}
+              radius="xl"
+            />
+          </Box>
+          <ActionIcon
+            id="cmt-send-btn"
+            aria-label="ส่งความคิดเห็น"
+            onClick={handleSubmit}
+            disabled={!text.trim() || isSubmitting}
+            mb={4}
+            color="orange"
             radius="xl"
-          />
-        </div>
-        <ActionIcon
-          id="cmt-send-btn"
-          aria-label="ส่งความคิดเห็น"
-          onClick={handleSubmit}
-          disabled={!text.trim() || isSubmitting}
-          className="mb-1"
-          color="orange"
-          radius="xl"
-          variant="filled"
-        >
-          {isSubmitting ? (
-            <Loader id="cmt-send-spinner" size="sm" color="white" />
-          ) : (
-            <IconSend2 size={16} stroke={2} className="translate-x-0.5" />
-          )}
-        </ActionIcon>
-      </div>
-    </div>
+            variant="filled"
+          >
+            {isSubmitting ? (
+              <Loader id="cmt-send-spinner" size="sm" color="white" />
+            ) : (
+              <IconSend2 size={16} stroke={2} className="translate-x-0.5" />
+            )}
+          </ActionIcon>
+        </Group>
+      </Stack>
+    </Box>
   );
 }
 
@@ -321,6 +343,7 @@ const CommentPage = ({ sectionId, postId, subjectName, className, showHeader = t
                 key={node.comment_id}
                 node={node}
                 onReply={setReplyingTo}
+                disableReply={!!post?.is_user_deleted}
               />
             ))}
             {isLoadingMore && (
@@ -343,6 +366,7 @@ const CommentPage = ({ sectionId, postId, subjectName, className, showHeader = t
         onCancelReply={() => setReplyingTo(null)}
         onSubmit={submitComment}
         isSubmitting={isSubmitting}
+        isUserDeleted={!!post?.is_user_deleted}
       />
     </div>
   );

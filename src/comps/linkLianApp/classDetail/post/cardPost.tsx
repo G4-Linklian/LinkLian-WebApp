@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Box, Button, Group, Loader, Paper, Text } from '@mantine/core';
-import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled } from '@tabler/icons-react';
+import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled, IconUserOff } from '@tabler/icons-react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { LiveStreaming02Icon } from '@hugeicons/core-free-icons';
 import { useRouter } from 'next/router';
@@ -141,6 +141,17 @@ function AssignmentTags({ post }: { post: PostItem }) {
 // ── ProfileAvatar ─────────────────────────────
 function ProfileAvatar({ post }: { post: PostItem }) {
     const pid = post.post_id;
+
+    if (post.is_user_deleted) {
+        return (
+            <div
+                id={`cp-avatar-${pid}`}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400"
+            >
+                <IconUserOff size={20} stroke={1.8} />
+            </div>
+        );
+    }
 
     if (post.is_anonymous || !post.user.profile_pic) {
         return (
