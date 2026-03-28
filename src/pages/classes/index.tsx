@@ -6,7 +6,11 @@ import ClassComp from '@/comps/linkLianApp/class/classComp';
 import { decodeTeacherToken } from '@/utils/authToken';
 
 function PageContent() {
-  return <ClassComp />;
+  return (
+    <div className="flex justify-center items-center w-full h-full">
+      <ClassComp />
+    </div>
+  );
 }
 
 export default function ClassesHome() {

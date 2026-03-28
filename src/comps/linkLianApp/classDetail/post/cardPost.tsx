@@ -6,7 +6,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Box, Button, Group, Loader, Paper, Text } from '@mantine/core';
-import { IconArrowsMaximize, IconDownload, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled } from '@tabler/icons-react';
+import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled } from '@tabler/icons-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LiveStreaming02Icon } from '@hugeicons/core-free-icons';
+import { useRouter } from 'next/router';
 import { PostItem, PostAttachment } from '@/utils/interface/class.types';
 import {
     POST_TYPE_LABEL,
@@ -229,31 +232,6 @@ const resolveAttachmentKind = (file: PostAttachment): AttachmentKind => {
     return 'other';
 };
 
-const getSizeFromQuery = (url: string): number | null => {
-    try {
-        const params = new URL(url).searchParams;
-        const candidates = ['size', 'file_size', 'filesize', 'contentLength'];
-        for (const key of candidates) {
-            const value = Number(params.get(key));
-            if (Number.isFinite(value) && value > 0) return value;
-        }
-        return null;
-    } catch {
-        return null;
-    }
-};
-
-const formatFileSize = (bytes: number | null): string => {
-    if (!bytes || bytes <= 0) return '-';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let value = bytes;
-    let idx = 0;
-    while (value >= 1024 && idx < units.length - 1) {
-        value /= 1024;
-        idx += 1;
-    }
-    return `${value >= 100 || idx === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[idx]}`;
-};
 
 function AttachmentSidePreview({
     attachments,
@@ -268,59 +246,13 @@ function AttachmentSidePreview({
     onPrev: () => void;
     onNext: () => void;
 }) {
+    const router = useRouter();
     const file = attachments[currentIndex] ?? attachments[0];
     const attachmentKind = resolveAttachmentKind(file);
-    const [fileSize, setFileSize] = useState<number | null>(() => getSizeFromQuery(file.file_url));
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewError, setPreviewError] = useState(false);
     const [pdfFrameLoaded, setPdfFrameLoaded] = useState(false);
     const [pdfRenderMode, setPdfRenderMode] = useState<'direct' | 'google'>('direct');
-
-    useEffect(() => {
-        const sizeFromQuery = getSizeFromQuery(file.file_url);
-        if (sizeFromQuery) {
-            setFileSize(sizeFromQuery);
-            return;
-        }
-
-        let isMounted = true;
-        const controller = new AbortController();
-
-        fetch(file.file_url, {
-            method: 'HEAD',
-            signal: controller.signal,
-        })
-            .then((res) => {
-                const size = Number(res.headers.get('content-length'));
-                if (isMounted && Number.isFinite(size) && size > 0) {
-                    setFileSize(size);
-                    return;
-                }
-                return fetchPostAttachmentBlob(file.file_url, getFileName(file)).then((blob) => {
-                    if (isMounted && blob && blob.size > 0) {
-                        setFileSize(blob.size);
-                    }
-                });
-            })
-            .catch(() => {
-                void fetchPostAttachmentBlob(file.file_url, getFileName(file))
-                    .then((blob) => {
-                        if (isMounted && blob && blob.size > 0) {
-                            setFileSize(blob.size);
-                            return;
-                        }
-                        if (isMounted) setFileSize(null);
-                    })
-                    .catch(() => {
-                        if (isMounted) setFileSize(null);
-                    });
-            });
-
-        return () => {
-            isMounted = false;
-            controller.abort();
-        };
-    }, [file.file_url]);
 
     useEffect(() => {
         if (attachmentKind !== 'image' && attachmentKind !== 'pdf') {
@@ -381,19 +313,24 @@ function AttachmentSidePreview({
         };
     }, [attachmentKind, file.file_url, pdfFrameLoaded]);
 
-    const handleDownload = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleDownload = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        void triggerPostAttachmentDownload(file.file_url, getFileName(file)).catch((err) => {
+        try {
+            await triggerPostAttachmentDownload(file.file_url, getFileName(file));
+        } catch (err) {
             console.error('[CardPost] download failed', err);
-        });
+        }
     };
 
-    const handleOpenPreview = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleOpenQnA = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        const targetUrl = previewUrl ?? file.file_url;
-        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        const sectionId = router.query.sectionId;
+        void router.push({
+            pathname: '/classes/qna',
+            query: { sectionId, postId: postId },
+        });
     };
 
     const youtubeThumbnail = attachmentKind === 'link' ? getYouTubeThumbnail(file.file_url) : null;
@@ -455,18 +392,27 @@ function AttachmentSidePreview({
                         )}
                     </Box>
                 ) : attachmentKind === 'link' ? (
-                    <Box className="relative h-full w-full">
+                    <a
+                        href={file.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative flex h-full w-full items-center justify-center bg-blue-50 hover:bg-blue-100 transition-colors"
+                    >
                         {youtubeThumbnail ? (
                             <img
                                 src={youtubeThumbnail}
                                 alt={getFileName(file)}
                                 className="h-full w-full object-cover"
-                                onError={(e) => {
-                                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                                }}
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                             />
-                        ) : null}
-                    </Box>
+                        ) : (
+                            <div className="flex flex-col items-center gap-2 text-blue-500">
+                                <IconExternalLink size={32} stroke={1.6} />
+                                <Text size="xs" c="blue.6" fw={500}>{hostLabel}</Text>
+                            </div>
+                        )}
+                    </a>
                 ) : (
                     <Box className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-gray-600">
                         <IconPaperclip size={40} stroke={1.8} />
@@ -495,33 +441,63 @@ function AttachmentSidePreview({
                     {getFileName(file)}
                 </Text>
                 <Group justify="space-between" className="pt-1" wrap="nowrap">
-                    <ActionIcon
-                        onClick={(e) => {
-                            void handleDownload(e);
-                        }}
-                        aria-label="Download attachment"
-                        radius="xl"
-                        variant="filled"
-                        color="white"
-                        className="shadow transition-transform duration-150 hover:scale-110 active:scale-95"
-                    >
-                        <IconDownload size={18} className="text-gray-800" stroke={2.2} />
-                    </ActionIcon>
+                    {attachmentKind === 'link' ? (
+                        <ActionIcon
+                            component="a"
+                            href={file.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            aria-label="เปิดลิงก์"
+                            radius="xl"
+                            variant="unstyled"
+                            styles={{
+                                root: {
+                                    backgroundColor: AppColors.primaryPalette[500],
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: AppColors.primaryPalette[300] },
+                                },
+                            }}
+                            className="shadow transition-all duration-150 hover:scale-110 active:scale-95"
+                        >
+                            <IconExternalLink size={18} stroke={2.2} />
+                        </ActionIcon>
+                    ) : (
+                        <ActionIcon
+                            onClick={(e) => { void handleDownload(e); }}
+                            aria-label="Download attachment"
+                            radius="xl"
+                            variant="unstyled"
+                            styles={{
+                                root: {
+                                    backgroundColor: AppColors.primaryPalette[500],
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: AppColors.primaryPalette[300] },
+                                },
+                            }}
+                            className="shadow transition-all duration-150 hover:scale-110 active:scale-95"
+                        >
+                            <IconDownload size={18} stroke={2.2} />
+                        </ActionIcon>
+                    )}
 
                     <ActionIcon
-                        onClick={handleOpenPreview}
-                        aria-label="Expand preview"
+                        onClick={handleOpenQnA}
+                        aria-label="Open Q&A Live"
                         radius="xl"
-                        variant="filled"
-                        color="white"
-                        className="shadow transition-transform duration-150 hover:scale-110 active:scale-95"
+                        variant="unstyled"
+                        styles={{
+                            root: {
+                                backgroundColor: AppColors.primaryPalette[500],
+                                color: '#fff',
+                                '&:hover': { backgroundColor: AppColors.primaryPalette[300] },
+                            },
+                        }}
+                        className="shadow transition-all duration-150 hover:scale-125 active:scale-95"
                     >
-                        <IconArrowsMaximize size={18} className="text-gray-800" stroke={2.2} />
+                        <HugeiconsIcon icon={LiveStreaming02Icon} size={18} color="currentColor" strokeWidth={2.2} />
                     </ActionIcon>
                 </Group>
-                <Text id={`cp-attachment-side-size-${postId}`} size="xs" c="white">
-                    {formatFileSize(fileSize)}
-                </Text>
                 {attachments.length > 1 && (
                     <Text id={`cp-attachment-side-more-${postId}`} size="11px" fw={500} c="white">
                         ไฟล์ {currentIndex + 1}/{attachments.length}
@@ -623,6 +599,30 @@ function MoreMenu({
     );
 }
 
+// ── renderTextWithLinks ───────────────────────
+const INLINE_URL_REGEX = /(https?:\/\/[^\s]+)/g;
+
+function renderTextWithLinks(text: string): React.ReactNode {
+    // split with capturing group → odd indices are the captured URL parts
+    return text.split(INLINE_URL_REGEX).map((part, i) => {
+        if (i % 2 === 1) {
+            return (
+                <a
+                    key={i}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="break-all text-blue-600 underline hover:text-blue-800"
+                >
+                    {part}
+                </a>
+            );
+        }
+        return part;
+    });
+}
+
 // ── CardPost ──────────────────────────────────
 export default function CardPost({
     post,
@@ -696,7 +696,7 @@ export default function CardPost({
                                 id={`cp-content-${pid}`}
                                 className={`text-sm leading-relaxed text-gray-700 ${!isExpanded && shouldTruncate ? 'line-clamp-4' : ''}`}
                             >
-                                {post.content}
+                                {renderTextWithLinks(post.content)}
                             </p>
                             {shouldTruncate && (
                                 <button

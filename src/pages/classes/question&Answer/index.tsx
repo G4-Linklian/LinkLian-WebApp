@@ -2,20 +2,19 @@ import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import LayoutShell from '@/comps/layouts/LayoutShell';
-import ClassDetailComp from '@/comps/linkLianApp/classDetail/classDetailComp';
+import QnaComp from '@/comps/linkLianApp/question&Answer/question&answerComp';
 import { decodeTeacherToken } from '@/utils/authToken';
 
 function PageContent() {
     return (
         <div className="flex justify-center items-center w-full h-full">
-            <ClassDetailComp />
+            <QnaComp />
         </div>
     );
 }
 
-export default function ClassDetailHome() {
+export default function QnaPage() {
     const router = useRouter();
-    const { subjectName } = router.query as { subjectName?: string };
 
     useEffect(() => {
         const token = decodeTeacherToken();
@@ -27,8 +26,8 @@ export default function ClassDetailHome() {
     return (
         <>
             <Head>
-                <title>{subjectName ?? 'ห้องเรียน'}</title>
-                <meta name="description" content="รายละเอียดห้องเรียน" />
+                <title>Q&A Live</title>
+                <meta name="description" content="Q&A Live" />
             </Head>
             <LayoutShell>
                 <PageContent />

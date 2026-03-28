@@ -6,7 +6,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { ActionIcon, Avatar, Badge, Card, Loader, Paper, ScrollArea, Stack, Text, TextInput, ThemeIcon } from '@mantine/core';
-import { useSearchPosts } from '@/hooks/social-feed/useSearchpost';
+import { useSearchPosts } from '@/comps/linkLianApp/hook/social-feed/useSearchpost';
 import { PostItem } from '@/utils/interface/class.types';
 import { POST_TYPE_LABEL, POST_TYPE_COLOR, formatDateTime } from '@/utils/function/classHelper';
 

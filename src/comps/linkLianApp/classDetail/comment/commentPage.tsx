@@ -9,7 +9,7 @@ import { ActionIcon, Alert, Badge, Button, Loader, Paper, ScrollArea, Text, Text
 import { IconSend2 } from '@tabler/icons-react';
 import { useRouter } from 'next/router';
 import CardPost from '../post/cardPost';
-import { useComments } from '@/hooks/social-feed/useComment';
+import { useComments } from '@/comps/linkLianApp/hook/social-feed/useComment';
 import { getPostById } from '@/utils/api/social-feed/post';
 import { CommentNode, PostItem } from '@/utils/interface/class.types';
 import { formatDateTime, getInitial } from '@/utils/function/classHelper';

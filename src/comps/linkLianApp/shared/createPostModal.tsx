@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActionIcon,
   Alert,
   Badge,
   Box,
   Button,
+  Checkbox,
   FileButton,
   Group,
   Loader,
   Modal,
   NumberInput,
   Paper,
+  Popover,
   ScrollArea,
   SegmentedControl,
   Stack,
@@ -22,12 +24,12 @@ import {
 import { DateTimePicker } from '@mantine/dates';
 import { useRouter } from 'next/router';
 import { useNotification } from '@/comps/noti/notiComp';
-import { useCreatePost } from '@/hooks/social-feed/useCreatepost';
+import { useCreatePost } from '@/comps/linkLianApp/hook/social-feed/useCreatepost';
 import { uploadFileStorage } from '@/utils/api/fileStorage';
 import { getPostById } from '@/utils/api/social-feed/post';
-import { PostItem, PostType } from '@/utils/interface/class.types';
+import { ClassFeedItem, PostItem, PostType } from '@/utils/interface/class.types';
 import { POST_TYPE_LABEL } from '@/utils/function/classHelper';
-import { IconCalendarEvent, IconLink, IconPaperclip, IconPhoto, IconX } from '@tabler/icons-react';
+import { IconCalendarEvent, IconChevronDown, IconLink, IconPaperclip, IconPhoto, IconX } from '@tabler/icons-react';
 
 const POST_TYPES: PostType[] = ['announcement', 'assignment'];
 const MODAL_Z_INDEX = 11000;
@@ -78,9 +80,10 @@ function PostTypeSelector({ value, onChange }: { value: PostType; onChange: (val
 export interface CreatePostModalProps {
   opened?: boolean;
   onClose?: () => void;
-  sectionId: number;
+  sectionId?: number;
   sectionIds?: number[];
   subjectName?: string;
+  classList?: ClassFeedItem[];
   editPostId?: number;
   editPostContentId?: number;
   initialPostType?: PostType;
@@ -94,6 +97,7 @@ const CreatePostModal = ({
   sectionId,
   sectionIds,
   subjectName,
+  classList,
   editPostId,
   editPostContentId: _editPostContentId,
   initialPostType,
@@ -103,6 +107,28 @@ const CreatePostModal = ({
   const router = useRouter();
   const isEditing = !!editPostId;
   const { showNotification } = useNotification();
+
+  const hasClassList = !!classList && classList.length > 0;
+  const [selectedSectionIds, setSelectedSectionIds] = useState<number[]>(() =>
+    hasClassList ? classList!.map((c) => c.section_id) : (sectionIds ?? (sectionId ? [sectionId] : []))
+  );
+  const [classSelectorOpen, setClassSelectorOpen] = useState(false);
+
+  const allSelected = hasClassList && selectedSectionIds.length === classList!.length;
+  const allClassIds = hasClassList ? classList!.map((c) => c.section_id) : [];
+
+  const classSelectorLabel = (() => {
+    if (!hasClassList) return '';
+    if (allSelected) return 'ทุกห้องเรียน';
+    if (selectedSectionIds.length === 1) {
+      const found = classList!.find((c) => c.section_id === selectedSectionIds[0]);
+      return found ? `${found.display_class_name}` : '1 ห้อง';
+    }
+    return `${selectedSectionIds.length} ห้องเรียน`;
+  })();
+
+  const effectiveSectionId = hasClassList ? (selectedSectionIds[0] ?? 0) : (sectionId ?? 0);
+  const effectiveSectionIds = hasClassList ? selectedSectionIds : sectionIds;
 
   const [editingPost, setEditingPost] = useState<PostItem | null>(null);
   const [loadingEditPost, setLoadingEditPost] = useState(false);
@@ -160,8 +186,8 @@ const CreatePostModal = ({
     submit, reset,
   } = useCreatePost({
     mode: isEditing ? 'edit' : 'create',
-    sectionId,
-    sectionIds,
+    sectionId: effectiveSectionId,
+    sectionIds: effectiveSectionIds,
     editingPost,
     initialPostType,
     allowAnonymous,
@@ -242,6 +268,30 @@ const CreatePostModal = ({
     });
   };
 
+  const detectedUrlsRef = useRef<Set<string>>(new Set());
+
+  // Reset detected URL set whenever the modal resets (e.g. after submit/close)
+  useEffect(() => {
+    if (!opened) detectedUrlsRef.current.clear();
+  }, [opened]);
+
+  const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
+
+  const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = event.target.value;
+    setContent(text);
+
+    const matches = text.match(URL_REGEX) ?? [];
+    matches.forEach((raw) => {
+      // Trim trailing punctuation that isn't part of the URL
+      const url = raw.replace(/[.,;:!?）)}\]"']+$/, '');
+      if (detectedUrlsRef.current.has(url)) return;
+      if (attachments.some((a) => a.file_url === url)) return;
+      detectedUrlsRef.current.add(url);
+      addAttachment({ file_url: url, file_type: 'link', original_name: url });
+    });
+  };
+
   const handleAddLink = () => {
     if (!linkUrl.trim()) return;
     addAttachment({
@@ -308,14 +358,93 @@ const CreatePostModal = ({
       >
         <Box id="crp-page" className="relative flex h-[calc(100vh-2rem)] max-h-[78vh] w-full flex-col bg-white text-black">
           <Group id="crp-header" justify="space-between" className="shrink-0 border-b border-gray-100 px-8 py-6" wrap="nowrap">
-            <Box id="crp-type-section" className="max-w-[320px] flex-1">
-              <PostTypeSelector value={postType} onChange={setPostType} />
-            </Box>
+            <Group gap="sm" className="min-w-0 flex-1" wrap="nowrap">
+              <Box id="crp-type-section" className="flex-1" style={{ maxWidth: hasClassList ? 260 : 320 }}>
+                <PostTypeSelector value={postType} onChange={setPostType} />
+              </Box>
+
+              {hasClassList && (
+                <Popover
+                  opened={classSelectorOpen}
+                  onChange={setClassSelectorOpen}
+                  position="bottom-start"
+                  width={280}
+                  shadow="md"
+                  radius="lg"
+                  withinPortal
+                  zIndex={MODAL_Z_INDEX + 5}
+                >
+                  <Popover.Target>
+                    <Button
+                      id="crp-class-select-trigger"
+                      variant="default"
+                      radius="xl"
+                      size="sm"
+                      justify="space-between"
+                      onClick={() => setClassSelectorOpen((v) => !v)}
+                      rightSection={<IconChevronDown size={14} stroke={1.8} />}
+                      className="border-gray-200 bg-white text-gray-700"
+                      style={{ minWidth: 130, maxWidth: 180 }}
+                    >
+                      <span className="truncate">{classSelectorLabel}</span>
+                    </Button>
+                  </Popover.Target>
+
+                  <Popover.Dropdown p="xs">
+                    <div className="mb-2 flex items-center justify-between gap-2 px-1">
+                      <Text size="xs" fw={600} c="dimmed">เลือกห้องเรียน</Text>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSectionIds(allSelected ? [] : allClassIds)}
+                        className="text-xs font-semibold text-orange-600"
+                      >
+                        {allSelected ? 'ล้างทั้งหมด' : 'เลือกทั้งหมด'}
+                      </button>
+                    </div>
+                    <ScrollArea.Autosize mah={240} type="hover" offsetScrollbars>
+                      <div className="space-y-1 p-1">
+                        {classList!.map((item) => {
+                          const checked = selectedSectionIds.includes(item.section_id);
+                          return (
+                            <button
+                              key={item.section_id}
+                              type="button"
+                              onClick={() =>
+                                setSelectedSectionIds((prev) =>
+                                  checked
+                                    ? prev.filter((id) => id !== item.section_id)
+                                    : [...prev, item.section_id],
+                                )
+                              }
+                              className="flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-orange-50"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onChange={() => undefined}
+                                color="orange"
+                                mt={2}
+                                tabIndex={-1}
+                                className="pointer-events-none"
+                              />
+                              <div className="min-w-0">
+                                <Text size="sm" fw={600} c="dark.7" truncate>{item.subject_name_th}</Text>
+                                <Text size="xs" c="dimmed" truncate>{item.display_class_name}</Text>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </ScrollArea.Autosize>
+                  </Popover.Dropdown>
+                </Popover>
+              )}
+            </Group>
+
             <ActionIcon
               id="crp-close-btn"
               aria-label="ปิด"
               onClick={handleCloseRequest}
-              className="ml-3"
+              className="ml-3 shrink-0"
               color="red"
               variant="light"
               radius="md"
@@ -380,7 +509,7 @@ const CreatePostModal = ({
               <Textarea
                 id="crp-content-input"
                 value={content}
-                onChange={(event) => setContent(event.target.value)}
+                onChange={handleContentChange}
                 placeholder={
                   postType === 'question'
                     ? 'เขียนคำถามที่ต้องการถาม...'
