@@ -26,6 +26,14 @@ export interface ClassSchedule {
   building: Building;
 }
 
+// ==================== SEMESTER ====================
+
+export interface SemesterOption {
+  semester_id: number;
+  semester: string;
+  status: "open" | "close";
+}
+
 // ==================== CLASS FEED ====================
 
 export interface ClassFeedItem {
@@ -209,6 +217,7 @@ export interface GetCommentsResponse {
 }
 
 export interface CreateCommentParams {
+  user_id: number;
   post_id: number;
   comment_text: string;
   is_anonymous?: boolean;
@@ -216,12 +225,14 @@ export interface CreateCommentParams {
 }
 
 export interface UpdateCommentParams {
+  user_id: number;
   comment_id: number;
   comment_text?: string;
   flag_valid?: boolean;
 }
 
 export interface DeleteCommentParams {
+  user_id: number;
   comment_id: number;
 }
 

@@ -346,18 +346,18 @@ const CreatePostModal = ({
         onClose={handleCloseRequest}
         zIndex={MODAL_Z_INDEX}
         withCloseButton={false}
-      centered
-      padding={0}
-      size="min(960px, calc(100vw - 2rem))"
-      overlayProps={{ backgroundOpacity: 0.35, blur: 1 }}
-      radius="md"
-      classNames={{
-        content: 'overflow-hidden bg-white',
-        body: 'h-full p-0',
-      }}
+        centered
+        padding={0}
+        size="min(960px, calc(100vw - 2rem))"
+        overlayProps={{ backgroundOpacity: 0.45, blur: 3 }}
+        radius="xl"
+        classNames={{
+          content: 'overflow-hidden bg-white ring-1 ring-black/[0.06] shadow-2xl',
+          body: 'h-full p-0',
+        }}
       >
         <Box id="crp-page" className="relative flex h-[calc(100vh-2rem)] max-h-[78vh] w-full flex-col bg-white text-black">
-          <Group id="crp-header" justify="space-between" className="shrink-0 border-b border-gray-100 px-8 py-6" wrap="nowrap">
+          <Group id="crp-header" justify="space-between" className="shrink-0 border-b border-gray-200 px-8 py-6" wrap="nowrap">
             <Group gap="sm" className="min-w-0 flex-1" wrap="nowrap">
               <Box id="crp-type-section" className="flex-1" style={{ maxWidth: hasClassList ? 260 : 320 }}>
                 <PostTypeSelector value={postType} onChange={setPostType} />
@@ -447,7 +447,7 @@ const CreatePostModal = ({
               className="ml-3 shrink-0"
               color="red"
               variant="light"
-              radius="md"
+              radius="lg"
             >
               <IconX size={16} stroke={2} />
             </ActionIcon>
@@ -480,12 +480,12 @@ const CreatePostModal = ({
             className="min-h-0 flex-1"
             classNames={{
               viewport: 'px-8 pb-20 pt-3',
-              scrollbar: 'bg-transparent p-0.5',
+              scrollbar: 'bg-transparent p-0.5 pb-20',
               thumb: 'rounded-full border-2 border-transparent bg-[#DB763F] bg-clip-padding',
             }}
           >
             {isEditing && loadingEditPost && (
-              <Paper id="crp-edit-loading" withBorder radius="md" p="md" className="mb-4 flex items-center gap-2">
+              <Paper id="crp-edit-loading" radius="lg" p="md" className="mb-4 flex items-center gap-2 border border-gray-200 bg-gray-50">
                 <Loader size="sm" color="gray" />
                 <Text size="sm" c="dimmed">กำลังโหลดโพสต์เดิม...</Text>
               </Paper>
@@ -498,9 +498,9 @@ const CreatePostModal = ({
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="หัวข้อโพสต์"
-                  radius="md"
+                  radius="lg"
                   size="lg"
-                  classNames={{ input: 'text-2xl font-semibold' }}
+                  classNames={{ input: 'text-2xl font-semibold border-gray-300 focus:border-blue-400' }}
                 />
               </Box>
             )}
@@ -519,15 +519,16 @@ const CreatePostModal = ({
                 }
                 autosize
                 minRows={6}
-                radius="md"
+                radius="lg"
+                classNames={{ input: 'border-gray-300 focus:border-blue-400' }}
               />
             </Box>
 
             {postType === 'assignment' && (
               <Paper
                 id="crp-assignment-fields"
-                className="mb-3 border border-orange-100 bg-orange-50"
-                radius="md"
+                className="mb-3 border border-orange-200 bg-orange-50"
+                radius="lg"
                 p="md"
               >
                 <Text id="crp-assignment-fields-label" mb="md" size="xs" fw={700} tt="uppercase" className="tracking-[0.08em] text-orange-700">
@@ -566,7 +567,7 @@ const CreatePostModal = ({
                   />
                 </Box>
 
-                <Group id="crp-group-section" justify="space-between" wrap="nowrap">
+                <Group id="crp-group-section" justify="space-between" wrap="nowrap" className="border-t border-orange-100 pt-3">
                   <Text id="crp-group-label" size="xs" fw={500} className="text-orange-800">
                     งานกลุ่ม
                   </Text>
@@ -581,7 +582,7 @@ const CreatePostModal = ({
             )}
 
             {allowAnonymous && (
-              <Paper id="crp-anon-section" className="mb-3 flex items-center justify-between" radius="md" withBorder p="md">
+              <Paper id="crp-anon-section" className="mb-3 flex items-center justify-between border border-gray-200 bg-white" radius="lg" p="md">
                 <Box>
                   <Text id="crp-anon-label" size="sm" fw={500} c="dark.6">ไม่ระบุตัวตน</Text>
                   <Text size="xs" c="dimmed">ชื่อของคุณจะไม่แสดงในโพสต์นี้</Text>
@@ -605,10 +606,10 @@ const CreatePostModal = ({
                     <Group
                       key={`${attachment.file_url}-${index}`}
                       id={`crp-attachment-item-${index}`}
-                      className="flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2"
+                      className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 shadow-sm"
                       wrap="nowrap"
                     >
-                      <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-orange-100 text-orange-700">
+                      <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-700">
                         <IconPaperclip size={16} stroke={1.8} />
                       </Box>
                       <Text id={`crp-attachment-name-${index}`} className="min-w-0 flex-1 truncate" size="xs" c="dark.6">
@@ -638,8 +639,8 @@ const CreatePostModal = ({
             )}
           </ScrollArea>
 
-          <Group id="crp-bottom-bar" justify="space-between" className="absolute inset-x-0 bottom-0 border-t border-gray-100 bg-white px-8 py-5" wrap="nowrap">
-            <Group id="crp-attachment-bar" gap={4} className="rounded-md bg-orange-100 px-2 py-1">
+          <Group id="crp-bottom-bar" justify="space-between" className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white px-8 py-5" wrap="nowrap">
+            <Group id="crp-attachment-bar" gap={4} className="rounded-xl border border-orange-200 bg-orange-50 px-2 py-1">
               <FileButton
                 onChange={(files) => handleFilesSelected(Array.isArray(files) ? files : files ? [files] : [])}
                 multiple
@@ -693,7 +694,7 @@ const CreatePostModal = ({
               aria-label={isEditing ? 'บันทึก' : 'โพสต์'}
               onClick={handleSubmit}
               disabled={isLoading || !hasContent || (isEditing && !editingPost) || attachments.some((attachment) => attachment.is_uploading)}
-              radius="md"
+              radius="xl"
               color="blue"
             >
               {isLoading ? (
@@ -714,17 +715,18 @@ const CreatePostModal = ({
         onClose={() => setConfirmCloseOpened(false)}
         centered
         zIndex={MODAL_Z_INDEX + 10}
-        radius="md"
+        radius="xl"
+        overlayProps={{ backgroundOpacity: 0.45, blur: 3 }}
         title="ยืนยันการปิด"
       >
         <Text size="sm" c="dimmed">
           ต้องการออกโดยไม่บันทึกหรือไม่?
         </Text>
         <Group mt="md" justify="flex-end" gap="sm">
-          <Button variant="default" radius="md" onClick={() => setConfirmCloseOpened(false)}>
+          <Button variant="default" radius="xl" onClick={() => setConfirmCloseOpened(false)}>
             ยกเลิก
           </Button>
-          <Button color="red" radius="md" onClick={handleConfirmClose}>
+          <Button color="red" radius="xl" onClick={handleConfirmClose}>
             ออกโดยไม่บันทึก
           </Button>
         </Group>
@@ -735,20 +737,22 @@ const CreatePostModal = ({
         onClose={() => setLinkModalOpened(false)}
         centered
         zIndex={MODAL_Z_INDEX + 10}
-        radius="md"
+        radius="xl"
+        overlayProps={{ backgroundOpacity: 0.45, blur: 3 }}
         title="แนบลิงก์"
       >
         <TextInput
           value={linkUrl}
           onChange={(event) => setLinkUrl(event.target.value)}
           placeholder="วาง URL ที่ต้องการแนบ"
-          radius="md"
+          radius="lg"
+          classNames={{ input: 'border-gray-300' }}
         />
         <Group mt="md" justify="flex-end" gap="sm">
-          <Button variant="default" radius="md" onClick={() => setLinkModalOpened(false)}>
+          <Button variant="default" radius="xl" onClick={() => setLinkModalOpened(false)}>
             ยกเลิก
           </Button>
-          <Button radius="md" onClick={handleAddLink} disabled={!linkUrl.trim()}>
+          <Button radius="xl" onClick={handleAddLink} disabled={!linkUrl.trim()}>
             เพิ่มลิงก์
           </Button>
         </Group>

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Badge, Button, Loader, Menu } from '@mantine/core';
-import { SemesterOption } from '@/comps/linkLianApp/hook/social-feed/useClassfeed';
+import { SemesterOption } from '@/utils/interface/class.types';
 
 interface FilterSemesterProps {
     semesters: SemesterOption[];

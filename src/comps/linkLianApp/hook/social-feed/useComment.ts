@@ -113,7 +113,8 @@ export const useComments = (postId: number): UseCommentsReturn => {
 
       setIsSubmitting(true);
       try {
-        const res = await createPostComment(userId, {
+        const res = await createPostComment({
+          user_id: userId,
           post_id: postId,
           comment_text: text.trim(),
           is_anonymous: isAnonymous,
@@ -142,7 +143,7 @@ export const useComments = (postId: number): UseCommentsReturn => {
     if (!userId) return false;
 
     try {
-      const res = await deletePostComment(userId, { comment_id: commentId });
+      const res = await deletePostComment({ user_id: userId, comment_id: commentId });
       if (res.success) {
         // ลบออก optimistically จาก tree
         setComments((prev) => removeFromTree(prev, commentId));

@@ -1,14 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { getTeacherClassFeed } from "@/utils/api/social-feed/feed";
 import { fetchDataApi } from "@/utils/callAPI";
-import { ClassFeedItem } from "@/utils/interface/class.types";
+import { ClassFeedItem, SemesterOption } from "@/utils/interface/class.types";
 import { decodeRegistrationToken, decodeTeacherToken, decodeToken } from "@/utils/authToken";
-
-export interface SemesterOption {
-  semester_id: number;
-  semester: string;
-  status: "open" | "close";
-}
 
 interface UseClassFeedReturn {
   classList: ClassFeedItem[];
