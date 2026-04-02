@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Box, Button, Group, Loader, Paper, Text } from '@mantine/core';
-import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled, IconUserOff } from '@tabler/icons-react';
+import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled, IconUser, IconUserOff } from '@tabler/icons-react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { LiveStreaming02Icon } from '@hugeicons/core-free-icons';
 import { useRouter } from 'next/router';
@@ -160,13 +160,7 @@ function ProfileAvatar({ post }: { post: PostItem }) {
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700"
             >
                 {post.is_anonymous ? (
-                    <svg className="h-5 w-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            fillRule="evenodd"
-                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
+                    <IconUser size={20} stroke={1.8} />
                 ) : (
                     getInitial(post.user.display_name)
                 )}

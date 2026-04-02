@@ -142,5 +142,7 @@ export const getRoleLabel = (roleName: string): string => {
 
 export const getInitial = (name?: string | null): string => {
   if (!name || name.trim() === '') return '?';
-  return name.trim()[0].toUpperCase();
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
 };
