@@ -2,12 +2,12 @@ import { NotificationProvider } from "@/comps/noti/notiComp";
 
 import React, { useEffect, useState } from "react";
 import {
-  IconNews,
-  IconSchool,
-  IconUsers,
-  IconMessageDots,
-  IconUser,
-  IconBell
+    IconNews,
+    IconSchool,
+    IconUsers,
+    IconMessageDots,
+    IconUser,
+    IconBell
 } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -59,7 +59,7 @@ const LayoutShell = ({ children }: any) => {
                     top: 0,
                     left: 0,
                     height: "60px",
-                    zIndex: 9999,
+                    zIndex: 50,
                     paddingTop: "10px"
                 }}>
                     <div className="flex flex-col items-center">
@@ -77,7 +77,7 @@ const LayoutShell = ({ children }: any) => {
                     top: 0,
                     left: 0,
                     height: "60px",
-                    zIndex: 9999,
+                    zIndex: 50,
                     paddingTop: "10px"
                 }}>
                     <div className="flex flex-col items-center">
@@ -121,7 +121,7 @@ const LayoutShell = ({ children }: any) => {
                                             ? "ชุมชน"
                                             : tab === "tab4"
                                                 ? "โปรไฟล์"
-                                                    : null}
+                                                : null}
                             </span>
                         </div>
                     ))}
@@ -132,10 +132,11 @@ const LayoutShell = ({ children }: any) => {
                 {/* Main content */}
                 <main style={{
                     background: "#ffffff",
-                    height: "100vh",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center"
+                    minHeight: "100vh",
+                    paddingTop: "60px"
+                    // display: "flex",
+                    // justifyContent: "center",
+                    // alignItems: "center"
                 }}>
                     {children}
                 </main>
@@ -145,4 +146,3 @@ const LayoutShell = ({ children }: any) => {
 };
 
 export default LayoutShell;
-

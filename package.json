@@ -9,11 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hugeicons/core-free-icons": "^4.0.0",
+    "@hugeicons/react": "^1.1.6",
     "@mantine/core": "^8.3.14",
     "@mantine/dates": "^8.3.14",
     "@mantine/dropzone": "^8.3.14",
     "@mantine/form": "^8.3.14",
     "@mantine/hooks": "^8.3.14",
+    "@mantine/modals": "^8.3.14",
+    "@mantine/notifications": "^8.3.14",
     "@tabler/icons-react": "^3.36.0",
     "dayjs": "^1.11.19",
     "exceljs": "^4.4.0",
@@ -22,8 +26,8 @@
     "jwt-decode": "^4.0.0",
     "next": "15.2.3",
     "next-auth": "^4.24.13",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
