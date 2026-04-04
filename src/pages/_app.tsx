@@ -94,18 +94,6 @@ const App = ({
         `}
             </Script>
 
-            {/* <LoadingProvider>
-        <LoadingComponent />
-        {hasToken && (
-          <SessionProvider session={session}>
-            {isRefreshingToken && isRender && (
-              <Component {...pageProps} data={data} setData={setData} />
-            )}
-          </SessionProvider>
-        )}
-        <LoadingComponent />
-      </LoadingProvider> */}
-
             {hasToken && (
                 <MantineProvider
                     theme={{
@@ -126,4 +114,3 @@ const App = ({
 };
 
 export default App;
-

@@ -23,7 +23,8 @@ function buildQueryString(params: Record<string, any>): string {
 export async function fetchDataApi(
   method: string,
   endpoint: string,
-  body: any = {}
+  body: any = {},
+  extraHeaders: Record<string, string> = {},
 ): Promise<any> {
 
   const urls = process.env.NEXT_PUBLIC_BASE_URL;
@@ -54,6 +55,7 @@ export async function fetchDataApi(
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...extraHeaders,
       },
       body:
         method !== 'GET'
@@ -77,4 +79,3 @@ export async function fetchDataApi(
     throw error;
   }
 }
-
