@@ -181,7 +181,7 @@ export default function QaLiveComp() {
 
         if (!Number.isFinite(qaLiveId) || qaLiveId <= 0) return;
 
-        const socketUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL?.replace('http', 'ws')}/ws/qa`;
+        const socketUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/ws/qa`;
         const ws = new WebSocket(socketUrl);
         socketRef.current = ws;
 
