@@ -7,9 +7,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Box, Button, Group, Loader, Paper, Text } from '@mantine/core';
 import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled, IconUser, IconUserOff } from '@tabler/icons-react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { LiveStreaming02Icon } from '@hugeicons/core-free-icons';
-import { useRouter } from 'next/router';
 import { PostItem, PostAttachment } from '@/utils/interface/class.types';
 import {
     POST_TYPE_LABEL,
@@ -251,7 +248,6 @@ function AttachmentSidePreview({
     onPrev: () => void;
     onNext: () => void;
 }) {
-    const router = useRouter();
     const file = attachments[currentIndex] ?? attachments[0];
     const attachmentKind = resolveAttachmentKind(file);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -326,16 +322,6 @@ function AttachmentSidePreview({
         } catch (err) {
             console.error('[CardPost] download failed', err);
         }
-    };
-
-    const handleOpenQnA = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const sectionId = router.query.sectionId;
-        void router.push({
-            pathname: '/classes/qna',
-            query: { sectionId, postId: postId },
-        });
     };
 
     const youtubeThumbnail = attachmentKind === 'link' ? getYouTubeThumbnail(file.file_url) : null;
@@ -486,22 +472,6 @@ function AttachmentSidePreview({
                         </ActionIcon>
                     )}
 
-                    <ActionIcon
-                        onClick={handleOpenQnA}
-                        aria-label="Open Q&A Live"
-                        radius="xl"
-                        variant="unstyled"
-                        styles={{
-                            root: {
-                                backgroundColor: AppColors.primaryPalette[500],
-                                color: '#fff',
-                                '&:hover': { backgroundColor: AppColors.primaryPalette[300] },
-                            },
-                        }}
-                        className="shadow transition-all duration-150 hover:scale-125 active:scale-95"
-                    >
-                        <HugeiconsIcon icon={LiveStreaming02Icon} size={18} color="currentColor" strokeWidth={2.2} />
-                    </ActionIcon>
                 </Group>
                 {attachments.length > 1 && (
                     <Text id={`cp-attachment-side-more-${postId}`} size="11px" fw={500} c="white">

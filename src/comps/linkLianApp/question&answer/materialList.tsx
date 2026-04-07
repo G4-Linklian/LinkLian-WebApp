@@ -18,8 +18,13 @@ interface MaterialItem {
 interface MaterialListProps {
     materials: MaterialItem[];
     activeMaterialId?: number;
+    activeAttachmentId?: number;
+    searchKeyword: string;
+    onSearchKeywordChange: (value: string) => void;
     showMaterialPanel: boolean;
     onToggleMaterialPanel: () => void;
+    onSelectMaterial: (postId?: number) => void;
+    onSelectAttachment: (postId?: number, attachment?: MaterialAttachment) => void;
 }
 
 const getFileNameFromUrl = (url?: string) => {
@@ -31,8 +36,13 @@ const getFileNameFromUrl = (url?: string) => {
 export default function MaterialList({
     materials,
     activeMaterialId,
+    activeAttachmentId,
+    searchKeyword,
+    onSearchKeywordChange,
     showMaterialPanel,
     onToggleMaterialPanel,
+    onSelectMaterial,
+    onSelectAttachment,
 }: MaterialListProps) {
     return (
         <Card
@@ -41,13 +51,20 @@ export default function MaterialList({
             radius="lg"
             bg="white"
             className="border border-gray-200"
-            style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}
+            style={{ 
+                height: "100%", 
+                width: "100%", 
+                display: "flex", 
+                flexDirection: "column", 
+                minHeight: 0,
+                overflow: "hidden",
+            }}
         >
             <Group justify="space-between" mb="md" wrap="nowrap">
                 <Text fw={700} size="lg">
                     บทเรียน ({materials.length})
                 </Text>
-                <Tooltip label={showMaterialPanel ? "ซ่อนรายการไฟล์" : "แสดงรายการไฟล์"}>
+                <Tooltip label={showMaterialPanel ? "ซ่อนบทเรียน" : "แสดงบทเรียน"}>
                     <ActionIcon
                         variant="default"
                         size="lg"
@@ -61,6 +78,9 @@ export default function MaterialList({
             <TextInput
                 leftSection={<IconSearch size={16} />}
                 placeholder="ค้นหาไฟล์..."
+                value={searchKeyword}
+                onChange={(event) => onSearchKeywordChange(event.currentTarget.value)}
+                radius="xl"
                 mb="md"
             />
 
@@ -73,13 +93,14 @@ export default function MaterialList({
                         return (
                             <Accordion.Item key={material.post_id} value={`post-${material.post_id}`}>
                                 <Accordion.Control
-                                    className={`${isActive ? "bg-blue-50 border border-blue-200" : "bg-white"}`}
+                                    onClick={() => onSelectMaterial(material.post_id)}
+                                    className={`${isActive ? "bg-orange-50 border border-orange-200" : "bg-white"}`}
                                 >
                                     <Group justify="space-between" wrap="nowrap">
                                         <Group gap="xs" wrap="nowrap">
                                             <ThemeIcon
                                                 variant={isActive ? "filled" : "light"}
-                                                color={isActive ? "blue" : "gray"}
+                                                color={isActive ? "orange" : "gray"}
                                                 size="sm"
                                             >
                                                 <IconFileText size={12} />
@@ -88,7 +109,7 @@ export default function MaterialList({
                                                 {material.post_title || "ไม่ระบุชื่อโพสต์"}
                                             </Text>
                                         </Group>
-                                        <Badge size="sm" radius="xl" color="blue" variant="filled">
+                                        <Badge size="sm" radius="xl" color="orange" variant="filled">
                                             {attachments.length}
                                         </Badge>
                                     </Group>
@@ -96,16 +117,27 @@ export default function MaterialList({
                                 <Accordion.Panel>
                                     <Stack gap={6}>
                                         {attachments.length > 0 ? (
-                                            attachments.map((attachment) => (
-                                                <Group key={attachment.attachment_id || attachment.file_url} gap="xs" wrap="nowrap">
-                                                    <ThemeIcon variant="light" color="gray" size="xs">
+                                            attachments.map((attachment) => {
+                                                const isActiveAttachment =
+                                                    isActive && activeAttachmentId != null && attachment.attachment_id === activeAttachmentId;
+
+                                                return (
+                                                <button
+                                                    key={attachment.attachment_id || attachment.file_url}
+                                                    type="button"
+                                                    onClick={() => onSelectAttachment(material.post_id, attachment)}
+                                                    className={`w-full rounded-md px-1.5 py-1 text-left transition-colors ${isActiveAttachment ? "bg-orange-50" : "hover:bg-gray-50"}`}
+                                                >
+                                                <Group gap="xs" wrap="nowrap">
+                                                    <ThemeIcon variant={isActiveAttachment ? "filled" : "light"} color={isActiveAttachment ? "orange" : "gray"} size="xs">
                                                         <IconFileText size={10} />
                                                     </ThemeIcon>
-                                                    <Text size="sm" lineClamp={1}>
+                                                    <Text size="sm" fw={isActiveAttachment ? 600 : 400} lineClamp={1}>
                                                         {attachment.original_name || getFileNameFromUrl(attachment.file_url)}
                                                     </Text>
                                                 </Group>
-                                            ))
+                                                </button>
+                                            )})
                                         ) : (
                                             <Text size="sm" c="dimmed">ไม่มีไฟล์แนบ</Text>
                                         )}

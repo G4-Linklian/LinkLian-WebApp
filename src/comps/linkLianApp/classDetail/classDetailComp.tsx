@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import CardPost from './post/cardPost'
 import FilterPost from './post/filterPost'
 import CreatePostModal from '@/comps/linkLianApp/shared/createPostModal'
+import CreateLiveModal from '../question&answer/createLiveModal'
 import CommentPage from './comment/commentPage'
 import SearchPost from './post/searchPost'
 import ClassInfoPopup from './classDetail/classInfoPopup'
@@ -20,6 +21,8 @@ import { ClassSchedule, PostItem } from '@/utils/interface/class.types'
 import { dayOfWeekToText, formatDateTime, formatTime } from '@/utils/function/classHelper'
 import { decodeRegistrationToken, decodeTeacherToken, decodeToken } from '@/utils/authToken'
 import { getSection } from '@/utils/api/section'
+import { createLive, getActiveLiveBySection, searchSectionFiles } from '@/utils/api/social-feed/qna'
+import { QnaLiveAttachment, QnaLiveMaterialItem } from '@/utils/interface/qna.types'
 import { AppColors } from '@/constants/colors'
 
 /** Parse a 6-digit hex color string to [r, g, b] (0-255). */
@@ -77,7 +80,7 @@ function useImageTone(
 
           for (let x = 0; x < W; x++) {
             const i = (y * W + x) * 4
-            const r = gr * ga + data[i]     * (1 - ga)
+            const r = gr * ga + data[i] * (1 - ga)
             const g = gg * ga + data[i + 1] * (1 - ga)
             const b = gb * ga + data[i + 2] * (1 - ga)
             sum += 0.299 * r + 0.587 * g + 0.114 * b
@@ -89,7 +92,7 @@ function useImageTone(
       }
     }
     img.src = imageUrl
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageUrl, stopsKey])
   return tone
 }
@@ -136,6 +139,19 @@ interface CommentModalProps {
   postId: number
   subjectName: string
   className: string
+}
+
+function getAttachmentDisplayName(attachment?: QnaLiveAttachment): string {
+  if (!attachment) return 'ไม่ระบุชื่อไฟล์'
+  if (attachment.original_name) return attachment.original_name
+  if (!attachment.file_url) return 'ไม่ระบุชื่อไฟล์'
+
+  const rawName = attachment.file_url.split('/').pop() || 'ไม่ระบุชื่อไฟล์'
+  try {
+    return decodeURIComponent(rawName)
+  } catch {
+    return rawName
+  }
 }
 
 function CommentModal({
@@ -364,14 +380,61 @@ export default function ClassDetailComp() {
   const [showSearch, setShowSearch] = useState(false)
   const [showClassInfo, setShowClassInfo] = useState(false)
   const [showCreatePost, setShowCreatePost] = useState(false)
+  const [showCreateLive, setShowCreateLive] = useState(false)
   const [showCommentPostId, setShowCommentPostId] = useState<number | null>(null)
   const [editingPost, setEditingPost] = useState<PostItem | null>(null)
   const [resolvedSubjectName, setResolvedSubjectName] = useState(subjectName)
   const [highlightedPostId, setHighlightedPostId] = useState<number | null>(null)
+  const [isLiveActive, setIsLiveActive] = useState(false)
+  const [liveName, setLiveName] = useState('')
+  const [liveMaterials, setLiveMaterials] = useState<QnaLiveMaterialItem[]>([])
+  const [selectedLivePostId, setSelectedLivePostId] = useState<string | null>(null)
+  const [selectedLiveAttachmentId, setSelectedLiveAttachmentId] = useState<string | null>(null)
+  const [isLiveMaterialLoading, setIsLiveMaterialLoading] = useState(false)
+  const [isStartingLive, setIsStartingLive] = useState(false)
+  const [liveMaterialError, setLiveMaterialError] = useState<string | null>(null)
+  const [activeLiveId, setActiveLiveId] = useState<number | null>(null)
 
   const navigateBack = () => {
     router.push('/classes')
   }
+
+  const navigateToLivePage = async (options?: {
+    name?: string
+    postId?: string | null
+    attachmentId?: string | null
+    qaLiveId?: number | null
+  }) => {
+    const currentSectionId = router.query.sectionId
+    await router.push({
+      pathname: '/classes/qa_live',
+      query: {
+        sectionId: currentSectionId,
+        ...(options?.name ? { liveName: options.name } : {}),
+        ...(options?.postId ? { postId: options.postId } : {}),
+        ...(options?.attachmentId ? { attachmentId: options.attachmentId } : {}),
+        ...(options?.qaLiveId ? { qaLiveId: options.qaLiveId } : {}),
+      },
+    })
+  }
+
+  const handleLiveButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (isLiveActive) {
+      void navigateToLivePage({
+        name: liveName.trim() || undefined,
+        postId: selectedLivePostId,
+        attachmentId: selectedLiveAttachmentId,
+        qaLiveId: activeLiveId,
+      })
+      return
+    }
+
+    setShowCreateLive(true)
+  }
+
   const [pendingFocusPostId, setPendingFocusPostId] = useState<number | null>(null)
   const [focusSignal, setFocusSignal] = useState(0)
 
@@ -388,6 +451,50 @@ export default function ClassDetailComp() {
   const { results: searchResults, keyword, setKeyword, isLoading: isSearchLoading, error: searchError } = useSearchPosts(parsedSectionId)
 
   const isSearchMode = keyword.trim().length > 0
+
+  const currentUserId = useMemo(() => {
+    try {
+      const teacherToken = decodeTeacherToken()
+
+      if (teacherToken?.user_id) {
+        return teacherToken.user_id
+      }
+
+      return 0
+    } catch {
+      return 0
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!parsedSectionId || parsedSectionId <= 0) return
+
+    let mounted = true
+    void (async () => {
+      try {
+        const res: any = await getActiveLiveBySection(parsedSectionId)
+        const rawLive = res?.data ?? res?.result?.data ?? null
+        const activeLive = Array.isArray(rawLive) ? rawLive[0] : rawLive
+
+        if (!mounted) return
+
+        const activeLiveId = Number(activeLive?.qa_live_id)
+        const status = String(activeLive?.status ?? '').toUpperCase()
+        const hasActiveLive = Boolean(activeLive) && (status === 'START' || status === 'LIVE' || (Number.isFinite(activeLiveId) && activeLiveId > 0))
+
+        setIsLiveActive(hasActiveLive)
+        setActiveLiveId(hasActiveLive && Number.isFinite(activeLiveId) ? activeLiveId : null)
+      } catch {
+        console.error('Failed to fetch active live for section', parsedSectionId)
+        setIsLiveActive(false)
+        setActiveLiveId(null)
+      }
+    })()
+
+    return () => {
+      mounted = false
+    }
+  }, [parsedSectionId])
 
   useEffect(() => {
     hasMoreRef.current = hasMore
@@ -447,6 +554,282 @@ export default function ClassDetailComp() {
 
     return Array.from(map.entries())
   }, [classInfo?.schedules])
+
+  const selectedLiveMaterial = useMemo(() => {
+    if (!selectedLivePostId) 
+      return undefined
+
+    const postId = Number(selectedLivePostId)
+
+    if (!Number.isFinite(postId)) 
+      return undefined
+    
+    return liveMaterials.find((item) => item.post_id === postId)
+  }, [liveMaterials, selectedLivePostId])
+
+  const postOptions = useMemo(
+    () =>
+      liveMaterials
+        .filter((item) => Number.isFinite(Number(item.post_id)))
+        .map((item) => ({
+          value: String(item.post_id),
+          label: (item.post_title || item.post_content?.title || 'ไม่ระบุชื่อโพสต์').trim(),
+        })),
+    [liveMaterials],
+  )
+
+  const attachmentOptions = useMemo(() => {
+    const attachments = selectedLiveMaterial?.attachments ?? []
+    return attachments
+      .filter((attachment) => Number.isFinite(Number(attachment.attachment_id)))
+      .map((attachment) => ({
+        value: String(attachment.attachment_id),
+        label: getAttachmentDisplayName(attachment),
+      }))
+  }, [selectedLiveMaterial])
+
+  useEffect(() => {
+    if (!showCreateLive) return
+
+    let mounted = true
+    const fetchLiveMaterials = async () => {
+      setIsLiveMaterialLoading(true)
+      setLiveMaterialError(null)
+
+      try {
+        const res = await searchSectionFiles({ 
+          section_id: parsedSectionId,
+          flag_valid: true,
+         })
+        const rawList = res?.success === false
+          ? []
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.result?.data)
+              ? res.result.data
+              : []
+
+        const grouped = new Map<string, QnaLiveMaterialItem>()
+
+        rawList.forEach((rawItem: any) => {
+          const postIdRaw = rawItem?.post_id ?? rawItem?.post?.post_id
+          const postId = Number(postIdRaw)
+          if (!Number.isFinite(postId)) return
+
+          const key = String(postId)
+          const existing = grouped.get(key)
+
+          const nextBase: QnaLiveMaterialItem = existing ?? {
+            post_id: postId,
+            section_id: Number(rawItem?.section_id ?? parsedSectionId),
+            post_title: String(rawItem?.post_title ?? rawItem?.post_content?.title ?? rawItem?.post?.title ?? '').trim(),
+            post_content: rawItem?.post_content,
+            attachments: [],
+          }
+
+          let attachmentList: any[] = [];
+          
+          if (Array.isArray(rawItem?.attachments)) {
+             attachmentList = rawItem.attachments;
+          } else if (rawItem?.post_attachment) {
+             attachmentList = [rawItem.post_attachment];
+          } else if (rawItem?.post?.attachments) {
+             attachmentList = rawItem.post.attachments;
+          }
+
+          const mergedAttachments = [...(nextBase.attachments ?? [])]
+          attachmentList.forEach((attachment: any) => {
+            const attachmentId = Number(attachment?.attachment_id)
+            if (!Number.isFinite(attachmentId)) return
+            if (mergedAttachments.some((item) => Number(item.attachment_id) === attachmentId)) return
+
+            mergedAttachments.push({
+              attachment_id: attachmentId,
+              file_url: attachment?.file_url,
+              file_type: attachment?.file_type,
+              original_name: attachment?.original_name || 'ไม่ระบุชื่อไฟล์',
+            })
+          })
+
+          if (mergedAttachments.length === 0) {
+              mergedAttachments.push({
+                  attachment_id: postId, 
+                  file_url: "",
+                  file_type: "unknown",
+                  original_name: "โพสต์นี้ไม่มีไฟล์แนบ (เปิดเป็นสไลด์เปล่า)",
+              });
+          }
+          
+          grouped.set(key, {
+            ...nextBase,
+            attachments: mergedAttachments,
+          })
+        })
+
+        const mapped = Array.from(grouped.values())
+
+        if (!mounted) return
+
+        setLiveMaterials(mapped)
+
+        const firstMaterialWithFiles = mapped.find((item) => (item.attachments?.length ?? 0) > 0)
+        const firstMaterial = firstMaterialWithFiles ?? mapped[0]
+        const firstAttachment = firstMaterial?.attachments?.[0]
+
+        if (!liveName.trim()) {
+          setLiveName(`Live ${safeSubjectName || safeClassName || 'ห้องเรียน'}`)
+        }
+
+        setSelectedLivePostId(firstMaterial?.post_id ? String(firstMaterial.post_id) : null)
+        setSelectedLiveAttachmentId(firstAttachment?.attachment_id ? String(firstAttachment.attachment_id) : null)
+      } catch {
+        if (!mounted) return
+        setLiveMaterials([])
+        setSelectedLivePostId(null)
+        setSelectedLiveAttachmentId(null)
+        setLiveMaterialError('โหลดรายการโพสต์และไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+      } finally {
+        if (mounted) setIsLiveMaterialLoading(false)
+      }
+    }
+
+    void fetchLiveMaterials()
+    return () => {
+      mounted = false
+    }
+  }, [showCreateLive, parsedSectionId, safeSubjectName, safeClassName])
+
+  useEffect(() => {
+    if (!selectedLivePostId) return
+    if (attachmentOptions.length === 0) {
+      setSelectedLiveAttachmentId(null)
+      return
+    }
+    if (!selectedLiveAttachmentId) {
+      setSelectedLiveAttachmentId(attachmentOptions[0].value)
+      return
+    }
+    const isCurrentAttachmentAvailable = attachmentOptions.some((item) => item.value === selectedLiveAttachmentId)
+    if (!isCurrentAttachmentAvailable) {
+      setSelectedLiveAttachmentId(attachmentOptions[0].value)
+    }
+  }, [selectedLivePostId, selectedLiveAttachmentId, attachmentOptions])
+
+  const getLiveByUserId = (): number | null => {
+    try {
+      const token = decodeTeacherToken()
+
+      console.log('Decoded teacher token for live_by:', token)
+
+      return token?.user_id || null
+    } catch {
+      return null
+    }
+  }
+
+  const handleStartLive = () => {
+    if (!selectedLivePostId || !selectedLiveAttachmentId || !liveName.trim()) return
+
+    const postId = Number(selectedLivePostId)
+    const attachmentId = Number(selectedLiveAttachmentId)
+    const liveBy = getLiveByUserId()
+
+    console.log('Starting live with', { postId, attachmentId, liveBy })
+
+    if (!Number.isFinite(postId) || !Number.isFinite(attachmentId) || !liveBy) {
+      setLiveMaterialError('ข้อมูลไม่ครบสำหรับเริ่มไลฟ์ กรุณาลองใหม่อีกครั้ง')
+      return
+    }
+
+    setIsStartingLive(true)
+    setLiveMaterialError(null)
+
+    void (async () => {
+      try {
+        const response = await createLive({
+          section_id: parsedSectionId,
+          post_id: postId,
+          attachment_id: attachmentId,
+          live_title: liveName.trim(),
+          live_by: liveBy,
+        })
+
+
+        if (response?.success === false) {
+          throw new Error(String(response?.message || 'เริ่มไลฟ์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'))
+        }
+
+        const createdLiveId = Number(response?.data?.qa_live_id)
+
+        if (Number.isFinite(createdLiveId) && createdLiveId > 0) {
+          setActiveLiveId(createdLiveId)
+        }
+
+        await navigateToLivePage({
+          qaLiveId: createdLiveId,
+          name: liveName.trim(),
+          postId: String(postId),
+          attachmentId: String(attachmentId),
+        })
+
+        setIsLiveActive(true)
+        setShowCreateLive(false)
+      } catch (error) {
+        const message = error instanceof Error && error.message
+          ? error.message
+          : 'เริ่มไลฟ์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'
+        setLiveMaterialError(message)
+      } finally {
+        setIsStartingLive(false)
+      }
+    })()
+  }
+
+  // socket for live updates in section room 
+  useEffect(() => {
+    if (!parsedSectionId || parsedSectionId <= 0) return
+
+    const socketUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL?.replace('http', 'ws')}/ws/qa`
+    const ws = new WebSocket(socketUrl)
+
+    ws.onopen = () => {
+      console.log('Connected to Section Room')
+      ws.send(JSON.stringify({
+        type: 'JOIN_SECTION_ROOM',
+        payload: {
+          section_id: String(parsedSectionId),
+          user_id: String(currentUserId)
+        }
+      }))
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data)
+        
+        if (msg.type === 'QA_LIVE_STARTED') {
+          const newQaLiveId = Number(msg.payload.qa_live_id)
+          
+          setIsLiveActive(true)
+          setActiveLiveId(newQaLiveId)
+        }
+
+        if (msg.type === 'QA_LIVE_ENDED') {
+          setIsLiveActive(false)
+          setActiveLiveId(null)
+        }
+
+      } catch (error) {
+        console.error('Error parsing section socket message', error)
+      }
+    }
+
+    ws.onclose = () => {
+      console.log('Disconnected from Section Room')
+    }
+
+    return () => ws.close()
+  }, [parsedSectionId, currentUserId])
 
   const openPost = (post: PostItem) => {
     const postId = Number(post.post_id)
@@ -734,8 +1117,35 @@ export default function ClassDetailComp() {
 
             {/* Filter bar — ซ่อนตอน search mode */}
             {!isSearchMode && (
-              <div id="cd-filter-bar" className="mt-3 flex shrink-0 justify-end">
+              <div id="cd-filter-bar" className="mt-3 flex shrink-0 items-center justify-between gap-2">
                 <FilterPost value={filterType} onChange={setFilterType} />
+                <Button
+                  id="cd-live-btn"
+                  onClick={handleLiveButtonClick}
+                  variant={isLiveActive ? 'filled' : 'outline'}
+                  color="red"
+                  radius="xl"
+                  size="sm"
+                  className={isLiveActive ? 'animate-pulse shadow-[0_0_8px_rgba(224,49,49,0.8)]' : ''}
+                  styles={{
+                    root: {
+                      backgroundColor: isLiveActive ? '#E03131' : '#FFFFFF',
+                      color: isLiveActive ? '#FFFFFF' : '#E03131',
+                      borderColor: '#E03131',
+                      borderWidth: '2px',
+                    },
+                    label: {
+                      color: isLiveActive ? '#FFFFFF' : '#E03131',
+                    },
+                  }}
+                  leftSection={
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <circle cx="10" cy="10" r="4" />
+                    </svg>
+                  }
+                >
+                  {isLiveActive ? 'กำลังไลฟ์' : 'ไลฟ์'}
+                </Button>
               </div>
             )}
 
@@ -956,6 +1366,31 @@ export default function ClassDetailComp() {
             className={className}
           />
         )}
+
+        <CreateLiveModal
+          opened={showCreateLive}
+          onClose={() => {
+            if (isStartingLive) return
+            setShowCreateLive(false)
+          }}
+          zIndex={CLASS_DETAIL_MODAL_Z_INDEX}
+          isLoading={isLiveMaterialLoading}
+          isSubmitting={isStartingLive}
+          error={liveMaterialError}
+          liveName={liveName}
+          selectedPostId={selectedLivePostId}
+          selectedAttachmentId={selectedLiveAttachmentId}
+          postOptions={postOptions}
+          attachmentOptions={attachmentOptions}
+          onLiveNameChange={setLiveName}
+          onPostChange={(value) => {
+            setSelectedLivePostId(value)
+          }}
+          onAttachmentChange={(value) => {
+            setSelectedLiveAttachmentId(value)
+          }}
+          onStartLive={handleStartLive}
+        />
       </div>
     </Box>
   )
