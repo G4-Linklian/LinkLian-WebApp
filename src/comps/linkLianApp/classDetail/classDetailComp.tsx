@@ -790,6 +790,7 @@ export default function ClassDetailComp() {
     if (!parsedSectionId || parsedSectionId <= 0) return
 
     const socketUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/ws/qa`
+    console.log('Connecting to Section Room socket at', socketUrl)
     const ws = new WebSocket(socketUrl)
 
     ws.onopen = () => {
