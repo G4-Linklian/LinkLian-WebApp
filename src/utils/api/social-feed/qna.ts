@@ -28,6 +28,26 @@ export const searchSectionFiles = async (input: fileFields) => {
 	return data;
 }
 
+export const searchLive = async (input: QnaLiveFields) => {
+    const {
+        section_id, 
+        live_by,
+        status,
+        live_title,
+        flag_valid,
+    } = input;
+
+    const data = await fetchDataApi("GET", "qa/live", {
+        section_id, 
+        live_by,
+        status,
+        live_title,
+        flag_valid,
+    });
+
+    return data;
+}
+
 export const createLive = async (input: QnaLiveFields) => {
 	const {
 		section_id,

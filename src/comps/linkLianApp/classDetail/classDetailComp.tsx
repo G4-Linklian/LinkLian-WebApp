@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { ActionIcon, Alert, Avatar, Badge, Box, Button, Loader, Modal, Paper, ScrollArea, Text, TextInput } from '@mantine/core'
+import { ActionIcon, Alert, Avatar, Badge, Box, Button, Loader, Modal, Paper, ScrollArea, TableTr, Text, TextInput } from '@mantine/core'
 import { useRouter } from 'next/router'
 import CardPost from './post/cardPost'
 import FilterPost from './post/filterPost'
@@ -24,6 +24,7 @@ import { getSection } from '@/utils/api/section'
 import { createLive, getActiveLiveBySection, searchSectionFiles } from '@/utils/api/social-feed/qna'
 import { QnaLiveAttachment, QnaLiveMaterialItem } from '@/utils/interface/qna.types'
 import { AppColors } from '@/constants/colors'
+import { IconBroadcast } from '@tabler/icons-react';
 
 /** Parse a 6-digit hex color string to [r, g, b] (0-255). */
 function hexToRgb(hex: string): [number, number, number] {
@@ -435,6 +436,17 @@ export default function ClassDetailComp() {
     setShowCreateLive(true)
   }
 
+  const handleArchiveLiveClick = () => {
+    void router.push({
+      pathname: '/classes/archiveLive',
+      query: {
+        sectionId: parsedSectionId,
+        ...(safeSubjectName ? { subjectName: safeSubjectName } : {}),
+        ...(safeClassName ? { className: safeClassName } : {}),
+      },
+    })
+  }
+
   const [pendingFocusPostId, setPendingFocusPostId] = useState<number | null>(null)
   const [focusSignal, setFocusSignal] = useState(0)
 
@@ -789,8 +801,13 @@ export default function ClassDetailComp() {
   useEffect(() => {
     if (!parsedSectionId || parsedSectionId <= 0) return
 
-    const socketUrl = `wss://uat-socket.linklian.org/ws/qa`
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL + '/ws/qa';
+        if (!socketUrl) return;
+
+    if (!socketUrl) return
+
     console.log('Connecting to Section Room socket at', socketUrl)
+    
     const ws = new WebSocket(socketUrl)
 
     ws.onopen = () => {
@@ -1120,33 +1137,49 @@ export default function ClassDetailComp() {
             {!isSearchMode && (
               <div id="cd-filter-bar" className="mt-3 flex shrink-0 items-center justify-between gap-2">
                 <FilterPost value={filterType} onChange={setFilterType} />
-                <Button
-                  id="cd-live-btn"
-                  onClick={handleLiveButtonClick}
-                  variant={isLiveActive ? 'filled' : 'outline'}
-                  color="red"
-                  radius="xl"
-                  size="sm"
-                  className={isLiveActive ? 'animate-pulse shadow-[0_0_8px_rgba(224,49,49,0.8)]' : ''}
-                  styles={{
-                    root: {
-                      backgroundColor: isLiveActive ? '#E03131' : '#FFFFFF',
-                      color: isLiveActive ? '#FFFFFF' : '#E03131',
-                      borderColor: '#E03131',
-                      borderWidth: '2px',
-                    },
-                    label: {
-                      color: isLiveActive ? '#FFFFFF' : '#E03131',
-                    },
-                  }}
-                  leftSection={
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                      <circle cx="10" cy="10" r="4" />
-                    </svg>
-                  }
-                >
-                  {isLiveActive ? 'กำลังไลฟ์' : 'ไลฟ์'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    id="cd-archive-live-btn"
+                    onClick={handleArchiveLiveClick}
+                    variant="outline"
+                    color="gray"
+                    radius="xl"
+                    size="sm"
+                    leftSection={
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 12h14M5 16h14" />
+                      </svg>
+                    }
+                  >
+                    ประวัติไลฟ์
+                  </Button>
+
+                  <Button
+                    id="cd-live-btn"
+                    onClick={handleLiveButtonClick}
+                    variant={isLiveActive ? 'filled' : 'outline'}
+                    color="red"
+                    radius="xl"
+                    size="sm"
+                    className={isLiveActive ? 'animate-pulse shadow-[0_0_8px_rgba(224,49,49,0.8)]' : ''}
+                    styles={{
+                      root: {
+                        backgroundColor: isLiveActive ? '#E03131' : '#FFFFFF',
+                        color: isLiveActive ? '#FFFFFF' : '#E03131',
+                        borderColor: '#E03131',
+                        borderWidth: '2px',
+                      },
+                      label: {
+                        color: isLiveActive ? '#FFFFFF' : '#E03131',
+                      },
+                    }}
+                    leftSection={
+                      <IconBroadcast size={16} color={isLiveActive ? '#FFFFFF' : '#E03131'} />
+                    }
+                  >
+                    {isLiveActive ? 'กำลังไลฟ์' : 'ไลฟ์'}
+                  </Button>
+                </div>
               </div>
             )}
 

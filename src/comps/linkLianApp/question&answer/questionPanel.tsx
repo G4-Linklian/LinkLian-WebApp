@@ -38,6 +38,7 @@ interface QaQuestion {
     slide_number?: number;
     status: string;
     upvote_count: number;
+    has_upvoted?: boolean;
     created_at: string;
     flag_valid: boolean;
     file_name?: string;
@@ -69,6 +70,7 @@ interface QuestionPanelProps {
     onUpvoteQuestion?: (questionId: number) => void;
     isLiveOwner?: boolean; 
     onMarkAsAnswered?: (questionId: number, currentStatus: string) => void;
+    isReadOnly?: boolean;
 }
 
 const formatTime = (isoString: string) => {
@@ -97,6 +99,7 @@ export default function QuestionPanel({
     onUpvoteQuestion,
     onMarkAsAnswered,
     isLiveOwner,
+    isReadOnly = false,
 }: QuestionPanelProps) {
     const [questionText, setQuestionText] = useState("");
     const [isSending, setIsSending] = useState(false);
@@ -128,6 +131,7 @@ export default function QuestionPanel({
     const hasQuestions = sortedQuestions.length > 0;
 
     const handleSend = async () => {
+        if (isReadOnly) return;
         const message = questionText.trim();
         if (!message || !onSendQuestion) return;
 
@@ -199,6 +203,7 @@ export default function QuestionPanel({
                     sortedQuestions.map((q) => {
                         const name = displayName(q);
                         const color = "orange";
+                        const isUpvotedByCurrentUser = q.has_upvoted === true;
                         const isAnonymousQuestion = q.is_anonymous === true;
                         const isCurrentUserQuestion = currentUserId != null && q.asker?.user_sys_id === currentUserId;
 
@@ -209,7 +214,7 @@ export default function QuestionPanel({
                         const isAnswered = answeredStatuses.has((q.status || "").toUpperCase());
 
                         return (
-                            <Group key={q.qa_question_id} align="flex-start" wrap="nowrap">
+                            <Group key={q.qa_question_id} align="flex-start" wrap="nowrap" style={{ width: "100%", minWidth: 0 }}>
                                 <Avatar
                                     src={avatarSrc}
                                     color={isAnonymousQuestion ? "gray" : color}
@@ -221,23 +226,23 @@ export default function QuestionPanel({
                                         name.charAt(0).toUpperCase()
                                     )}
                                 </Avatar>
-                                <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2" style={{ width: "100%" }}>
-                                    <Group gap="xs" justify="space-between" wrap="nowrap">
-                                        <Group gap="xs">
-                                            <Text fw={600} size="sm">{name}</Text>
+                                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3" style={{ width: "100%", minWidth: 0 }}>
+                                    <Group gap="xs" justify="space-between" wrap="nowrap" style={{ minWidth: 0 }}>
+                                        <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+                                            <Text fw={500} size="xs" c="dimmed" truncate>{name}</Text>
                                             {isAnswered && (
                                                 <Tooltip label="ตอบแล้ว">
                                                     <IconCircleCheckFilled size={16} color="#16A34A" />
                                                 </Tooltip>
                                             )}
-                                            <Text c="dimmed" size="xs">{formatTime(q.created_at)}</Text>
+                                            <Text c="dimmed" size="xs" style={{ flexShrink: 0 }}>{formatTime(q.created_at)}</Text>
                                         </Group>
 
                                         <Button
                                             size="compact-xs"
                                             radius="xl"
-                                            variant={q.upvote_count > 0 ? "light" : "subtle"}
-                                            color={q.upvote_count > 0 ? "orange" : "gray"}
+                                            variant={isUpvotedByCurrentUser ? "light" : "subtle"}
+                                            color={isUpvotedByCurrentUser ? "orange" : "gray"}
                                             leftSection={<IconArrowBigUpLineFilled size={14} />}
                                             onClick={() => onUpvoteQuestion?.(q.qa_question_id)}
                                             styles={{ label: { fontSize: "12px" } }}
@@ -246,10 +251,24 @@ export default function QuestionPanel({
                                         </Button>
                                     </Group>
 
-                                    <Text size="sm" mt={2} mb={4}>{q.question}</Text>
+                                    <Text
+                                        size="sm"
+                                        fw={600}
+                                        c="dark.8"
+                                        mt={8}
+                                        mb={8}
+                                        style={{
+                                            lineHeight: 1.6,
+                                            whiteSpace: "pre-wrap",
+                                            overflowWrap: "anywhere",
+                                            wordBreak: "break-word",
+                                        }}
+                                    >
+                                        {q.question}
+                                    </Text>
 
                                     <Stack gap={4} mt={6}>
-                                        <Text size="xs" c="dimmed" lineClamp={1}>
+                                        <Text size="xs" c="dimmed" lineClamp={1} style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
                                             {q.file_name || "ไม่ระบุชื่อไฟล์"}
                                             {q.slide_number ? ` • หน้า ${q.slide_number}` : ""}
                                         </Text>
@@ -297,34 +316,40 @@ export default function QuestionPanel({
                 <Text c="dimmed" size="xs">ไฟล์ {fileName} • หน้า {currentSlide}</Text>
             </Group>
 
-            <Group wrap="nowrap" align="center">
-                <TextInput
-                    placeholder="พิมพ์ข้อความ..."
-                    value={questionText}
-                    onChange={(event) => setQuestionText(event.currentTarget.value)}
-                    onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                            event.preventDefault();
+            {!isReadOnly ? (
+                <Group wrap="nowrap" align="center">
+                    <TextInput
+                        placeholder="พิมพ์ข้อความ..."
+                        value={questionText}
+                        onChange={(event) => setQuestionText(event.currentTarget.value)}
+                        onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                                event.preventDefault();
+                                void handleSend();
+                            }
+                        }}
+                        style={{ flex: 1 }}
+                        radius="xl"
+                    />
+                    <ActionIcon
+                        size={42}
+                        radius="xl"
+                        variant="filled"
+                        color="orange"
+                        onClick={() => {
                             void handleSend();
-                        }
-                    }}
-                    style={{ flex: 1 }}
-                    radius="xl"
-                />
-                <ActionIcon
-                    size={42}
-                    radius="xl"
-                    variant="filled"
-                    color="orange"
-                    onClick={() => {
-                        void handleSend();
-                    }}
-                    loading={isSending}
-                    disabled={!questionText.trim()}
-                >
-                    <IconSend2 size={18} />
-                </ActionIcon>
-            </Group>
+                        }}
+                        loading={isSending}
+                        disabled={!questionText.trim()}
+                    >
+                        <IconSend2 size={18} />
+                    </ActionIcon>
+                </Group>
+            ) : (
+                <Text size="xs" c="dimmed" ta="center">
+                    ไม่สามารถพิมพ์คอมเมนต์ได้
+                </Text>
+            )}
         </Card>
     );
 }

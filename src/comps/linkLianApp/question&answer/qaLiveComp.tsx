@@ -60,6 +60,7 @@ interface QaQuestion {
     slide_number?: number;
     status: string;
     upvote_count: number;
+    has_upvoted?: boolean;
     created_at: string;
     flag_valid: boolean;
     file_name?: string;
@@ -118,6 +119,8 @@ export default function QaLiveComp() {
     const router = useRouter();
     const rawLiveId = Array.isArray(router.query.qaLiveId) ? router.query.qaLiveId[0] : router.query.qaLiveId;
     const qaLiveId = Number(rawLiveId);
+    const mode = Array.isArray(router.query.mode) ? router.query.mode[0] : router.query.mode;
+    const isHistoryMode = mode === "history";
 
     const currentUserId = useMemo(() => {
         const teacherToken = decodeTeacherToken();
@@ -178,10 +181,13 @@ export default function QaLiveComp() {
     // socket connection
     useEffect(() => {
         if (!router.isReady) return;
+        if (isHistoryMode) return;
 
         if (!Number.isFinite(qaLiveId) || qaLiveId <= 0) return;
 
-        const socketUrl = `wss://uat-socket.linklian.org/ws/qa`;
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL + '/ws/qa'
+        if (!socketUrl) return;
+
         console.log('Connecting to Section Room socket at', socketUrl)
         const ws = new WebSocket(socketUrl);
         socketRef.current = ws;
@@ -291,7 +297,7 @@ export default function QaLiveComp() {
 
                     case "QA_UPVOTED":
                         console.log("socket message:", payload);
-                        
+
                         if (Number(payload.qa_live_id) !== Number(qaLiveId)) {
                             console.log("qaLiveId isn't matching:", payload.qa_live_id, "vs", qaLiveId);
                             break;
@@ -322,7 +328,7 @@ export default function QaLiveComp() {
         return () => {
             ws.close();
         };
-    }, [qaLiveId, router]);
+    }, [qaLiveId, router, isHistoryMode]);
 
     useEffect(() => {
         const fetchLiveTitle = async () => {
@@ -332,7 +338,7 @@ export default function QaLiveComp() {
             try {
                 const res = await getLiveById(qaLiveId);
                 if (res?.success && res?.data) {
-                    setLiveTitle(res.data.live_title || "ไลฟ์ถามตอบ");
+                    setLiveTitle(res.data.live_title || "ประวัติไลฟ์");
                     const ownerId = Number(res.data.live_by);
                     setLiveByUserId(Number.isFinite(ownerId) && ownerId > 0 ? ownerId : undefined);
                 }
@@ -471,7 +477,27 @@ export default function QaLiveComp() {
                         normalizeQuestionWithProfile(item, profileMap)
                     );
 
-                    setQuestions(normalizedQuestions);
+                    if (currentUserId && currentUserId > 0) {
+                        const questionsWithVoteState = await Promise.all(
+                            normalizedQuestions.map(async (item) => {
+                                try {
+                                    const voteRes = await searchUpvote({
+                                        qa_question_id: item.qa_question_id,
+                                        voter_id: currentUserId,
+                                    });
+                                    const hasUpvoted = Array.isArray(voteRes?.data) && voteRes.data.length > 0;
+                                    return { ...item, has_upvoted: hasUpvoted };
+                                } catch {
+                                    return { ...item, has_upvoted: false };
+                                }
+                            })
+                        );
+
+                        setQuestions(questionsWithVoteState);
+                        return;
+                    }
+
+                    setQuestions(normalizedQuestions.map((item) => ({ ...item, has_upvoted: false })));
                 }
             } catch (error) {
                 console.error("Failed to fetch questions:", error);
@@ -479,7 +505,7 @@ export default function QaLiveComp() {
         };
 
         fetchQuestions();
-    }, [qaLiveId]);
+    }, [qaLiveId, currentUserId]);
 
     const getLiveByUserId = (): number | null => {
         try {
@@ -720,6 +746,8 @@ export default function QaLiveComp() {
         }
 
         if (
+            isLiveOwner &&
+            !isHistoryMode &&
             Number.isFinite(qaLiveId) &&
             qaLiveId > 0 &&
             !isSameAttachment &&
@@ -764,6 +792,18 @@ export default function QaLiveComp() {
     };
 
     const handleLeaveLive = async () => {
+        if (isHistoryMode) {
+            await router.push({
+                pathname: "/classes//archiveLive",
+                query: {
+                    sectionId: router.query.sectionId,
+                    subjectName: router.query.subjectName,
+                    className: router.query.className,
+                },
+            });
+            return;
+        }
+
         await router.push({
             pathname: "/classes/classDetail",
             query: {
@@ -777,7 +817,7 @@ export default function QaLiveComp() {
     const handlePageChange = (page: number) => {
         setCurrentSlide(page);
 
-        if (isLiveOwner && socketRef.current?.readyState === WebSocket.OPEN) {
+        if (!isHistoryMode && isLiveOwner && socketRef.current?.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({
                 type: "SLIDE_SYNC",
                 payload: {
@@ -795,6 +835,7 @@ export default function QaLiveComp() {
         fileName: string;
         slideNumber?: number;
     }) => {
+        if (isHistoryMode) return;
         if (!Number.isFinite(qaLiveId) || qaLiveId <= 0) return;
         if (!activeMaterialId || !activeAttachmentId) return;
 
@@ -855,6 +896,17 @@ export default function QaLiveComp() {
                 await createUpvote({ qa_question_id: questionId, voter_id: currentUserId });
             }
 
+            setQuestions((prev) =>
+                prev.map((q) =>
+                    q.qa_question_id === questionId
+                        ? {
+                            ...q,
+                            has_upvoted: !hasVoted,
+                        }
+                        : q
+                )
+            );
+
             console.log("Upvote process completed for question ID:", questionId);
 
         } catch (error) {
@@ -900,7 +952,7 @@ export default function QaLiveComp() {
         const isAnswered = ["ANSWERED"].includes((currentStatus || "").toUpperCase());
         const nextStatus = isAnswered ? "PENDING" : "ANSWERED";
 
-        setQuestions(prev => prev.map(q => 
+        setQuestions(prev => prev.map(q =>
             q.qa_question_id === questionId ? { ...q, status: nextStatus } : q
         ));
 
@@ -908,7 +960,7 @@ export default function QaLiveComp() {
             await updateQuestion(questionId, {
                 status: nextStatus,
             });
-            
+
             console.log(`Question ID ${questionId} marked as ${nextStatus}`);
 
         } catch (error) {
@@ -921,12 +973,18 @@ export default function QaLiveComp() {
     return (
         <div className="w-full bg-[#FAFAFA] overflow-hidden" style={{ height: "calc(100vh - 72px)" }}>
             <div className="mx-auto pt-3" style={{ width: "94%", height: "100%" }}>
-                <Paper radius="xl" p="md" className="border border-gray-200" bg="white" style={{ height: "calc(100% - 4px)" }}>
+                <Paper radius="lg" p="md" className="border border-gray-200" bg="white" style={{ height: "calc(100% - 4px)" }}>
                     <Stack h="100%" gap="md" style={{ minHeight: 0 }}>
                         <Group justify="space-between" wrap="wrap">
                             <Group>
-                                <Badge color="red" variant="light" size="xl" radius="sm" leftSection={<IconSquare size={8} fill="currentColor" />}>
-                                    ไลฟ์ {viewerCount > 0 ? `(${viewerCount})` : ""}
+                                <Badge
+                                    color={isHistoryMode ? "orange" : "red"}
+                                    variant="light"
+                                    size="xl"
+                                    radius="md"
+                                    leftSection={<IconSquare size={8} fill="currentColor" />}
+                                >
+                                    {isHistoryMode ? "ประวัติไลฟ์" : `ไลฟ์ ${viewerCount > 0 ? `(${viewerCount})` : ""}`}
                                 </Badge>
                                 <Text fw={700} size="lg">
                                     {liveTitle}
@@ -936,11 +994,12 @@ export default function QaLiveComp() {
                             <Group gap="xs">
                                 <Button
                                     variant="default"
+                                    radius="md"
                                     leftSection={<IconPlayerStopFilled size={14} />}
-                                    onClick={isLiveOwner ? handleEndLive : handleLeaveLive}
-                                    loading={isLiveOwner && isEndingLive}
+                                    onClick={isHistoryMode ? handleLeaveLive : (isLiveOwner ? handleEndLive : handleLeaveLive)}
+                                    loading={!isHistoryMode && isLiveOwner && isEndingLive}
                                 >
-                                    {isLiveOwner ? "ปิดไลฟ์" : "ออกจากไลฟ์"}
+                                    {isHistoryMode ? "กลับหน้าประวัติ" : (isLiveOwner ? "ปิดไลฟ์" : "ออกจากไลฟ์")}
                                 </Button>
                             </Group>
                         </Group>
@@ -1027,7 +1086,7 @@ export default function QaLiveComp() {
                                                     paddingLeft: !showMaterialPanel ? 60 : 0,
                                                     paddingRight: !showQuestionPanel ? 60 : 0,
                                                 }
-                                            : {}),
+                                                : {}),
                                     }}
                                 >
                                     <PresentationPanel
@@ -1054,11 +1113,12 @@ export default function QaLiveComp() {
                                             selectedFileFilter={selectedQuestionFileFilter}
                                             onFileFilterChange={setSelectedQuestionFileFilter}
                                             onToggleQuestionPanel={() => setShowQuestionPanel((prev) => !prev)}
-                                            onSendQuestion={handleSendQuestion}
+                                            onSendQuestion={isHistoryMode ? undefined : handleSendQuestion}
                                             onJumpToQuestion={handleJumpToQuestion}
                                             onUpvoteQuestion={handleUpvoteQuestion}
-                                            isLiveOwner={isLiveOwner}
-                                            onMarkAsAnswered={handleMarkAsAnswered}
+                                            isLiveOwner={!isHistoryMode && isLiveOwner}
+                                            onMarkAsAnswered={isHistoryMode ? undefined : handleMarkAsAnswered}
+                                            isReadOnly={isHistoryMode}
                                         />
                                     </Grid.Col>
                                 )}

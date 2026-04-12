@@ -1,6 +1,7 @@
 import React from "react";
 import { Accordion, ActionIcon, Badge, Card, Group, Stack, Text, TextInput, ThemeIcon, Tooltip } from "@mantine/core";
 import { IconFileText, IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconSearch } from "@tabler/icons-react";
+import { AppColors } from "@/constants/colors";
 
 interface MaterialAttachment {
     attachment_id?: number;
@@ -94,13 +95,14 @@ export default function MaterialList({
                             <Accordion.Item key={material.post_id} value={`post-${material.post_id}`}>
                                 <Accordion.Control
                                     onClick={() => onSelectMaterial(material.post_id)}
-                                    className={`${isActive ? "bg-orange-50 border border-orange-200" : "bg-white"}`}
+                                    className={`${isActive ? "border" : "bg-white"}`}
+                                    style={isActive ? { backgroundColor: AppColors.primaryPalette[100], borderColor: AppColors.primaryPalette[200] } : undefined}
                                 >
                                     <Group justify="space-between" wrap="nowrap">
                                         <Group gap="xs" wrap="nowrap">
                                             <ThemeIcon
                                                 variant={isActive ? "filled" : "light"}
-                                                color={isActive ? "orange" : "gray"}
+                                                color={isActive ? AppColors.primaryPalette[500] : "gray"}
                                                 size="sm"
                                             >
                                                 <IconFileText size={12} />
@@ -109,7 +111,7 @@ export default function MaterialList({
                                                 {material.post_title || "ไม่ระบุชื่อโพสต์"}
                                             </Text>
                                         </Group>
-                                        <Badge size="sm" radius="xl" color="orange" variant="filled">
+                                        <Badge size="sm" radius="xl" color={AppColors.primaryPalette[500]} variant="filled">
                                             {attachments.length}
                                         </Badge>
                                     </Group>
@@ -126,10 +128,11 @@ export default function MaterialList({
                                                     key={attachment.attachment_id || attachment.file_url}
                                                     type="button"
                                                     onClick={() => onSelectAttachment(material.post_id, attachment)}
-                                                    className={`w-full rounded-md px-1.5 py-1 text-left transition-colors ${isActiveAttachment ? "bg-orange-50" : "hover:bg-gray-50"}`}
+                                                    className={`w-full rounded-md px-1.5 py-1 text-left transition-colors ${isActiveAttachment ? "" : "hover:bg-gray-50"}`}
+                                                    style={isActiveAttachment ? { backgroundColor: AppColors.primaryPalette[100] } : undefined}
                                                 >
                                                 <Group gap="xs" wrap="nowrap">
-                                                    <ThemeIcon variant={isActiveAttachment ? "filled" : "light"} color={isActiveAttachment ? "orange" : "gray"} size="xs">
+                                                    <ThemeIcon variant={isActiveAttachment ? "filled" : "light"} color={isActiveAttachment ? AppColors.primaryPalette[500] : "gray"} size="xs">
                                                         <IconFileText size={10} />
                                                     </ThemeIcon>
                                                     <Text size="sm" fw={isActiveAttachment ? 600 : 400} lineClamp={1}>
