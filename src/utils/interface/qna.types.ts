@@ -11,6 +11,7 @@ export interface fileFields {
     type?: string;
     created_at?: string;
     updated_at?: string;
+
     total_count?: number;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
@@ -48,6 +49,11 @@ export interface QnaLiveFields {
     live_by?: number;
     created_at?: string;
     updated_at?: string;
+    status?: string;
+    flag_valid?: boolean;
+
+    sort_by?: string;
+    sort_order?: 'ASC' | 'DESC';
 }
 
 export interface QnaLiveLogFields {
