@@ -6,12 +6,15 @@ import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useMediaQuery } from "@/comps/public/useMediaQuery";
-import { decodeToken, decodeRegistrationToken } from "@/utils/authToken";
+import { decodeRegistrationToken } from "@/utils/authToken";
 import { dataRegistration } from "@/comps/layouts/tabRoute";
 import { Avatar, Button } from "@mantine/core";
+import { useNotification } from "@/comps/noti/notiComp";
+import { useReportIssue } from "@/comps/layouts/reportIssue/useReportIssue";
+import ReportIssueModal from "@/comps/layouts/reportIssue/ReportIssueModal";
 import {
   IconHelpCircle,
-  IconLogout
+  IconLogout,
 } from "@tabler/icons-react";
 
 interface MainLinkProps {
@@ -68,6 +71,25 @@ export function Sidebar() {
   const router = useRouter();
   const isLargerThanSm = useMediaQuery("(min-width: 768px)");
   const [token, setToken] = useState<any | null>(false);
+  const { showNotification } = useNotification();
+
+  const {
+    reportModalOpened,
+    reportTitle,
+    reportDetail,
+    reportFiles,
+    isSubmittingReport,
+    setReportTitle,
+    setReportDetail,
+    openReportModal,
+    closeReportModal,
+    handleSelectReportFiles,
+    handleRemoveReportFile,
+    handleSubmitReport,
+  } = useReportIssue({
+    token,
+    showNotification,
+  });
 
   const userProfile = {
     name: token?.institution?.inst_name_th,
@@ -126,6 +148,7 @@ export function Sidebar() {
           justify="flex-start"
           className="mb-2 ml-1"
           size="md"
+          onClick={openReportModal}
         >
           <span className="text-sm font-medium">แจ้งปัญหา</span>
         </Button>
@@ -163,6 +186,20 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      <ReportIssueModal
+        opened={reportModalOpened}
+        onClose={closeReportModal}
+        reportTitle={reportTitle}
+        onChangeTitle={setReportTitle}
+        reportDetail={reportDetail}
+        onChangeDetail={setReportDetail}
+        reportFiles={reportFiles}
+        onSelectFiles={handleSelectReportFiles}
+        onRemoveFile={handleRemoveReportFile}
+        onSubmit={handleSubmitReport}
+        isSubmitting={isSubmittingReport}
+      />
 
     </div>
   );
