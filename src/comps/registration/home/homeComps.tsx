@@ -2,6 +2,7 @@ import React from 'react'
 import Breadcrumb from "@/comps/breadCrumb/breadCrumb";
 import DetailSection from './detail/detailSection';
 import NotificationSection from './notification/notificationSection';
+import ReportComp from './report/reportComp';
 
 
 const HomeComp = () => {
@@ -19,7 +20,7 @@ const HomeComp = () => {
                 <DetailSection />
 
                 {/* Notification component */}
-                <NotificationSection />
+                <ReportComp />
             </div>
         </div>
     )
