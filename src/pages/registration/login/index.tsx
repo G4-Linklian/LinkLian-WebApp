@@ -19,6 +19,8 @@ function PageContent() {
 
     const router = useRouter();
 
+    console.log("Registration Login Page");
+
     return (
         // <div className="w-[100%] h-full text-black justify-center items-center flex">Info</div>
         <div className="bg-[#343434] w-full h-full">
