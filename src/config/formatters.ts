@@ -102,3 +102,36 @@ export const normalizeTime = (time?: string | Date) => {
   return undefined;
 };
 
+export const formatMonthYear = (value: DateInput): string => {
+  if (!value) return "-";
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("th-TH", {
+    year: "numeric",
+    month: "long",
+  });
+};
+
+export const formatSecondsToHourMinute = (value?: number | null): string => {
+  if (value === null || value === undefined || Number.isNaN(value) || value < 0) {
+    return "-";
+  }
+
+  const totalMinutes = Math.floor(value / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) {
+    return `${minutes} นาที`;
+  }
+
+  if (minutes === 0) {
+    return `${hours} ชม.`;
+  }
+
+  return `${hours} ชม. ${minutes} นาที`;
+};
+
