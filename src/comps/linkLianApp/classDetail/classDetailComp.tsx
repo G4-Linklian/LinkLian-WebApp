@@ -568,14 +568,14 @@ export default function ClassDetailComp() {
   }, [classInfo?.schedules])
 
   const selectedLiveMaterial = useMemo(() => {
-    if (!selectedLivePostId) 
+    if (!selectedLivePostId)
       return undefined
 
     const postId = Number(selectedLivePostId)
 
-    if (!Number.isFinite(postId)) 
+    if (!Number.isFinite(postId))
       return undefined
-    
+
     return liveMaterials.find((item) => item.post_id === postId)
   }, [liveMaterials, selectedLivePostId])
 
@@ -609,10 +609,10 @@ export default function ClassDetailComp() {
       setLiveMaterialError(null)
 
       try {
-        const res = await searchSectionFiles({ 
+        const res = await searchSectionFiles({
           section_id: parsedSectionId,
           flag_valid: true,
-         })
+        })
         const rawList = res?.success === false
           ? []
           : Array.isArray(res?.data)
@@ -640,13 +640,13 @@ export default function ClassDetailComp() {
           }
 
           let attachmentList: any[] = [];
-          
+
           if (Array.isArray(rawItem?.attachments)) {
-             attachmentList = rawItem.attachments;
+            attachmentList = rawItem.attachments;
           } else if (rawItem?.post_attachment) {
-             attachmentList = [rawItem.post_attachment];
+            attachmentList = [rawItem.post_attachment];
           } else if (rawItem?.post?.attachments) {
-             attachmentList = rawItem.post.attachments;
+            attachmentList = rawItem.post.attachments;
           }
 
           const mergedAttachments = [...(nextBase.attachments ?? [])]
@@ -664,14 +664,14 @@ export default function ClassDetailComp() {
           })
 
           if (mergedAttachments.length === 0) {
-              mergedAttachments.push({
-                  attachment_id: postId, 
-                  file_url: "",
-                  file_type: "unknown",
-                  original_name: "โพสต์นี้ไม่มีไฟล์แนบ (เปิดเป็นสไลด์เปล่า)",
-              });
+            mergedAttachments.push({
+              attachment_id: postId,
+              file_url: "",
+              file_type: "unknown",
+              original_name: "โพสต์นี้ไม่มีไฟล์แนบ (เปิดเป็นสไลด์เปล่า)",
+            });
           }
-          
+
           grouped.set(key, {
             ...nextBase,
             attachments: mergedAttachments,
@@ -802,12 +802,12 @@ export default function ClassDetailComp() {
     if (!parsedSectionId || parsedSectionId <= 0) return
 
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL + '/ws/qa';
-        if (!socketUrl) return;
+    if (!socketUrl) return;
 
     if (!socketUrl) return
 
     console.log('Connecting to Section Room socket at', socketUrl)
-    
+
     const ws = new WebSocket(socketUrl)
 
     ws.onopen = () => {
@@ -824,10 +824,10 @@ export default function ClassDetailComp() {
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data)
-        
+
         if (msg.type === 'QA_LIVE_STARTED') {
           const newQaLiveId = Number(msg.payload.qa_live_id)
-          
+
           setIsLiveActive(true)
           setActiveLiveId(newQaLiveId)
         }
@@ -947,6 +947,16 @@ export default function ClassDetailComp() {
       loadMore()
     }
   }
+
+  const { openPostId } = router.query;
+  useEffect(() => {
+    if (router.isReady && openPostId) {
+      setShowCommentPostId(Number(openPostId));
+
+      const { openPostId: _, ...restQuery } = router.query;
+      router.replace({ query: restQuery }, undefined, { shallow: true });
+    }
+  }, [router.isReady, openPostId]);
 
   return (
     <Box className="h-[calc(100vh-64px)] w-full overflow-hidden bg-[#FAFAFA] text-black">

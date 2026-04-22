@@ -25,9 +25,9 @@ export default function ProfileComp({ onLogout }: ProfileCompProps) {
   }, [router]);
 
   return (
-    <div className="w-full bg-gray-50 overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
-      <div className="mx-auto pt-12" style={{ width: '80%', height: '100%' }}>
-        <Grid gutter="lg" style={{ height: '100%' }} id="profile-grid">
+    <div className="w-full overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
+      <div className="mx-auto pt-5" style={{ width: '80%', height: '100%' }}>
+        <Grid gutter="xl" style={{ height: '100%' }} id="profile-grid">
           {/* Left */}
           <Grid.Col span={8} style={{ height: '100%' }}>
             <Stack gap="lg" style={{ height: '100%' }}>

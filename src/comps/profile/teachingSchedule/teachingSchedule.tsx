@@ -58,8 +58,8 @@ export default function TeachingSchedule() {
     const sortedDays = Object.keys(groupedSchedule).map(Number).sort((a, b) => a - b);
 
     return (
-        <Card shadow="sm" padding="xl" radius="lg" bg="white" className="border border-gray-200"
-            style={{ height: 'calc(100vh - 125px)', display: 'flex', flexDirection: 'column' }}
+        <Card shadow="sm" padding="lg" radius="lg" bg="white" className="border border-gray-200"
+            style={{ height: 'calc(100vh - 110px)', display: 'flex', flexDirection: 'column' }}
             id="teaching-schedule-card"
         >
             <Text size="xl" fw={700} mb="lg" className="text-gray-800" style={{ flexShrink: 0 }} id="teaching-schedule-title">
