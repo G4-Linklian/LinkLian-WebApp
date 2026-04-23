@@ -182,153 +182,180 @@ export default function QaLiveComp() {
     useEffect(() => {
         if (!router.isReady) return;
         if (isHistoryMode) return;
-
         if (!Number.isFinite(qaLiveId) || qaLiveId <= 0) return;
 
-        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL + '/ws/qa'
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL + '/ws/qa';
         if (!socketUrl) return;
 
-        console.log('Connecting to Section Room socket at', socketUrl)
-        const ws = new WebSocket(socketUrl);
-        socketRef.current = ws;
+        let ws: WebSocket | null = null;
+        let reconnectTimer: NodeJS.Timeout;
+        let isUnmounted = false;
+        let reconnectAttempts = 0;
 
-        ws.onopen = () => {
-            console.log("Socket connected");
+        const connectSocket = () => {
+            if (isUnmounted) return;
 
-            ws.send(JSON.stringify({
-                type: "JOIN_LIVE",
-                payload: {
-                    qa_live_id: String(qaLiveId),
-                    user_id: currentUserId ? String(currentUserId) : "0"
-                }
-            }));
-        };
+            console.log(`Connecting to socket... Attempt: ${reconnectAttempts}`);
+            ws = new WebSocket(socketUrl);
+            socketRef.current = ws;
 
-        ws.onmessage = (event) => {
-            try {
-                const msg = JSON.parse(event.data);
-                const payload = msg.payload;
+            ws.onopen = () => {
+                console.log("Socket connected successfully!");
+                reconnectAttempts = 0;
 
-                switch (msg.type) {
-                    case "VIEWER_COUNT_UPDATED":
-                        if (payload.count !== undefined) {
-                            setViewerCount(payload.count);
-                        }
-                        break;
-                    case "LIVE_CURRENT_STATE":
-                        if (!payload || !payload.attachment_id) break;
+                ws?.send(JSON.stringify({
+                    type: "JOIN_LIVE",
+                    payload: {
+                        qa_live_id: String(qaLiveId),
+                        user_id: currentUserId ? String(currentUserId) : "0"
+                    }
+                }));
+            };
 
-                        const currentMats = materialsRef.current;
-                        const targetMat = currentMats.find(m =>
-                            m.attachments?.some(a => Number(a.attachment_id) === Number(payload.attachment_id))
-                        );
-                        const targetAtt = targetMat?.attachments?.find(
-                            a => Number(a.attachment_id) === Number(payload.attachment_id)
-                        );
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    const payload = msg.payload;
 
-                        if (targetMat && targetAtt) {
-                            setActiveMaterialId(targetMat.post_id);
-                            setActiveAttachmentId(targetAtt.attachment_id);
-                            setSelectedAttachment(targetAtt);
-                            setSelectedPostTitle(targetMat.post_title || targetMat.post_content?.title || "");
-                        }
-                        break;
-
-                    case "FILE_CHANGED":
-                        if (payload.qa_live_id !== qaLiveId) break;
-
-                        if (!isSyncEnabledRef.current) {
+                    switch (msg.type) {
+                        case "VIEWER_COUNT_UPDATED":
+                            if (payload.count !== undefined) {
+                                setViewerCount(payload.count);
+                            }
                             break;
-                        }
 
-                        const currentMaterials = materialsRef.current;
-                        const material = currentMaterials.find(m =>
-                            m.attachments?.some(a => a.attachment_id === payload.attachment_id)
-                        );
-                        const attachment = material?.attachments?.find(
-                            a => a.attachment_id === payload.attachment_id
-                        );
+                        case "LIVE_CURRENT_STATE":
+                            if (!payload || !payload.attachment_id) break;
 
-                        if (material && attachment) {
-                            setActiveMaterialId(material.post_id);
-                            setActiveAttachmentId(attachment.attachment_id);
-                            setSelectedAttachment(attachment);
-                        }
+                            const currentMats = materialsRef.current;
+                            const targetMat = currentMats.find(m =>
+                                m.attachments?.some(a => Number(a.attachment_id) === Number(payload.attachment_id))
+                            );
+                            const targetAtt = targetMat?.attachments?.find(
+                                a => Number(a.attachment_id) === Number(payload.attachment_id)
+                            );
 
-                        setLiveLogs((prev) => {
-                            const nextItem = {
-                                qa_live_id: payload.qa_live_id,
-                                post_id: payload.post_id,
-                                attachment_id: payload.attachment_id,
-                                opened_at: payload.opened_at,
-                            };
-                            const deduped = prev.filter((item) => item.attachment_id !== payload.attachment_id);
-                            return [nextItem, ...deduped];
-                        });
-                        break;
-
-                    case "QA_LIVE_ENDED":
-                        if (payload.qa_live_id !== qaLiveId) break;
-                        router.push({
-                            pathname: "/classes/classDetail",
-                            query: {
-                                sectionId: router.query.sectionId,
-                                subjectName: router.query.subjectName,
-                                className: router.query.className,
-                            },
-                        });
-                        break;
-
-                    case "QA_NEW_QUESTION":
-                        if (payload.qa_live_id !== qaLiveId) break;
-                        upsertQuestion(payload);
-                        break;
-
-                    case "QA_QUESTION_UPDATED":
-                        if (payload.qa_live_id !== qaLiveId) break;
-                        setQuestions(prev =>
-                            prev.map(q =>
-                                q.qa_question_id === payload.qa_question_id
-                                    ? { ...q, status: payload.status, question: payload.question }
-                                    : q
-                            )
-                        );
-                        break;
-
-                    case "QA_UPVOTED":
-                        console.log("socket message:", payload);
-
-                        if (Number(payload.qa_live_id) !== Number(qaLiveId)) {
-                            console.log("qaLiveId isn't matching:", payload.qa_live_id, "vs", qaLiveId);
+                            if (targetMat && targetAtt) {
+                                setActiveMaterialId(targetMat.post_id);
+                                setActiveAttachmentId(targetAtt.attachment_id);
+                                setSelectedAttachment(targetAtt);
+                                setSelectedPostTitle(targetMat.post_title || targetMat.post_content?.title || "");
+                            }
                             break;
-                        }
 
-                        setQuestions(prev =>
-                            prev.map(q =>
-                                Number(q.qa_question_id) === Number(payload.qa_question_id)
-                                    ? { ...q, upvote_count: Number(payload.upvote_count) }
-                                    : q
-                            )
-                        );
-                        break;
+                        case "FILE_CHANGED":
+                            if (payload.qa_live_id !== qaLiveId) break;
+
+                            if (!isSyncEnabledRef.current) {
+                                break;
+                            }
+
+                            const currentMaterials = materialsRef.current;
+                            const material = currentMaterials.find(m =>
+                                m.attachments?.some(a => a.attachment_id === payload.attachment_id)
+                            );
+                            const attachment = material?.attachments?.find(
+                                a => a.attachment_id === payload.attachment_id
+                            );
+
+                            if (material && attachment) {
+                                setActiveMaterialId(material.post_id);
+                                setActiveAttachmentId(attachment.attachment_id);
+                                setSelectedAttachment(attachment);
+                            }
+
+                            setLiveLogs((prev) => {
+                                const nextItem = {
+                                    qa_live_id: payload.qa_live_id,
+                                    post_id: payload.post_id,
+                                    attachment_id: payload.attachment_id,
+                                    opened_at: payload.opened_at,
+                                };
+                                const deduped = prev.filter((item) => item.attachment_id !== payload.attachment_id);
+                                return [nextItem, ...deduped];
+                            });
+                            break;
+
+                        case "QA_LIVE_ENDED":
+                            if (payload.qa_live_id !== qaLiveId) break;
+                            router.push({
+                                pathname: "/classes/classDetail",
+                                query: {
+                                    sectionId: router.query.sectionId,
+                                    subjectName: router.query.subjectName,
+                                    className: router.query.className,
+                                },
+                            });
+                            break;
+
+                        case "QA_NEW_QUESTION":
+                            if (payload.qa_live_id !== qaLiveId) break;
+                            upsertQuestion(payload);
+                            break;
+
+                        case "QA_QUESTION_UPDATED":
+                            if (payload.qa_live_id !== qaLiveId) break;
+                            setQuestions(prev =>
+                                prev.map(q =>
+                                    q.qa_question_id === payload.qa_question_id
+                                        ? { ...q, status: payload.status, question: payload.question }
+                                        : q
+                                )
+                            );
+                            break;
+
+                        case "QA_UPVOTED":
+                            console.log("socket message:", payload);
+
+                            if (Number(payload.qa_live_id) !== Number(qaLiveId)) {
+                                console.log("qaLiveId isn't matching:", payload.qa_live_id, "vs", qaLiveId);
+                                break;
+                            }
+
+                            setQuestions(prev =>
+                                prev.map(q =>
+                                    Number(q.qa_question_id) === Number(payload.qa_question_id)
+                                        ? { ...q, upvote_count: Number(payload.upvote_count) }
+                                        : q
+                                )
+                            );
+                            break;
+                    }
+                } catch (error) {
+                    console.error("Error parsing socket message", error);
                 }
-            } catch (error) {
-                console.error("Error parsing socket message", error);
-            }
+            };
+
+            ws.onerror = (error) => {
+                console.error("Socket Error:", error);
+            };
+
+            ws.onclose = (event) => {
+                if (!isUnmounted) {
+                    const delay = Math.min(1000 * (2 ** reconnectAttempts), 10000);
+
+                    console.log(`Socket disconnected. Reconnecting in ${delay / 1000} seconds...`);
+
+                    reconnectTimer = setTimeout(() => {
+                        reconnectAttempts++;
+                        connectSocket();
+                    }, delay);
+                } else {
+                    console.log("Socket closed cleanly (User left page).");
+                }
+            };
         };
 
-        ws.onclose = () => {
-            console.log("Socket disconnected");
-        };
-
-        ws.onerror = (error) => {
-            console.error("Socket Error:", error);
-        };
+        connectSocket();
 
         return () => {
-            ws.close();
+            isUnmounted = true; 
+            clearTimeout(reconnectTimer); 
+            if (ws) {
+                ws.close(); 
+            }
         };
-    }, [qaLiveId, router, isHistoryMode]);
+    }, [qaLiveId, router.isReady, isHistoryMode, currentUserId]); 
 
     useEffect(() => {
         const fetchLiveTitle = async () => {
@@ -545,6 +572,7 @@ export default function QaLiveComp() {
             try {
                 const sectionId = router.query.sectionId;
                 const keyword = debouncedSearchKeyword;
+
                 const res = await searchSectionFiles({
                     section_id: Number(sectionId),
                     flag_valid: true,
@@ -971,7 +999,7 @@ export default function QaLiveComp() {
     const displayPostTitle = selectedPostTitle || activeMaterial?.post_content?.title || "ไม่พบชื่อโพสต์";
 
     return (
-        <div className="w-full bg-[#FAFAFA] overflow-hidden" style={{ height: "calc(100vh - 72px)" }}>
+        <div className="w-full overflow-hidden" style={{ height: "calc(100vh - 72px)" }}>
             <div className="mx-auto pt-3" style={{ width: "94%", height: "100%" }}>
                 <Paper radius="lg" p="md" className="border border-gray-200" bg="white" style={{ height: "calc(100% - 4px)" }}>
                     <Stack h="100%" gap="md" style={{ minHeight: 0 }}>
