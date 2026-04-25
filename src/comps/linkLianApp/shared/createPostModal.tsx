@@ -20,6 +20,7 @@ import {
   Text,
   TextInput,
   Textarea,
+  Title,
 } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useRouter } from 'next/router';
@@ -715,18 +716,30 @@ const CreatePostModal = ({
         onClose={() => setConfirmCloseOpened(false)}
         centered
         zIndex={MODAL_Z_INDEX + 10}
-        radius="xl"
+        radius="lg"
+        padding="lg"
+        size="md"
+        className="text-center flex flex-col justify-center items-center"
         overlayProps={{ backgroundOpacity: 0.45, blur: 3 }}
-        title="ยืนยันการปิด"
+        withCloseButton={false}
       >
-        <Text size="sm" c="dimmed">
+        <Title
+          order={2}
+          className="text-center font-semibold"
+          size="xl"
+          mb="md"
+          mt="lg"
+        >
+          ยืนยันการปิด
+        </Title>
+        <Text size="sm" c="dimmed" ta="center">
           ต้องการออกโดยไม่บันทึกหรือไม่?
         </Text>
-        <Group mt="md" justify="flex-end" gap="sm">
-          <Button variant="default" radius="xl" onClick={() => setConfirmCloseOpened(false)}>
+        <Group mt="lg" justify="flex-end" gap="sm">
+          <Button variant="default" radius="md" onClick={() => setConfirmCloseOpened(false)}>
             ยกเลิก
           </Button>
-          <Button color="red" radius="xl" onClick={handleConfirmClose}>
+          <Button color="red" radius="md" onClick={handleConfirmClose}>
             ออกโดยไม่บันทึก
           </Button>
         </Group>

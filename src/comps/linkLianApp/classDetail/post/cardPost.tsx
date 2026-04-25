@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react';
-import { ActionIcon, Box, Button, Group, Loader, Paper, Text } from '@mantine/core';
+import { ActionIcon, Box, Button, Group, Loader, Modal, Paper, Text, Title } from '@mantine/core';
 import { IconDownload, IconExternalLink, IconFileTypePdf, IconMessageCircle, IconPaperclip, IconPhoto, IconPointFilled, IconUser, IconUserOff } from '@tabler/icons-react';
 import { PostItem, PostAttachment } from '@/utils/interface/class.types';
 import {
@@ -495,6 +495,7 @@ function MoreMenu({
 }) {
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [confirmDeleteOpened, setConfirmDeleteOpened] = useState(false);
     const currentUserId = getCurrentUserId();
     const isOwner = currentUserId === post.user.user_sys_id;
     const pid = post.post_id;
@@ -502,11 +503,13 @@ function MoreMenu({
     if (!isOwner) return null;
 
     const handleDelete = async () => {
-        if (!confirm('ต้องการลบโพสต์นี้หรือไม่?')) return;
         setIsDeleting(true);
         try {
             const res = await deletePost(currentUserId!, pid, post.post_content_id);
-            if (res.success) onDeleted?.(pid);
+            if (res.success) {
+                onDeleted?.(pid);
+                setConfirmDeleteOpened(false);
+            }
         } catch (err) {
             console.error('[CardPost] delete error:', err);
         } finally {
@@ -551,7 +554,11 @@ function MoreMenu({
                         )}
                         <button
                             id={`cp-delete-btn-${pid}`}
-                            onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteOpened(true);
+                                setOpen(false);
+                            }}
                             disabled={isDeleting}
                             className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
                         >
@@ -570,6 +577,56 @@ function MoreMenu({
                     </div>
                 </>
             )}
+
+            <Modal
+                opened={confirmDeleteOpened}
+                onClose={() => {
+                    if (isDeleting) return;
+                    setConfirmDeleteOpened(false);
+                }}
+                centered
+                zIndex={12000}
+                radius="lg"
+                padding="lg"
+                size="md"
+                className="text-center flex flex-col justify-center items-center"
+                overlayProps={{ backgroundOpacity: 0.45, blur: 3 }}
+                withCloseButton={false}
+            >
+                <Title
+                    order={2}
+                    className="text-center font-semibold"
+                    size="xl"
+                    mb="md"
+                    mt="lg"
+                >
+                    ยืนยันการลบ
+                </Title>
+                <Text size="sm" c="dimmed" ta="center">
+                    ต้องการลบโพสต์นี้หรือไม่?
+                </Text>
+                <Group mt="lg" justify="flex-end" gap="sm">
+                    <Button
+                        variant="default"
+                        radius="md"
+                        onClick={() => setConfirmDeleteOpened(false)}
+                        disabled={isDeleting}
+                    >
+                        ยกเลิก
+                    </Button>
+                    <Button
+                        color="red"
+                        radius="md"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDelete();
+                        }}
+                        loading={isDeleting}
+                    >
+                        ยืนยันการลบ
+                    </Button>
+                </Group>
+            </Modal>
         </div>
     );
 }

@@ -106,8 +106,8 @@ const getSocialFeedRoleName = (): string => {
   try {
     const tokens = [
       decodeTeacherToken(),
-      decodeRegistrationToken(),
-      decodeToken(),
+      // decodeRegistrationToken(),
+      // decodeToken(),
     ].filter(Boolean)
 
     const roleName = tokens
@@ -127,7 +127,7 @@ interface ClassHeaderProps {
   subTitle: string
   schedules: ClassSchedule[]
   scrollRatio: number
-  onBack: () => void
+  // onBack: () => void
   onSearch: () => void
   onShowClassInfo: () => void
   onCreatePost: () => void
@@ -213,7 +213,7 @@ function ClassHeader({
   subTitle,
   schedules,
   scrollRatio,
-  onBack,
+  // onBack,
   onSearch,
   onShowClassInfo,
   onCreatePost,
@@ -263,9 +263,9 @@ function ClassHeader({
 
       {/* Top row — แสดงตลอด */}
       <div id="cd-header-top-row" className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-3">
-        <div id="cd-header-nav-breadcrumb-row" className="flex min-w-0 items-center gap-2 text-xs">
+        {/* <div id="cd-header-nav-breadcrumb-row" className="flex min-w-0 items-center gap-2 text-xs"> */}
 
-          <ActionIcon
+        {/* <ActionIcon
             id="cd-back-btn"
             aria-label="ย้อนกลับ"
             onClick={onBack}
@@ -276,16 +276,16 @@ function ClassHeader({
             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-          </ActionIcon>
+          </ActionIcon> */}
 
-          {/* Breadcrumb — always visible, tone-aware */}
-          <span className={`flex min-w-0 items-center gap-1 drop-shadow transition-colors duration-300 ${breadcrumbClass}`}>
+        {/* Breadcrumb — always visible, tone-aware */}
+        {/* <span className={`flex min-w-0 items-center gap-1 drop-shadow transition-colors duration-300 ${breadcrumbClass}`}>
             <span id="cd-header-breadcrumb-home">ห้องเรียน</span>
             <span>/</span>
             <span id="cd-header-breadcrumb-subject" className="truncate">{subjectName}</span>
             <span id="cd-header-breadcrumb-class" className="truncate">{className}</span>
-          </span>
-        </div>
+          </span> */}
+        {/* </div> */}
 
         <div id="cd-header-actions" className="flex shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 xl:hidden">
@@ -314,18 +314,6 @@ function ClassHeader({
               </svg>
             </ActionIcon>
           </div>
-          <ActionIcon
-            id="cd-create-post-btn"
-            aria-label="สร้างโพสต์"
-            onClick={onCreatePost}
-            variant="filled"
-            color="orange"
-            radius="xl"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </ActionIcon>
         </div>
       </div>
 
@@ -1032,7 +1020,7 @@ export default function ClassDetailComp() {
                                 {educator.display_name || 'ไม่ระบุชื่อ'}
                                 {educator.is_main_teacher ? ' (ผู้สอนหลัก)' : ''}
                               </Text>
-                              <Text truncate size="11px" c="dimmed">รหัส: {educator.user_sys_id}</Text>
+                              <Text truncate size="11px" c="dimmed">{educator.educator_code}</Text>
                             </div>
                           </Paper>
                         ))}
@@ -1078,7 +1066,7 @@ export default function ClassDetailComp() {
                               )}
                               <div className="min-w-0">
                                 <Text truncate size="xs" fw={600} c="dark.7">{member.display_name || 'ไม่ระบุชื่อ'}</Text>
-                                <Text truncate size="11px" c="dimmed">รหัส: {member.student_code || member.user_sys_id}</Text>
+                                <Text truncate size="11px" c="dimmed">{member.student_code}</Text>
                               </div>
                             </Paper>
                           ))}
@@ -1104,44 +1092,63 @@ export default function ClassDetailComp() {
               subTitle={subTitle}
               schedules={classInfo?.schedules ?? []}
               scrollRatio={scrollRatio}
-              onBack={navigateBack}
+              // onBack={navigateBack}
               onSearch={() => setShowSearch(true)}
               onShowClassInfo={() => setShowClassInfo(true)}
               onCreatePost={openCreatePost}
             />
 
             {/* Search bar — desktop only */}
-            <Paper
-              id="cd-search-bar"
-              className="mt-3 hidden shrink-0 xl:flex"
-              radius="lg"
-              withBorder
-              p="sm"
-            >
-              <TextInput
-                id="cd-search-input"
-                ref={searchInputRef}
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                placeholder="ค้นหาโพสต์ในห้องเรียนนี้..."
-                className="w-full"
-                variant="unstyled"
+            <div id="cd-search-create-container" className="mt-3 flex items-center justify-between gap-3">
+              <Paper
+                id="cd-search-bar"
+                className="hidden min-w-0 flex-1 xl:flex"
+                radius="lg"
+                withBorder
+              >
+                <TextInput
+                  id="cd-search-input"
+                  ref={searchInputRef}
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  placeholder="ค้นหาโพสต์ในห้องเรียนนี้..."
+                  className="w-full"
+                  variant="unstyled"
+                  size="md" 
+                  px="md" 
+                  leftSection={
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  }
+                  rightSection={
+                    keyword ? (
+                      <ActionIcon onClick={clearSearch} variant="light" color="gray" radius="xl" size="sm">
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </ActionIcon>
+                    ) : undefined
+                  }
+                />
+              </Paper>
+
+              <Button
+                id="cd-create-post-btn"
+                onClick={openCreatePost}
+                variant="filled"
+                color="#DB763F"
+                radius="lg"
+                size="md"
                 leftSection={
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                   </svg>
                 }
-                rightSection={
-                  keyword ? (
-                    <ActionIcon onClick={clearSearch} variant="light" color="gray" radius="xl" size="sm">
-                      <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </ActionIcon>
-                  ) : undefined
-                }
-              />
-            </Paper>
+              >
+                สร้างโพสต์
+              </Button>
+            </div>
 
             {/* Filter bar — ซ่อนตอน search mode */}
             {!isSearchMode && (

@@ -118,7 +118,7 @@ export default function ClassInfoPopup({
                         </Text>
                         {member.student_code && (
                           <Text pl="md" size="xs" style={{ color: AppColors.primaryPalette[600] }}>
-                            รหัส: {member.student_code}
+                            {member.student_code}
                           </Text>
                         )}
                       </div>
