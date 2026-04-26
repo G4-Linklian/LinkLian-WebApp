@@ -20,11 +20,11 @@ export const tabRoutes = {
 };
 
 export const data = [
-    {
-        label: "แจ้งเตือน",
-        route: "/notification",
-        icon: <IconBell size={18} stroke={1.8} />,
-    },
+    // {
+    //     label: "แจ้งเตือน",
+    //     route: "/notification",
+    //     icon: <IconBell size={18} stroke={1.8} />,
+    // },
     {
         label: "ห้องเรียน",
         route: "/classes",

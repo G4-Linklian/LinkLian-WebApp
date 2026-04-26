@@ -249,6 +249,7 @@ export interface ClassMember {
 export interface ClassEducator {
   educator_id: number;
   position: string;
+  educator_code: string;
   user_sys_id: number;
   display_name: string;
   profile_pic: string | null;
