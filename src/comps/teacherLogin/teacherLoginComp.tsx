@@ -218,15 +218,13 @@ const TeacherLoginPage = () => {
                     w-full max-w-md p-8 rounded-lg
                     ${isLargerThanSm ? 'mr-[18%]' : 'mr-0'}
                 `}>
-                    {!isLargerThanSm && (
-                        <Image
-                            src="/image/banner-black.png"
-                            alt="logo"
-                            width={120}
-                            height={60}
-                            style={{ margin: '0 auto 20px auto' }}
-                        />
-                    )}
+                    <Image
+                        src="/image/logo-web.png"
+                        alt="logo"
+                        width={140}
+                        height={60}
+                        style={{ margin: '0 auto 20px auto' }}
+                    />
                     <h2 className="text-2xl font-bold text-center mb-8 text-[#7A2310]">เข้าสู่ระบบผู้สอน</h2>
 
                     <form onSubmit={form.onSubmit(handleSubmit)}>
