@@ -121,7 +121,7 @@ export function Sidebar() {
         <div className="h-20 flex items-center justify-center border-b border-gray-100 mb-4">
           <Link href="/home">
             <Image
-              src="/image/banner-black.png"
+              src="/image/logo-web.png"
               alt="Link-Lian Logo"
               width={140}
               height={50}
