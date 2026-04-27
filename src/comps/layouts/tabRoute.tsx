@@ -82,9 +82,9 @@ export const dataRegistration = [
         route: "/registration/registration",
         icon: <IconUsersGroup size={18} stroke={1.8} />,
     },
-    {
-        label: "คู่มือ",
-        route: "/registration/manual",
-        icon: <IconFileAnalytics size={18} stroke={1.8} />,
-    },
+    // {
+    //     label: "คู่มือ",
+    //     route: "/registration/manual",
+    //     icon: <IconFileAnalytics size={18} stroke={1.8} />,
+    // },
 ];
