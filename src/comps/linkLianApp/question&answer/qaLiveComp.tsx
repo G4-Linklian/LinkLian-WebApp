@@ -148,6 +148,8 @@ export default function QaLiveComp() {
     }, [materials]);
 
     const upsertQuestion = (nextQuestion: QaQuestion) => {
+        console.log("New question is comming");
+        console.log("Upserting question:", nextQuestion);
         setQuestions((prev) => {
             const exists = prev.some((item) => item.qa_question_id === nextQuestion.qa_question_id);
             if (exists) {
@@ -216,6 +218,7 @@ export default function QaLiveComp() {
                 try {
                     const msg = JSON.parse(event.data);
                     const payload = msg.payload;
+                    console.log("Received socket message /payload:", msg);
 
                     switch (msg.type) {
                         case "VIEWER_COUNT_UPDATED":
@@ -244,7 +247,7 @@ export default function QaLiveComp() {
                             break;
 
                         case "FILE_CHANGED":
-                            if (payload.qa_live_id !== qaLiveId) break;
+                            if (Number(payload.qa_live_id) !== Number(qaLiveId)) break;
 
                             if (!isSyncEnabledRef.current) {
                                 break;
@@ -252,10 +255,10 @@ export default function QaLiveComp() {
 
                             const currentMaterials = materialsRef.current;
                             const material = currentMaterials.find(m =>
-                                m.attachments?.some(a => a.attachment_id === payload.attachment_id)
+                                m.attachments?.some(a => Number(a.attachment_id) === Number(payload.attachment_id))
                             );
                             const attachment = material?.attachments?.find(
-                                a => a.attachment_id === payload.attachment_id
+                                a => Number(a.attachment_id) === Number(payload.attachment_id)
                             );
 
                             if (material && attachment) {
@@ -277,7 +280,7 @@ export default function QaLiveComp() {
                             break;
 
                         case "QA_LIVE_ENDED":
-                            if (payload.qa_live_id !== qaLiveId) break;
+                            if (Number(payload.qa_live_id) !== Number(qaLiveId)) break;
                             router.push({
                                 pathname: "/classes/classDetail",
                                 query: {
@@ -289,12 +292,18 @@ export default function QaLiveComp() {
                             break;
 
                         case "QA_NEW_QUESTION":
-                            if (payload.qa_live_id !== qaLiveId) break;
+                            console.log("Received new question via socket:", payload);
+                            if (Number(payload.qa_live_id) !== Number(qaLiveId)) {
+                                console.log("qaLiveId isn't matching for new question:", typeof payload.qa_live_id, "vs", typeof qaLiveId, payload.qa_live_id, qaLiveId);
+                                break;
+                            };
+                            console.log(' Upsert question from socket');
                             upsertQuestion(payload);
+                            console.log("Upserted question from socket:", payload);
                             break;
 
                         case "QA_QUESTION_UPDATED":
-                            if (payload.qa_live_id !== qaLiveId) break;
+                            if (Number(payload.qa_live_id) !== Number(qaLiveId)) break;
                             setQuestions(prev =>
                                 prev.map(q =>
                                     q.qa_question_id === payload.qa_question_id
