@@ -1,6 +1,6 @@
 import React from "react";
 import { Accordion, ActionIcon, Badge, Card, Group, Stack, Text, TextInput, ThemeIcon, Tooltip } from "@mantine/core";
-import { IconFileText, IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconSearch } from "@tabler/icons-react";
+import { IconFileText, IconLayoutSidebarLeftCollapse, IconSearch } from "@tabler/icons-react";
 import { AppColors } from "@/constants/colors";
 
 interface MaterialAttachment {
@@ -22,8 +22,7 @@ interface MaterialListProps {
     activeAttachmentId?: number;
     searchKeyword: string;
     onSearchKeywordChange: (value: string) => void;
-    showMaterialPanel: boolean;
-    onToggleMaterialPanel: () => void;
+    onCloseMaterialPanel: () => void;
     onSelectMaterial: (postId?: number) => void;
     onSelectAttachment: (postId?: number, attachment?: MaterialAttachment) => void;
 }
@@ -40,8 +39,7 @@ export default function MaterialList({
     activeAttachmentId,
     searchKeyword,
     onSearchKeywordChange,
-    showMaterialPanel,
-    onToggleMaterialPanel,
+    onCloseMaterialPanel,
     onSelectMaterial,
     onSelectAttachment,
 }: MaterialListProps) {
@@ -65,13 +63,13 @@ export default function MaterialList({
                 <Text fw={700} size="lg">
                     บทเรียน ({materials.length})
                 </Text>
-                <Tooltip label={showMaterialPanel ? "ซ่อนบทเรียน" : "แสดงบทเรียน"}>
+                <Tooltip label="ซ่อนบทเรียน">
                     <ActionIcon
                         variant="default"
                         size="lg"
-                        onClick={onToggleMaterialPanel}
+                        onClick={onCloseMaterialPanel}
                     >
-                        {showMaterialPanel ? <IconLayoutSidebarLeftCollapse size={18} /> : <IconLayoutSidebarLeftExpand size={18} />}
+                        <IconLayoutSidebarLeftCollapse size={18} />
                     </ActionIcon>
                 </Tooltip>
             </Group>

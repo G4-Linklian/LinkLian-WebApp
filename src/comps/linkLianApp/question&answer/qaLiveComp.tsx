@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { ActionIcon, Badge, Button, Grid, Group, Paper, Stack, Tooltip, Text } from "@mantine/core";
+import { ActionIcon, Badge, Button, Group, Paper, Stack, Tooltip, Text } from "@mantine/core";
 import {
     IconLayoutSidebarLeftExpand,
     IconLayoutSidebarRightExpand,
@@ -686,12 +686,6 @@ export default function QaLiveComp() {
         fetchSectionFiles();
     }, [router.query.sectionId, router.query.postId, router.query.attachmentId, debouncedSearchKeyword]);
 
-    const centerSpan = useMemo(() => {
-        if (showMaterialPanel && showQuestionPanel) return 6;
-        if (showMaterialPanel || showQuestionPanel) return 9;
-        return 12;
-    }, [showMaterialPanel, showQuestionPanel]);
-
     const areBothSidePanelsHidden = !showMaterialPanel && !showQuestionPanel;
     const isSingleSidePanelVisible = showMaterialPanel !== showQuestionPanel;
 
@@ -1080,35 +1074,25 @@ export default function QaLiveComp() {
                                 </Tooltip>
                             )}
 
-                            <Grid
-                                gutter="md"
-                                align="stretch"
-                                style={{ height: "100%", minHeight: 0, overflow: "hidden" }}
-                                styles={{ inner: { height: "100%", minHeight: 0 } }}
-                            >
+                            <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden md:flex-row">
                                 {showMaterialPanel && (
-                                    <Grid.Col span={{ base: 12, md: 3 }} style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", height: "100%" }}>
+                                    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden md:w-[320px] md:shrink-0 md:basis-[320px]">
                                         <MaterialList
                                             materials={materials}
                                             activeMaterialId={activeMaterialId}
                                             activeAttachmentId={activeAttachmentId}
                                             searchKeyword={searchKeyword}
                                             onSearchKeywordChange={setSearchKeyword}
-                                            showMaterialPanel={showMaterialPanel}
-                                            onToggleMaterialPanel={() => setShowMaterialPanel((prev) => !prev)}
+                                            onCloseMaterialPanel={() => setShowMaterialPanel(false)}
                                             onSelectMaterial={handleSelectMaterial}
                                             onSelectAttachment={handleSelectAttachment}
                                         />
-                                    </Grid.Col>
+                                    </div>
                                 )}
 
-                                <Grid.Col
-                                    span={{ base: 12, md: centerSpan }}
-                                    offset={{ base: 0, md: 0 }}
+                                <div
+                                    className="flex h-full min-h-0 min-w-0 flex-1 flex-col"
                                     style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        minHeight: 0,
                                         ...(areBothSidePanelsHidden
                                             ? {
                                                 maxWidth: "92%",
@@ -1123,7 +1107,10 @@ export default function QaLiveComp() {
                                                     paddingLeft: !showMaterialPanel ? 60 : 0,
                                                     paddingRight: !showQuestionPanel ? 60 : 0,
                                                 }
-                                                : {}),
+                                                : {
+                                                    paddingLeft: 0,
+                                                    paddingRight: 0,
+                                                }),
                                     }}
                                 >
                                     <PresentationPanel
@@ -1135,21 +1122,20 @@ export default function QaLiveComp() {
                                         requestedPage={requestedSlide}
                                         jumpKey={slideJumpKey}
                                     />
-                                </Grid.Col>
+                                </div>
 
                                 {showQuestionPanel && (
-                                    <Grid.Col span={{ base: 12, md: 3 }} style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", height: "100%" }}>
+                                    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden md:w-[320px] md:shrink-0 md:basis-[320px]">
                                         <QuestionPanel
                                             fileName={presentationFileName}
                                             currentSlide={currentSlide}
                                             questions={displayQuestions}
-                                            showQuestionPanel={showQuestionPanel}
                                             currentUserId={currentUserId}
                                             currentUserProfile={currentUserProfile}
                                             fileFilterOptions={questionFileOptions}
                                             selectedFileFilter={selectedQuestionFileFilter}
                                             onFileFilterChange={setSelectedQuestionFileFilter}
-                                            onToggleQuestionPanel={() => setShowQuestionPanel((prev) => !prev)}
+                                            onCloseQuestionPanel={() => setShowQuestionPanel(false)}
                                             onSendQuestion={isHistoryMode ? undefined : handleSendQuestion}
                                             onJumpToQuestion={handleJumpToQuestion}
                                             onUpvoteQuestion={handleUpvoteQuestion}
@@ -1157,9 +1143,9 @@ export default function QaLiveComp() {
                                             onMarkAsAnswered={isHistoryMode ? undefined : handleMarkAsAnswered}
                                             isReadOnly={isHistoryMode}
                                         />
-                                    </Grid.Col>
+                                    </div>
                                 )}
-                            </Grid>
+                            </div>
                         </div>
                     </Stack>
                 </Paper>
