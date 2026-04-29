@@ -83,11 +83,11 @@ export function MainLinks() {
   }, [router.isReady]);
 
   data = [
-    {
-      label: "แจ้งเตือน",
-      route: "notification",
-      icon: <IconBell size={18} stroke={1.8} />,
-    },
+    // {
+    //   label: "แจ้งเตือน",
+    //   route: "notification",
+    //   icon: <IconBell size={18} stroke={1.8} />,
+    // },
     {
       label: "ห้องเรียน",
       route: "classes",
@@ -143,7 +143,7 @@ export function MainLinks() {
       <div className="flex flex-col justify-center">
         <Link href="/home" className="text-[#1E9900] font-black text-xl mr-6 ml-2">
           <Image
-            src="/image/banner-black.png"
+            src="/image/logo-web.png"
             alt="profile"
             width={120}
             height={50}

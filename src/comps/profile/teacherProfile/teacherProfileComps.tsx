@@ -107,67 +107,65 @@ export default function TeacherProfileComps({ onLogout }: TeacherProfileCompsPro
     };
 
     return (
-        <div>
-            <Card shadow="sm" padding="xl" radius="lg" className="relative border border-gray-200" bg="white"
-                style={{ height: 'calc(50vh - 200px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-                id="profile-card"
-            >
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                    <div
-                        className="relative inline-block"
-                        style={{ position: 'relative', width: '120px', height: '120px', alignItems: 'center', display: 'flex' }}
+        <Card shadow="sm" padding="lg" radius="lg" className="relative border border-gray-200" bg="white" mb="lg"
+            style={{ height: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+            id="profile-card"
+        >
+            <div className="flex flex-col md:flex-row items-center gap-8">
+                <div
+                    className="relative inline-block"
+                    style={{ position: 'relative', width: '120px', height: '120px', alignItems: 'center', display: 'flex' }}
+                >
+                    <Avatar
+                        src={profile?.profile_pic}
+                        size={120}
+                        radius={100}
+                        color="#DB763F"
+                        className="border-2 border-white shadow-sm"
+                        id="profile-pic"
                     >
-                        <Avatar
-                            src={profile?.profile_pic}
-                            size={120}
-                            radius={100}
-                            color="#DB763F"
-                            className="border-2 border-white shadow-sm"
-                            id="profile-pic"
-                        >
-                            {profile?.first_name?.[0]}
-                        </Avatar>
+                        {profile?.first_name?.[0]}
+                    </Avatar>
 
-                        <ActionIcon
-                            variant="filled"
-                            color="#DB763F"
-                            size="md"
-                            radius="100%"
-                            className="border-2 border-white shadow-sm"
-                            style={{ position: 'absolute', bottom: 1, right: 5, zIndex: 10 }}
-                            onClick={handleAvatarClick}
-                            loading={isUploading}
-                            id="edit-profile-pic-button"
-                        >
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageChange}
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                            />
+                    <ActionIcon
+                        variant="filled"
+                        color="#DB763F"
+                        size="md"
+                        radius="100%"
+                        className="border-2 border-white shadow-sm"
+                        style={{ position: 'absolute', bottom: 1, right: 5, zIndex: 10 }}
+                        onClick={handleAvatarClick}
+                        loading={isUploading}
+                        id="edit-profile-pic-button"
+                    >
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                        />
 
-                            <IconPencil size={20} />
-                        </ActionIcon>
-                    </div>
-
-                    <Stack gap="xs" className="flex-1" pt="sm">
-                        <Text size="md" fw={500} id="user-code">
-                            {profile?.code || ''}
-                        </Text>
-                        <Text size="xl" fw={700} id="user-name">
-                            {profile?.first_name} {profile?.last_name}
-                        </Text>
-                        <Text size="md" color="dimmed" id="user-email">
-                            {profile?.email}
-                        </Text>
-                        <Text size="md" color="red" onClick={handleLogout} className="cursor-pointer" id="logout-button">
-                            <IconLogout size={16} className="inline mr-2" />
-                            ออกจากระบบ
-                        </Text>
-                    </Stack>
+                        <IconPencil size={20} />
+                    </ActionIcon>
                 </div>
-            </Card>
-        </div>
+
+                <Stack gap="xs" className="flex-1" pt="sm">
+                    <Text size="md" fw={500} id="user-code">
+                        {profile?.code || ''}
+                    </Text>
+                    <Text size="xl" fw={700} id="user-name">
+                        {profile?.first_name} {profile?.last_name}
+                    </Text>
+                    <Text size="md" color="dimmed" id="user-email">
+                        {profile?.email}
+                    </Text>
+                    <Text size="md" color="red" onClick={handleLogout} className="cursor-pointer" id="logout-button">
+                        <IconLogout size={16} className="inline mr-2" />
+                        ออกจากระบบ
+                    </Text>
+                </Stack>
+            </div>
+        </Card>
     );
 }

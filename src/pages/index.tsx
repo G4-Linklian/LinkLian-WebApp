@@ -15,8 +15,6 @@ const geistMono = Geist_Mono({
 
 import React from 'react'
 
-import LayoutShell from "@/comps/layouts/LayoutShellManagement";
-
 function PageContent() {
     // const [canRead, setCanRead] = useState(false);
 
@@ -40,9 +38,7 @@ function PageContent() {
 export default function Home() {
     return (
         <>
-            <LayoutShell>
-                <PageContent></PageContent>
-            </LayoutShell>
+           
         </>
     );
 }
