@@ -1,6 +1,49 @@
-import React, { useState, useEffect } from "react";
-import { Card, Group, Stack, Text, Button } from "@mantine/core";
+import React, { useState, useEffect, useRef, Component, ErrorInfo, ReactNode } from "react";
+import { Card, Group, Stack, Text, Button, NumberInput } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
+import { pdfjs } from "react-pdf";
+
+if (typeof window !== "undefined") {
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+}
+
+const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), { ssr: false });
+const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), { ssr: false });
+
+interface ErrorBoundaryProps {
+    children: ReactNode;
+    fileSource: string;
+    fallback: ReactNode;
+}
+
+class PdfErrorBoundary extends Component<ErrorBoundaryProps, { hasError: boolean }> {
+    constructor(props: ErrorBoundaryProps) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(_: Error) {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        console.error("ระงับ Error จากไฟล์ PDF สำเร็จ ป้องกันเว็บพัง:", error);
+    }
+
+    componentDidUpdate(prevProps: ErrorBoundaryProps) {
+        if (prevProps.fileSource !== this.props.fileSource) {
+            this.setState({ hasError: false });
+        }
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback;
+        }
+        return this.props.children;
+    }
+}
 
 interface PresentationPanelProps {
     chapterTitle: string;
@@ -22,6 +65,12 @@ const isPdf = (value?: string) => {
     return text.includes("pdf") || text.endsWith(".pdf");
 };
 
+const pdfOptions = {
+    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+};
+
 export default function PresentationPanel({
     chapterTitle,
     fileName,
@@ -32,35 +81,112 @@ export default function PresentationPanel({
     jumpKey,
 }: PresentationPanelProps) {
     const [currentPage, setCurrentPage] = useState(1);
-    const [iframeKey, setIframeKey] = useState(0); 
+    const [pdfPageCount, setPdfPageCount] = useState<number | undefined>(undefined);
+    const [pageWidth, setPageWidth] = useState<number | undefined>(undefined);
+    const [pageHeight, setPageHeight] = useState<number | undefined>(undefined);
+    const [pageAspectRatio, setPageAspectRatio] = useState<number | undefined>(undefined);
+    const [isClient, setIsClient] = useState(false);
+    const previewRef = useRef<HTMLDivElement | null>(null);
+
+    const [inputPage, setInputPage] = useState<string | number>(1);
 
     const fileSource = fileUrl || "";
     const displayType = `${fileType || ""} ${fileName || ""} ${fileSource}`.toLowerCase();
+    
     const canPreviewImage = Boolean(fileSource) && isImage(displayType);
-    const canPreviewPdf = Boolean(fileSource) && isPdf(displayType);
+    const canPreviewPdf = Boolean(fileSource) && isPdf(displayType) && !canPreviewImage;
     const hasSource = Boolean(fileSource);
+    
+    const normalizedTotalPages = pdfPageCount && pdfPageCount > 0
+        ? pdfPageCount
+        : canPreviewImage
+            ? 1
+            : undefined;
+            
+    const isAtLastPage = normalizedTotalPages
+        ? currentPage >= normalizedTotalPages
+        : false;
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [fileUrl]);
+        setPdfPageCount(undefined);
+    }, [fileSource]);
+
+    useEffect(() => {
+        if (!previewRef.current) return;
+        const updateWidth = () => {
+            const nextWidth = previewRef.current?.clientWidth || 0;
+            const nextHeight = previewRef.current?.clientHeight || 0;
+            setPageWidth(nextWidth > 0 ? nextWidth : undefined);
+            setPageHeight(nextHeight > 0 ? nextHeight : undefined);
+        };
+
+        updateWidth();
+
+        const observer = new ResizeObserver(updateWidth);
+        observer.observe(previewRef.current);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, []);
+
+    const resolvedPageWidth = (() => {
+        if (!pageWidth) return undefined;
+        if (!pageHeight || !pageAspectRatio) return pageWidth;
+        const fitWidth = pageHeight * pageAspectRatio;
+        return Math.min(pageWidth, fitWidth);
+    })();
+
+    useEffect(() => {
+        if (!normalizedTotalPages) return;
+        if (currentPage <= normalizedTotalPages) return;
+        setCurrentPage(normalizedTotalPages);
+        onPageChange?.(normalizedTotalPages, normalizedTotalPages);
+    }, [currentPage, normalizedTotalPages, onPageChange]);
 
     useEffect(() => {
         if (!requestedPage || requestedPage < 1) return;
-        setCurrentPage(requestedPage);
-        setIframeKey(k => k + 1); 
-        onPageChange?.(requestedPage, 0); 
-    }, [requestedPage, jumpKey]);
+        const safePage = normalizedTotalPages
+            ? Math.min(requestedPage, normalizedTotalPages)
+            : requestedPage;
+        setCurrentPage(safePage);
+        onPageChange?.(safePage, normalizedTotalPages ?? 0);
+    }, [requestedPage, jumpKey, normalizedTotalPages, onPageChange]);
+
+    useEffect(() => {
+        setInputPage(currentPage);
+    }, [currentPage]);
 
     const goToPage = (page: number) => {
         const safePage = Math.max(1, page);
-        setCurrentPage(safePage);
-        setIframeKey(k => k + 1); 
-        onPageChange?.(safePage, 0);
+        const boundedPage = normalizedTotalPages
+            ? Math.min(safePage, normalizedTotalPages)
+            : safePage;
+        if (boundedPage === currentPage) return;
+        setCurrentPage(boundedPage);
+        onPageChange?.(boundedPage, normalizedTotalPages ?? 0);
     };
 
-    const pdfIframeUrl = fileSource
-        ? `${fileSource}#page=${currentPage}&toolbar=0&navpanes=0&scrollbar=0&view=Fit&pageLayout=SinglePage`
-        : "";
+    const handlePageSubmit = () => {
+        const pageNum = Number(inputPage);
+        if (!isNaN(pageNum) && pageNum >= 1) {
+            goToPage(pageNum);
+            setInputPage(pageNum);
+        } else {
+            setInputPage(currentPage);
+        }
+    };
+
+    const ErrorFallbackUI = (
+        <Stack align="center" justify="center" h="100%" px="md" gap={8}>
+            <Text size="sm" c="red" ta="center">ไม่สามารถแสดงไฟล์นี้ได้</Text>
+        </Stack>
+    );
 
     return (
         <Card
@@ -91,37 +217,58 @@ export default function PresentationPanel({
                     alignItems: "center",
                     position: "relative",
                 }}
+                ref={previewRef}
             >
                 {canPreviewImage && (
-                    <img src={fileSource} alt={fileName} className="h-full w-full rounded-2xl object-contain" />
+                    <div className="absolute inset-0 overflow-y-auto rounded-2xl">
+                        <img 
+                            src={fileSource} 
+                            alt={fileName} 
+                            className="w-full h-auto block" 
+                        />
+                    </div>
                 )}
 
-                {canPreviewPdf && (
-                    <iframe
-                        key={iframeKey}
-                        src={pdfIframeUrl}
-                        title={fileName}
-                        scrolling="no"
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            border: "none",
-                            borderRadius: "1rem",
-                            pointerEvents: "none", 
-                            userSelect: "none"
-                        }}
-                    />
+                {canPreviewPdf && isClient && (
+                    <PdfErrorBoundary fileSource={fileSource} fallback={ErrorFallbackUI}>
+                        <Document
+                            key={fileSource}
+                            file={fileSource}
+                            options={pdfOptions}
+                            onLoadSuccess={(pdf: { numPages: number }) => {
+                                setPdfPageCount(pdf.numPages || undefined);
+                                onPageChange?.(1, pdf.numPages || 0);
+                            }}
+                            onLoadError={(error: Error) => {
+                                setPdfPageCount(undefined);
+                                console.error("Failed to load PDF document.", fileSource);
+                            }}
+                            loading={
+                                <Text size="sm" c="dimmed">กำลังโหลดไฟล์ PDF...</Text>
+                            }
+                            error={ErrorFallbackUI}
+                        >
+                            <Page
+                                pageNumber={currentPage}
+                                width={resolvedPageWidth}
+                                renderTextLayer={false}
+                                renderAnnotationLayer={false}
+                                onLoadSuccess={(page) => {
+                                    if (!pageAspectRatio) {
+                                        const { width, height } = page.getViewport({ scale: 1 });
+                                        if (height > 0) {
+                                            setPageAspectRatio(width / height);
+                                        }
+                                    }
+                                }}
+                            />
+                        </Document>
+                    </PdfErrorBoundary>
                 )}
 
                 {!canPreviewImage && !canPreviewPdf && hasSource && (
                     <Stack align="center" justify="center" h="100%" px="md" gap={8}>
-                        <Text size="sm" c="dimmed" ta="center">ไฟล์นี้ไม่รองรับการพรีวิวในหน้านี้</Text>
-                        <Button component="a" href={fileSource} target="_blank" rel="noopener noreferrer" variant="light" color="orange">
-                            เปิดไฟล์
-                        </Button>
+                        <Text size="sm" c="dimmed" ta="center">ไม่สามารถแสดงไฟล์นี้ได้</Text>
                     </Stack>
                 )}
 
@@ -143,13 +290,31 @@ export default function PresentationPanel({
                         ก่อนหน้า
                     </Button>
                     
-                    <Text fw={600} c="dimmed">
-                        หน้า {currentPage}
-                    </Text>
+                    <Group gap="xs" align="center">
+                        <Text fw={600} c="dimmed">หน้า</Text>
+                        <NumberInput
+                            value={inputPage}
+                            onChange={setInputPage}
+                            onBlur={handlePageSubmit}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") handlePageSubmit();
+                            }}
+                            min={1}
+                            max={normalizedTotalPages || 1}
+                            hideControls
+                            size="sm"
+                            w={70}
+                            styles={{ input: { textAlign: 'center', fontWeight: 600 } }}
+                        />
+                        {normalizedTotalPages && (
+                            <Text fw={600} c="dimmed">/ {normalizedTotalPages}</Text>
+                        )}
+                    </Group>
                     
                     <Button
                         variant="default"
                         rightSection={<IconChevronRight size={16} />}
+                        disabled={isAtLastPage}
                         onClick={() => goToPage(currentPage + 1)}
                     >
                         ถัดไป

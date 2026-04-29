@@ -17,7 +17,6 @@ import {
     IconCircleCheckFilled,
     IconCornerDownRight,
     IconLayoutSidebarRightCollapse,
-    IconLayoutSidebarRightExpand,
     IconMessageCircle,
     IconSend2,
     IconUser,
@@ -49,7 +48,6 @@ interface QuestionPanelProps {
     fileName: string;
     currentSlide: number;
     questions?: QaQuestion[];
-    showQuestionPanel: boolean;
     currentUserId?: number;
     currentUserProfile?: {
         first_name?: string;
@@ -59,7 +57,7 @@ interface QuestionPanelProps {
     fileFilterOptions?: Array<{ value: string; label: string }>;
     selectedFileFilter?: string;
     onFileFilterChange?: (value: string) => void;
-    onToggleQuestionPanel: () => void;
+    onCloseQuestionPanel: () => void;
     onSendQuestion?: (payload: {
         question: string;
         isAnonymous: boolean;
@@ -87,13 +85,12 @@ export default function QuestionPanel({
     fileName,
     currentSlide,
     questions = [],
-    showQuestionPanel,
     currentUserId,
     currentUserProfile,
     fileFilterOptions,
     selectedFileFilter = "all",
     onFileFilterChange,
-    onToggleQuestionPanel,
+    onCloseQuestionPanel,
     onSendQuestion,
     onJumpToQuestion,
     onUpvoteQuestion,
@@ -170,9 +167,9 @@ export default function QuestionPanel({
                     <Badge variant="light" color="orange" radius="xl" size="lg">
                         {hasQuestions ? sortedQuestions.length : 0}
                     </Badge>
-                    <Tooltip label={showQuestionPanel ? "ซ่อนคำถาม" : "แสดงคำถาม"}>
-                        <ActionIcon variant="default" size="lg" onClick={onToggleQuestionPanel}>
-                            {showQuestionPanel ? <IconLayoutSidebarRightCollapse size={18} /> : <IconLayoutSidebarRightExpand size={18} />}
+                    <Tooltip label="ซ่อนคำถาม">
+                        <ActionIcon variant="default" size="lg" onClick={onCloseQuestionPanel}>
+                            <IconLayoutSidebarRightCollapse size={18} />
                         </ActionIcon>
                     </Tooltip>
                 </Group>
