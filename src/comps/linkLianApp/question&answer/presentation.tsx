@@ -7,6 +7,10 @@ import { pdfjs } from "react-pdf";
 const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), { ssr: false });
 const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), { ssr: false });
 
+if (typeof window !== "undefined") {
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+}
+
 interface ErrorBoundaryProps {
     children: ReactNode;
     fileSource: string;
@@ -105,7 +109,6 @@ export default function PresentationPanel({
 
     useEffect(() => {
         setIsClient(true);
-        pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
     }, []);
 
     useEffect(() => {
