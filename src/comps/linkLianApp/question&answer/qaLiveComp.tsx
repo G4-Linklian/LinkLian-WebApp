@@ -582,6 +582,10 @@ export default function QaLiveComp() {
                 const sectionId = router.query.sectionId;
                 const keyword = debouncedSearchKeyword;
 
+                if (!sectionId) {
+                    return;
+                }
+
                 console.log("Fetching section files with keyword:", keyword, "and sectionId:", sectionId);
 
                 const res = await searchSectionFiles({
