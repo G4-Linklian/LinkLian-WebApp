@@ -4,10 +4,6 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
 import { pdfjs } from "react-pdf";
 
-if (typeof window !== "undefined") {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
-}
-
 const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), { ssr: false });
 const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), { ssr: false });
 
@@ -109,6 +105,10 @@ export default function PresentationPanel({
 
     useEffect(() => {
         setIsClient(true);
+        
+        if (pdfjs.version) {
+            pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+        }
     }, []);
 
     useEffect(() => {
