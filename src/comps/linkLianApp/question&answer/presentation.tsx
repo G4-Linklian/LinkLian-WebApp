@@ -62,9 +62,9 @@ const isPdf = (value?: string) => {
 };
 
 const pdfOptions = {
-    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapUrl: "/cmaps/",
     cMapPacked: true,
-    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+    standardFontDataUrl: "/standard_fonts/",
 };
 
 export default function PresentationPanel({
@@ -88,27 +88,24 @@ export default function PresentationPanel({
 
     const fileSource = fileUrl || "";
     const displayType = `${fileType || ""} ${fileName || ""} ${fileSource}`.toLowerCase();
-    
+
     const canPreviewImage = Boolean(fileSource) && isImage(displayType);
     const canPreviewPdf = Boolean(fileSource) && isPdf(displayType) && !canPreviewImage;
     const hasSource = Boolean(fileSource);
-    
+
     const normalizedTotalPages = pdfPageCount && pdfPageCount > 0
         ? pdfPageCount
         : canPreviewImage
             ? 1
             : undefined;
-            
+
     const isAtLastPage = normalizedTotalPages
         ? currentPage >= normalizedTotalPages
         : false;
 
     useEffect(() => {
         setIsClient(true);
-        
-        if (pdfjs.version) {
-            pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
-        }
+        pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
     }, []);
 
     useEffect(() => {
@@ -211,7 +208,7 @@ export default function PresentationPanel({
                 style={{
                     flex: 1,
                     minHeight: 0,
-                    overflow: "hidden", 
+                    overflow: "hidden",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
@@ -221,10 +218,10 @@ export default function PresentationPanel({
             >
                 {canPreviewImage && (
                     <div className="absolute inset-0 overflow-y-auto rounded-2xl">
-                        <img 
-                            src={fileSource} 
-                            alt={fileName} 
-                            className="w-full h-auto block" 
+                        <img
+                            src={fileSource}
+                            alt={fileName}
+                            className="w-full h-auto block"
                         />
                     </div>
                 )}
@@ -289,7 +286,7 @@ export default function PresentationPanel({
                     >
                         ก่อนหน้า
                     </Button>
-                    
+
                     <Group gap="xs" align="center">
                         <Text fw={600} c="dimmed">หน้า</Text>
                         <NumberInput
@@ -310,7 +307,7 @@ export default function PresentationPanel({
                             <Text fw={600} c="dimmed">/ {normalizedTotalPages}</Text>
                         )}
                     </Group>
-                    
+
                     <Button
                         variant="default"
                         rightSection={<IconChevronRight size={16} />}
