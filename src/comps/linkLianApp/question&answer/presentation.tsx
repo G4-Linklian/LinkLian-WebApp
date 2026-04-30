@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, Component, ErrorInfo, ReactNode } f
 import { Card, Group, Stack, Text, Button, NumberInput } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import { pdfjs } from "react-pdf";
 
 const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), { ssr: false });
@@ -61,12 +62,6 @@ const isPdf = (value?: string) => {
     return text.includes("pdf") || text.endsWith(".pdf");
 };
 
-const pdfOptions = {
-    cMapUrl: "/cmaps/",
-    cMapPacked: true,
-    standardFontDataUrl: "/standard_fonts/",
-};
-
 export default function PresentationPanel({
     chapterTitle,
     fileName,
@@ -76,6 +71,7 @@ export default function PresentationPanel({
     requestedPage,
     jumpKey,
 }: PresentationPanelProps) {
+    const { basePath } = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const [pdfPageCount, setPdfPageCount] = useState<number | undefined>(undefined);
     const [pageWidth, setPageWidth] = useState<number | undefined>(undefined);
@@ -105,8 +101,14 @@ export default function PresentationPanel({
 
     useEffect(() => {
         setIsClient(true);
-        pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
-    }, []);
+        pdfjs.GlobalWorkerOptions.workerSrc = `${basePath}/pdf.worker.min.js`;
+    }, [basePath]);
+
+    const pdfOptions = {
+        cMapUrl: `${basePath}/cmaps/`,
+        cMapPacked: true,
+        standardFontDataUrl: `${basePath}/standard_fonts/`,
+    };
 
     useEffect(() => {
         setCurrentPage(1);
