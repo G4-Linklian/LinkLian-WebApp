@@ -26,7 +26,7 @@ const LayoutShell = ({ children }: any) => {
 
     const [activeTab, setActiveTab] = useState<string | null>("tab3");
 
-    console.log('version 1.0.0');
+    console.log('version 1.0.2');
 
     useEffect(() => {
         const cleanPath = router.pathname.split('?')[0];

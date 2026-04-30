@@ -4,8 +4,18 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
 import { pdfjs } from "react-pdf";
 
-const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), { ssr: false });
-const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), { ssr: false });
+const Document = dynamic(
+    () => import("react-pdf").then((mod) => {
+        mod.pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+        return mod.Document;
+    }),
+    { ssr: false }
+);
+
+const Page = dynamic(
+    () => import("react-pdf").then((mod) => mod.Page),
+    { ssr: false }
+);
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -105,7 +115,6 @@ export default function PresentationPanel({
 
     useEffect(() => {
         setIsClient(true);
-        pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
     }, []);
 
     useEffect(() => {
