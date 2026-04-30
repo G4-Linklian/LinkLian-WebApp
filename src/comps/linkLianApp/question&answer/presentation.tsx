@@ -99,15 +99,23 @@ export default function PresentationPanel({
         ? currentPage >= normalizedTotalPages
         : false;
 
+    const assetBasePath = basePath || "";
+
+    if (typeof window !== "undefined") {
+        const workerSrc = `${assetBasePath}/pdf.worker.min.js`;
+        if (pdfjs.GlobalWorkerOptions.workerSrc !== workerSrc) {
+            pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        }
+    }
+
     useEffect(() => {
         setIsClient(true);
-        pdfjs.GlobalWorkerOptions.workerSrc = `${basePath}/pdf.worker.min.js`;
-    }, [basePath]);
+    }, []);
 
     const pdfOptions = {
-        cMapUrl: `${basePath}/cmaps/`,
+        cMapUrl: `${assetBasePath}/cmaps/`,
         cMapPacked: true,
-        standardFontDataUrl: `${basePath}/standard_fonts/`,
+        standardFontDataUrl: `${assetBasePath}/standard_fonts/`,
     };
 
     useEffect(() => {
