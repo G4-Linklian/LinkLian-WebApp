@@ -596,6 +596,8 @@ export default function ClassDetailComp() {
       setIsLiveMaterialLoading(true)
       setLiveMaterialError(null)
 
+      console.log('Fetching live materials for section', parsedSectionId)
+
       try {
         const res = await searchSectionFiles({
           section_id: parsedSectionId,
